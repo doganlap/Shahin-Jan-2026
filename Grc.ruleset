@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="GRC Code Analysis Rules" Description="Code analysis rules for GRC system with ABP Framework compatibility" ToolsVersion="17.0">
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.NetAnalyzers" RuleNamespace="Microsoft.CodeAnalysis.NetAnalyzers">
+    <!-- Security Rules - Errors -->
+    <Rule Id="CA5350" Action="Error" /> <!-- Do not use weak cryptographic algorithms -->
+    <Rule Id="CA5351" Action="Error" /> <!-- Do not use broken cryptographic algorithms -->
+    <Rule Id="CA5359" Action="Error" /> <!-- Do not disable certificate validation -->
+    <Rule Id="CA1031" Action="Error" /> <!-- Do not catch general exception types -->
+    <Rule Id="CA1062" Action="Error" /> <!-- Validate arguments of public methods -->
+    <Rule Id="CA1308" Action="Error" /> <!-- Normalize strings to uppercase -->
+    
+    <!-- Code Quality Rules - Warnings -->
+    <Rule Id="CA1307" Action="Warning" /> <!-- Specify StringComparison -->
+    <Rule Id="CA1812" Action="Warning" /> <!-- Avoid uninstantiated internal classes -->
+    <Rule Id="CA1822" Action="Warning" /> <!-- Mark members as static -->
+    <Rule Id="CA1806" Action="Warning" /> <!-- Do not ignore method results -->
+    
+    <!-- Performance Rules - Warnings -->
+    <Rule Id="CA1823" Action="Warning" /> <!-- Avoid unused private fields -->
+    <Rule Id="CA1824" Action="Warning" /> <!-- Mark assemblies with NeutralResourcesLanguageAttribute -->
+    
+    <!-- Design Rules - Suggestions -->
+    <Rule Id="CA1724" Action="None" /> <!-- Type names should not match namespaces -->
+    <Rule Id="CA1065" Action="Warning" /> <!-- Do not raise exceptions in unexpected locations -->
+  </Rules>
+  
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <!-- StyleCop Rules - Warnings -->
+    <Rule Id="SA1633" Action="Warning" /> <!-- File header must contain header -->
+    <Rule Id="SA1200" Action="Warning" /> <!-- Using directives should be placed correctly -->
+    <Rule Id="SA1201" Action="Warning" /> <!-- Elements should appear in the correct order -->
+    <Rule Id="SA1309" Action="Warning" /> <!-- Field names should not begin with underscore -->
+    <Rule Id="SA1401" Action="Warning" /> <!-- Fields should be private -->
+  </Rules>
+  
+  <Rules AnalyzerId="SecurityCodeScan.VS2019" RuleNamespace="SecurityCodeScan.VS2019">
+    <!-- Security Code Scan Rules - Errors -->
+    <Rule Id="SCS0005" Action="Error" /> <!-- Weak hashing function -->
+    <Rule Id="SCS0014" Action="Error" /> <!-- SQL Injection -->
+    <Rule Id="SCS0027" Action="Error" /> <!-- XSS Vulnerability -->
+    <Rule Id="SCS0031" Action="Error" /> <!-- Hard-coded password -->
+  </Rules>
+</RuleSet>

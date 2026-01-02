@@ -1,0 +1,36 @@
+## Build artifacts
+bin/
+obj/
+
+## IDE
+.vs/
+*.user
+*.suo
+*.userprefs
+*.csproj.user
+
+## Logs
+*.log
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Tooling
+/.idea/
+/.vscode/
+
+## Packages
+*.nupkg
+packages/
+
+## Env/Secrets
+.env
+.env.*
+
+## Dotnet
+project.lock.json
+artifacts/
+
+## Others
+node_modules/
