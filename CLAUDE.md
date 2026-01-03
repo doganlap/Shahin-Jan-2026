@@ -7,9 +7,9 @@ This is the **GRC System** (Governance, Risk, and Compliance) - an enterprise ap
 ## Technology Stack
 
 - **Framework**: ABP Framework 8.3.0
-- **UI**: Blazor Server with Basic Theme
+- **UI**: Blazor WebAssembly with Basic Theme
 - **Backend**: .NET 8.0
-- **Database**: PostgreSQL
+- **Database**: SQL Server
 - **ORM**: Entity Framework Core
 - **Authentication**: ABP Identity with Azure AD integration
 - **Caching**: Redis
@@ -19,7 +19,7 @@ This is the **GRC System** (Governance, Risk, and Compliance) - an enterprise ap
 
 ```
 src/
-├── Grc.Blazor/              # Blazor Server UI application
+├── Grc.Blazor/              # Blazor WebAssembly UI application
 ├── Grc.Application/          # Application services layer
 ├── Grc.Application.Contracts/ # DTOs and interfaces
 ├── Grc.Domain/               # Domain entities and business logic
@@ -42,7 +42,7 @@ src/
 - Implement `ITransientDependency` or `ISingletonDependency` for DI
 
 ### Database
-- PostgreSQL with EF Core
+- SQL Server with EF Core
 - Migrations in `Grc.EntityFrameworkCore/Migrations`
 - Use `GrcDbContext` for data access
 
