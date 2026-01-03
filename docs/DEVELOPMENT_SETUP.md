@@ -227,16 +227,81 @@ All configuration files are already created:
 - Configure API key in extension or environment
 - Test manually: `ggshield secret scan path .`
 
-### 9. Next Steps
+### 9. Development Workflow
+
+#### Daily Workflow
+
+1. **Pull latest changes:**
+   ```bash
+   git pull origin develop
+   ```
+
+2. **Restore packages:**
+   ```bash
+   dotnet restore
+   ```
+
+3. **Build solution:**
+   ```bash
+   dotnet build
+   ```
+
+4. **Run application:**
+   ```bash
+   # Terminal 1: API
+   cd src/Grc.HttpApi.Host
+   dotnet run
+   
+   # Terminal 2: Blazor
+   cd src/Grc.Blazor
+   dotnet run
+   ```
+
+5. **Make changes and test**
+
+6. **Commit changes:**
+   ```bash
+   git add .
+   git commit -m "feat: description"
+   # Pre-commit hook runs automatically
+   ```
+
+#### Running Tests
+
+```bash
+# Run all tests
+dotnet test
+
+# Run specific test project
+dotnet test src/Grc.Application.Tests
+
+# With coverage
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+#### Code Formatting
+
+```bash
+# Format all code
+dotnet format
+
+# Verify formatting (CI check)
+dotnet format --verify-no-changes
+```
+
+### 10. Next Steps
 
 After completing IDE setup:
 1. Verify all agents are active
-2. Proceed to **Phase 0: Core Integration & Error Handling**
-3. Follow the plan execution checklist
+2. Run the application locally
+3. Test API endpoints via Swagger
+4. Test Blazor UI
+5. Proceed with feature development
 
-### 10. Support
+### 11. Support
 
 For issues or questions:
-- Check plan documentation: `/root/.cursor/plans/grc_production_readiness_plan_6c402cfa.plan.md`
-- Review Phase -1 requirements in plan
-- Verify all configuration files match plan specifications
+- Check [ARCHITECTURE.md](./ARCHITECTURE.md) for system design
+- Check [DEPLOYMENT.md](./DEPLOYMENT.md) for deployment help
+- Check [DOCKER.md](./DOCKER.md) for containerization
+- Review error logs in `logs/` directory
