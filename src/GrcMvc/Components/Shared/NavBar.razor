@@ -1,0 +1,71 @@
+@using GrcMvc.Models.Dtos
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+            <i class="bi bi-shield-lock"></i> GRC System
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/onboarding">
+                        <i class="bi bi-rocket"></i> Onboarding
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="bi bi-graph-up"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/workflows">
+                        <i class="bi bi-diagram-3"></i> Workflows
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/approvals">
+                        <i class="bi bi-check-circle"></i> Approvals
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/inbox">
+                        <i class="bi bi-inbox"></i> Inbox
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/risks">
+                        <i class="bi bi-exclamation-triangle"></i> Risks
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/controls">
+                        <i class="bi bi-shield-check"></i> Controls
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="moreDropdown" role="button"
+                        data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/assessments">Assessments</a></li>
+                        <li><a class="dropdown-item" href="/audits">Audits</a></li>
+                        <li><a class="dropdown-item" href="/policies">Policies</a></li>
+                        <li><a class="dropdown-item" href="/evidence">Evidence</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/reports">Reports</a></li>
+                        <li><a class="dropdown-item" href="/admin">Admin</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-warning" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

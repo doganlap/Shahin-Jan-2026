@@ -1,0 +1,128 @@
+@page "/inbox"
+@using GrcMvc.Models.Dtos
+
+<PageTitle>Inbox</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3">My Inbox</h1>
+            <small class="text-muted">@(tasks?.Count ?? 0) pending tasks</small>
+        </div>
+    </div>
+
+    <LoadingSpinner IsLoading="@isLoading" Message="Loading tasks..." />
+
+    @if (!isLoading)
+    {
+        @if (tasks == null || tasks.Count == 0)
+        {
+            <div class="alert alert-success">No pending tasks. You're all caught up!</div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Task</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                @foreach (var task in tasks)
+                {
+                    <tr class="@(task.IsOverdue ? "table-danger" : "")">
+                        <td>
+                            <strong>@task.Title</strong><br />
+                            <small class="text-muted">@task.Description</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-@GetPriorityBadge(task.Priority)">@task.Priority</span>
+                        </td>
+                        <td>
+                            <StatusBadge Status="@task.Status" />
+                        </td>
+                        <td>
+                            @if (task.DueDate.HasValue)
+                            {
+                                <span class="@(task.IsOverdue ? "text-danger fw-bold" : "")">
+                                    @task.DueDate.Value.ToString("MMM dd")
+                                    @if (task.IsOverdue)
+                                    {
+                                        <span class="badge bg-danger ms-2">OVERDUE</span>
+                                    }
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td>
+                            <a href="/inbox/@task.Id" class="btn btn-sm btn-primary">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<InboxTaskListItemDto>? tasks;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Demo data - using mock tasks
+            tasks = new List<InboxTaskListItemDto>
+            {
+                new() { Id = Guid.NewGuid(), Title = "Review Q1 Risk Assessment", Description = "Provide feedback on Q1 risk assessment findings", Priority = "High", Status = "Pending", DueDate = DateTime.UtcNow.AddDays(2), IsOverdue = false },
+                new() { Id = Guid.NewGuid(), Title = "Approve Control Test Results", Description = "Review and approve control testing results", Priority = "Critical", Status = "Pending", DueDate = DateTime.UtcNow.AddDays(1), IsOverdue = false },
+                new() { Id = Guid.NewGuid(), Title = "Update Policy Documentation", Description = "Update security policy per compliance requirements", Priority = "Medium", Status = "In Progress", DueDate = DateTime.UtcNow.AddDays(5), IsOverdue = false },
+                new() { Id = Guid.NewGuid(), Title = "Compliance Training Completion", Description = "Complete annual compliance training", Priority = "Medium", Status = "Pending", DueDate = DateTime.UtcNow.AddDays(-1), IsOverdue = true }
+            };
+        }
+        catch (Exception)
+        {
+            tasks = new List<InboxTaskListItemDto>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            "Completed" => "success",
+            "In Progress" => "info",
+            "Pending" => "warning",
+            _ => "secondary"
+        };
+    }
+
+    private string GetPriorityBadge(string priority)
+    {
+        return priority switch
+        {
+            "Critical" => "danger",
+            "High" => "warning",
+            "Medium" => "info",
+            "Low" => "secondary",
+            _ => "light"
+        };
+    }
+}
