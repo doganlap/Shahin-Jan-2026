@@ -402,6 +402,10 @@ builder.Services.AddScoped<ISmartOnboardingService, SmartOnboardingService>();
 // Role Delegation Service (Human↔Human, Human↔Agent, Agent↔Agent, Multi-Agent)
 builder.Services.AddScoped<IRoleDelegationService, RoleDelegationService>();
 
+// Catalog Data Service (Dynamic querying of regulators, frameworks, controls, evidence types)
+builder.Services.AddScoped<ICatalogDataService, CatalogDataService>();
+// MemoryCache already added above
+
 // Register Resilience Services
 builder.Services.AddScoped<IResilienceService, ResilienceService>();
 

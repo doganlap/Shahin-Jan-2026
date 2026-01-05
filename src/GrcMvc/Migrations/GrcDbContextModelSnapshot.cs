@@ -4509,6 +4509,106 @@ namespace GrcMvc.Migrations
                     b.ToTable("TaskComments");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.TaskDelegation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("DelegatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DelegationStrategy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FromAgentType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FromType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("FromUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FromUserName")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("RevokedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SelectedAgentType")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ToAgentType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ToAgentTypesJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ToType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ToUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ToUserName")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("WorkflowInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("WorkflowInstanceId");
+
+                    b.ToTable("TaskDelegations");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6140,6 +6240,9 @@ namespace GrcMvc.Migrations
                     b.Property<DateTime?>("LastEscalatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Metadata")
+                        .HasColumnType("text");
+
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("text");
 
@@ -6954,6 +7057,25 @@ namespace GrcMvc.Migrations
                     b.Navigation("WorkflowTask");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.TaskDelegation", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.WorkflowTask", "Task")
+                        .WithMany("Delegations")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GrcMvc.Models.Entities.WorkflowInstance", "WorkflowInstance")
+                        .WithMany()
+                        .HasForeignKey("WorkflowInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+
+                    b.Navigation("WorkflowInstance");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.TenantBaseline", b =>
                 {
                     b.HasOne("GrcMvc.Models.Entities.Tenant", "Tenant")
@@ -7423,6 +7545,11 @@ namespace GrcMvc.Migrations
                     b.Navigation("AuditEntries");
 
                     b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.WorkflowTask", b =>
+                {
+                    b.Navigation("Delegations");
                 });
 #pragma warning restore 612, 618
         }

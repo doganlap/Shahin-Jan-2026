@@ -599,6 +599,7 @@ namespace GrcMvc.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.TaskName).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.Status).HasMaxLength(50);
+                entity.Property(e => e.Metadata).HasMaxLength(4000); // For agent assignment metadata
                 entity.HasIndex(e => new { e.AssignedToUserId, e.Status });
                 entity.HasIndex(e => new { e.Status, e.DueDate });
                 entity.HasIndex(e => e.WorkflowInstanceId);
@@ -607,6 +608,12 @@ namespace GrcMvc.Data
                 entity.HasOne(e => e.WorkflowInstance)
                     .WithMany(i => i.Tasks)
                     .HasForeignKey(e => e.WorkflowInstanceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Navigation to TaskDelegations
+                entity.HasMany(e => e.Delegations)
+                    .WithOne(d => d.Task)
+                    .HasForeignKey(d => d.TaskId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -623,6 +630,38 @@ namespace GrcMvc.Data
                 entity.HasOne(e => e.WorkflowTask)
                     .WithMany()
                     .HasForeignKey(e => e.WorkflowTaskId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure TaskDelegation
+            modelBuilder.Entity<TaskDelegation>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FromType).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.ToType).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.FromUserName).HasMaxLength(255);
+                entity.Property(e => e.ToUserName).HasMaxLength(255);
+                entity.Property(e => e.FromAgentType).HasMaxLength(100);
+                entity.Property(e => e.ToAgentType).HasMaxLength(100);
+                entity.Property(e => e.Action).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Reason).HasMaxLength(1000);
+                entity.Property(e => e.DelegationStrategy).HasMaxLength(50);
+                entity.Property(e => e.SelectedAgentType).HasMaxLength(100);
+                entity.Property(e => e.ToAgentTypesJson).HasMaxLength(2000); // JSON array of agent types
+                entity.HasIndex(e => new { e.TenantId, e.TaskId });
+                entity.HasIndex(e => new { e.TenantId, e.IsActive, e.IsRevoked });
+                entity.HasIndex(e => e.DelegatedAt);
+                entity.HasIndex(e => e.WorkflowInstanceId);
+                entity.HasQueryFilter(e => !e.IsDeleted);
+
+                entity.HasOne(e => e.Task)
+                    .WithMany(t => t.Delegations)
+                    .HasForeignKey(e => e.TaskId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.WorkflowInstance)
+                    .WithMany()
+                    .HasForeignKey(e => e.WorkflowInstanceId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
