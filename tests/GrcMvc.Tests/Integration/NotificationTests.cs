@@ -1,7 +1,7 @@
 using GrcMvc.BackgroundJobs;
 using GrcMvc.Data;
 using GrcMvc.Models.Workflows;
-using GrcMvc.Services.Interfaces;
+using GrcMvc.Services.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
