@@ -230,24 +230,32 @@
 
     async function loadControls() {
         try {
-            // Mock data for now - replace with API call
-            allControls = [
-                { id: 1, controlCode: 'ECC-1-1-1', controlName: 'Cybersecurity Strategy', framework: 'NCA-ECC', domain: 'GOV', status: 'Compliant', maturity: 'Managed', lastAssessed: '2026-01-03' },
-                { id: 2, controlCode: 'ECC-1-1-2', controlName: 'Cybersecurity Governance', framework: 'NCA-ECC', domain: 'GOV', status: 'Compliant', maturity: 'Defined', lastAssessed: '2026-01-03' },
-                { id: 3, controlCode: 'ECC-1-2-1', controlName: 'Cybersecurity Policies', framework: 'NCA-ECC', domain: 'GOV', status: 'Partial', maturity: 'Repeatable', lastAssessed: '2026-01-02' },
-                { id: 4, controlCode: 'ECC-2-1-1', controlName: 'Asset Management', framework: 'NCA-ECC', domain: 'DEF', status: 'NonCompliant', maturity: 'Initial', lastAssessed: '2026-01-01' },
-                { id: 5, controlCode: 'ECC-2-2-1', controlName: 'Access Control', framework: 'NCA-ECC', domain: 'DEF', status: 'NotAssessed', maturity: null, lastAssessed: null },
-                { id: 6, controlCode: 'SAMA-1-1', controlName: 'Security Program', framework: 'SAMA-CSF', domain: 'GOV', status: 'Compliant', maturity: 'Managed', lastAssessed: '2026-01-03' },
-                { id: 7, controlCode: 'SAMA-1-2', controlName: 'Risk Assessment', framework: 'SAMA-CSF', domain: 'GOV', status: 'Partial', maturity: 'Defined', lastAssessed: '2026-01-02' },
-                { id: 8, controlCode: 'PDPL-1', controlName: 'Data Processing Consent', framework: 'PDPL', domain: 'GOV', status: 'Compliant', maturity: 'Managed', lastAssessed: '2026-01-03' },
-                { id: 9, controlCode: 'PDPL-2', controlName: 'Data Subject Rights', framework: 'PDPL', domain: 'GOV', status: 'Partial', maturity: 'Repeatable', lastAssessed: '2026-01-02' },
-                { id: 10, controlCode: 'ECC-3-1-1', controlName: 'Incident Management', framework: 'NCA-ECC', domain: 'RES', status: 'NotAssessed', maturity: null, lastAssessed: null },
-            ];
+            const response = await fetch('/api/controls?page=1&size=500');
+            const result = await response.json();
+
+            if (result.success && result.data && result.data.items) {
+                allControls = result.data.items.map(c => ({
+                    id: c.id,
+                    controlCode: c.code || c.controlCode || c.name?.substring(0, 10),
+                    controlName: c.name || c.controlName,
+                    framework: c.frameworkCode || c.framework || 'N/A',
+                    domain: c.category || c.domain || 'N/A',
+                    status: c.complianceStatus || c.status || 'NotAssessed',
+                    maturity: c.maturityLevel || c.maturity || null,
+                    lastAssessed: c.lastAssessedDate || c.lastAssessed || null
+                }));
+            } else {
+                // Fallback to empty if API returns no data
+                allControls = [];
+            }
 
             updateStats();
             renderControls();
         } catch (error) {
             console.error('Error loading controls:', error);
+            // Show error in table
+            document.getElementById('controlsTableBody').innerHTML =
+                '<tr><td colspan="8" class="text-center py-4 text-danger">Error loading controls. Please try again.</td></tr>';
         }
     }
 

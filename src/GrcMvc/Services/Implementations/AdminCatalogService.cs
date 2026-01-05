@@ -7,6 +7,7 @@ using GrcMvc.Data;
 using GrcMvc.Models.Entities;
 using GrcMvc.Models.Entities.Catalogs;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Application.Policy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -21,15 +22,18 @@ namespace GrcMvc.Services.Implementations
         private readonly GrcDbContext _context;
         private readonly IAuditEventService _auditService;
         private readonly ILogger<AdminCatalogService> _logger;
+        private readonly PolicyEnforcementHelper _policyHelper;
 
         public AdminCatalogService(
             GrcDbContext context,
             IAuditEventService auditService,
-            ILogger<AdminCatalogService> logger)
+            ILogger<AdminCatalogService> logger,
+            PolicyEnforcementHelper policyHelper)
         {
             _context = context;
             _auditService = auditService;
             _logger = logger;
+            _policyHelper = policyHelper;
         }
 
         #region Regulators
@@ -40,6 +44,13 @@ namespace GrcMvc.Services.Implementations
             regulator.CreatedDate = DateTime.UtcNow;
             regulator.CreatedBy = createdBy;
             regulator.IsActive = true;
+
+            // Enforce policy before creating catalog item
+            await _policyHelper.EnforceCreateAsync(
+                resourceType: "RegulatorCatalog",
+                resource: regulator,
+                dataClassification: "internal",
+                owner: createdBy);
 
             _context.RegulatorCatalogs.Add(regulator);
             await _context.SaveChangesAsync();
@@ -127,6 +138,13 @@ namespace GrcMvc.Services.Implementations
             framework.CreatedBy = createdBy;
             framework.IsActive = true;
             framework.Status = "Active";
+
+            // Enforce policy before creating framework
+            await _policyHelper.EnforceCreateAsync(
+                resourceType: "FrameworkCatalog",
+                resource: framework,
+                dataClassification: "internal",
+                owner: createdBy);
 
             _context.FrameworkCatalogs.Add(framework);
             await _context.SaveChangesAsync();
@@ -252,6 +270,13 @@ namespace GrcMvc.Services.Implementations
             control.CreatedDate = DateTime.UtcNow;
             control.CreatedBy = createdBy;
             control.IsActive = true;
+
+            // Enforce policy before creating control
+            await _policyHelper.EnforceCreateAsync(
+                resourceType: "ControlCatalog",
+                resource: control,
+                dataClassification: "internal",
+                owner: createdBy);
 
             _context.ControlCatalogs.Add(control);
             await _context.SaveChangesAsync();

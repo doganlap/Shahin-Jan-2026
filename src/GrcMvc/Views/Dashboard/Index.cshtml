@@ -191,56 +191,50 @@
         loadRecentActivity(tenantId);
     });
 
-    function loadDashboardData(tenantId) {
-        // For now, use mock data. In production, fetch from API
-        const mockData = {
-            stats: {
-                activePlans: 2,
-                completedPlans: 5,
-                activeBaselines: 6,
-                estimatedControlCount: 288
-            },
-            recentPlans: [
-                {
-                    id: '1',
-                    name: '2026 Q1 Full Assessment',
-                    planType: 'Full',
-                    status: 'Active',
-                    startDate: '2026-01-04',
-                    targetEndDate: '2026-02-28'
-                },
-                {
-                    id: '2',
-                    name: 'PDPL Compliance Review',
-                    planType: 'QuickScan',
-                    status: 'Active',
-                    startDate: '2026-01-06',
-                    targetEndDate: '2026-01-27'
-                },
-                {
-                    id: '3',
-                    name: '2025 Year-End Assessment',
-                    planType: 'Full',
-                    status: 'Completed',
-                    startDate: '2025-10-01',
-                    targetEndDate: '2025-12-31'
-                }
-            ],
-            organization: {
-                name: 'Acme Corporation',
-                type: 'Financial Services',
-                sector: 'Banking',
-                country: 'SA',
-                size: 'Large',
-                maturity: 'Managed'
-            }
-        };
+    async function loadDashboardData(tenantId) {
+        try {
+            // Fetch dashboard data from API
+            const response = await fetch('/api/dashboard/summary');
+            const result = await response.json();
 
-        // Update stats
-        document.getElementById('activePlansCount').textContent = mockData.stats.activePlans;
-        document.getElementById('completedPlansCount').textContent = mockData.stats.completedPlans;
-        document.getElementById('baselinesCount').textContent = mockData.stats.activeBaselines;
-        document.getElementById('controlsCount').textContent = mockData.stats.estimatedControlCount;
+            let stats = { activePlans: 0, completedPlans: 0, activeBaselines: 0, estimatedControlCount: 0 };
+            let recentPlans = [];
+            let organization = {};
+
+            if (result.success && result.data) {
+                stats = result.data.stats || stats;
+                recentPlans = result.data.recentPlans || [];
+                organization = result.data.organization || {};
+            }
+
+            // Update stats
+            document.getElementById('activePlansCount').textContent = stats.activePlans || 0;
+            document.getElementById('completedPlansCount').textContent = stats.completedPlans || 0;
+            document.getElementById('baselinesCount').textContent = stats.activeBaselines || 0;
+            document.getElementById('controlsCount').textContent = stats.estimatedControlCount || 0;
+
+            // Update plans table
+            renderPlansTable(recentPlans);
+
+            // Update organization profile
+            renderOrgProfile(organization);
+
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            // Show defaults on error
+            document.getElementById('activePlansCount').textContent = '-';
+            document.getElementById('completedPlansCount').textContent = '-';
+            document.getElementById('baselinesCount').textContent = '-';
+            document.getElementById('controlsCount').textContent = '-';
+        }
+    }
+
+    function renderPlansTable(recentPlans) {
+        const tbody = document.querySelector('#plansTable tbody');
+        if (!recentPlans || recentPlans.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No plans found</td></tr>';
+            return;
+        }
 
         // Update plans table
         const tbody = document.querySelector('#plansTable tbody');
@@ -267,19 +261,19 @@
         <dl class="row">
             <dt class="col-sm-6">Organization:</dt>
             <dd class="col-sm-6"><strong>${mockData.organization.name}</strong></dd>
-            
+
             <dt class="col-sm-6">Type:</dt>
             <dd class="col-sm-6">${mockData.organization.type}</dd>
-            
+
             <dt class="col-sm-6">Sector:</dt>
             <dd class="col-sm-6">${mockData.organization.sector}</dd>
-            
+
             <dt class="col-sm-6">Country:</dt>
             <dd class="col-sm-6">${mockData.organization.country}</dd>
-            
+
             <dt class="col-sm-6">Size:</dt>
             <dd class="col-sm-6">${mockData.organization.size}</dd>
-            
+
             <dt class="col-sm-6">Maturity:</dt>
             <dd class="col-sm-6"><span class="badge bg-success">${mockData.organization.maturity}</span></dd>
         </dl>

@@ -7,6 +7,7 @@ using GrcMvc.Models.Entities;
 using GrcMvc.Data;
 using GrcMvc.Models.DTOs;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Application.Policy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -22,17 +23,20 @@ namespace GrcMvc.Services.Implementations
         private readonly IRulesEngineService _rulesEngine;
         private readonly IAuditEventService _auditService;
         private readonly ILogger<OnboardingService> _logger;
+        private readonly PolicyEnforcementHelper _policyHelper;
 
         public OnboardingService(
             IUnitOfWork unitOfWork,
             IRulesEngineService rulesEngine,
             IAuditEventService auditService,
-            ILogger<OnboardingService> logger)
+            ILogger<OnboardingService> logger,
+            PolicyEnforcementHelper policyHelper)
         {
             _unitOfWork = unitOfWork;
             _rulesEngine = rulesEngine;
             _auditService = auditService;
             _logger = logger;
+            _policyHelper = policyHelper;
         }
 
         /// <summary>
@@ -76,6 +80,13 @@ namespace GrcMvc.Services.Implementations
                     CreatedBy = userId
                 };
 
+                // Enforce policy before saving organization profile
+                await _policyHelper.EnforceCreateAsync(
+                    resourceType: "OrganizationProfile",
+                    resource: profile,
+                    dataClassification: "confidential",
+                    owner: userId);
+
                 await _unitOfWork.OrganizationProfiles.AddAsync(profile);
                 await _unitOfWork.SaveChangesAsync();
 
@@ -93,6 +104,11 @@ namespace GrcMvc.Services.Implementations
 
                 _logger.LogInformation($"Organization profile created for tenant {tenantId}");
                 return profile;
+            }
+            catch (PolicyViolationException pve)
+            {
+                _logger.LogWarning($"Policy violation prevented organization profile creation: {pve.Message}. Rule: {pve.RuleId}");
+                throw;
             }
             catch (Exception ex)
             {

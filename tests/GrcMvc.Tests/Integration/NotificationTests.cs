@@ -1,12 +1,15 @@
 using GrcMvc.BackgroundJobs;
 using GrcMvc.Data;
-using GrcMvc.Models.Workflows;
+using GrcMvc.Models.Entities;
 using GrcMvc.Services.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
+using WorkflowNotification = GrcMvc.Models.Workflows.WorkflowNotification;
+using WorkflowSettings = GrcMvc.BackgroundJobs.WorkflowSettings;
+using UserNotificationPreference = GrcMvc.Models.Entities.UserNotificationPreference;
 
 namespace GrcMvc.Tests.Integration
 {
@@ -19,6 +22,14 @@ namespace GrcMvc.Tests.Integration
         private readonly Mock<ISmtpEmailService> _mockEmailService;
         private readonly Mock<ILogger<NotificationDeliveryJob>> _mockLogger;
         private readonly NotificationDeliveryJob _job;
+        private readonly Guid _testTenantId = Guid.NewGuid();
+        private readonly Guid _testWorkflowId = Guid.NewGuid();
+        private readonly Guid _notificationId1 = Guid.NewGuid();
+        private readonly Guid _notificationId2 = Guid.NewGuid();
+        private readonly Guid _notificationId3 = Guid.NewGuid();
+        private readonly Guid _notificationId4 = Guid.NewGuid();
+        private readonly Guid _notificationId5 = Guid.NewGuid();
+        private readonly Guid _notificationId6 = Guid.NewGuid();
 
         public NotificationTests()
         {
@@ -52,25 +63,23 @@ namespace GrcMvc.Tests.Integration
         private void SeedTestData()
         {
             // Add test tenant
-            _context.Tenants.Add(new Tenant { Id = 1, Name = "Test Tenant", IsActive = true });
-
-            // Add test user
-            _context.Users.Add(new Microsoft.AspNetCore.Identity.IdentityUser
+            _context.Tenants.Add(new Tenant
             {
-                Id = "test-user-1",
-                Email = "test@example.com",
-                UserName = "testuser"
+                Id = _testTenantId,
+                OrganizationName = "Test Tenant",
+                TenantSlug = "test-tenant",
+                AdminEmail = "admin@test.com",
+                IsActive = true
             });
 
             // Add test workflow
             _context.WorkflowInstances.Add(new WorkflowInstance
             {
-                Id = 1,
+                Id = _testWorkflowId,
+                TenantId = _testTenantId,
                 WorkflowType = "TestWorkflow",
                 Status = "Active",
-                TenantId = 1,
-                CreatedByUserId = "test-user-1",
-                CreatedAt = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow
             });
 
             _context.SaveChanges();
@@ -82,14 +91,14 @@ namespace GrcMvc.Tests.Integration
             // Arrange
             var notification = new WorkflowNotification
             {
-                Id = 1,
-                WorkflowInstanceId = 1,
+                Id = _notificationId1,
+                WorkflowInstanceId = _testWorkflowId,
                 RecipientUserId = "test-user-1",
                 NotificationType = "TaskAssigned",
                 Subject = "Test Subject",
                 Body = "Test Body",
                 Priority = "Normal",
-                TenantId = 1,
+                TenantId = _testTenantId,
                 CreatedAt = DateTime.UtcNow,
                 RequiresEmail = true,
                 IsDelivered = false,
@@ -111,7 +120,7 @@ namespace GrcMvc.Tests.Integration
             await _job.ExecuteAsync();
 
             // Assert
-            var updatedNotification = await _context.WorkflowNotifications.FindAsync(1);
+            var updatedNotification = await _context.WorkflowNotifications.FindAsync(_notificationId1);
             Assert.NotNull(updatedNotification);
             Assert.True(updatedNotification.IsDelivered);
             Assert.NotNull(updatedNotification.DeliveredAt);
@@ -123,14 +132,14 @@ namespace GrcMvc.Tests.Integration
             // Arrange
             var notification = new WorkflowNotification
             {
-                Id = 2,
-                WorkflowInstanceId = 1,
+                Id = _notificationId2,
+                WorkflowInstanceId = _testWorkflowId,
                 RecipientUserId = "test-user-1",
                 NotificationType = "TaskAssigned",
                 Subject = "Test Subject",
                 Body = "Test Body",
                 Priority = "Normal",
-                TenantId = 1,
+                TenantId = _testTenantId,
                 CreatedAt = DateTime.UtcNow,
                 RequiresEmail = true,
                 IsDelivered = false,
@@ -152,11 +161,12 @@ namespace GrcMvc.Tests.Integration
             await _job.ExecuteAsync();
 
             // Assert
-            var updatedNotification = await _context.WorkflowNotifications.FindAsync(2);
+            var updatedNotification = await _context.WorkflowNotifications.FindAsync(_notificationId2);
             Assert.NotNull(updatedNotification);
             Assert.False(updatedNotification.IsDelivered);
             Assert.Equal(1, updatedNotification.DeliveryAttempts);
-            Assert.NotNull(updatedNotification.NextRetryAt);
+            // Note: LastAttemptAt is used instead of NextRetryAt
+            Assert.NotNull(updatedNotification.LastAttemptAt);
         }
 
         [Fact]
@@ -165,8 +175,9 @@ namespace GrcMvc.Tests.Integration
             // Arrange
             var preference = new UserNotificationPreference
             {
+                Id = Guid.NewGuid(),
                 UserId = "test-user-1",
-                TenantId = 1,
+                TenantId = _testTenantId,
                 EmailEnabled = false,
                 SmsEnabled = false
             };
@@ -174,14 +185,14 @@ namespace GrcMvc.Tests.Integration
 
             var notification = new WorkflowNotification
             {
-                Id = 3,
-                WorkflowInstanceId = 1,
+                Id = _notificationId3,
+                WorkflowInstanceId = _testWorkflowId,
                 RecipientUserId = "test-user-1",
                 NotificationType = "TaskAssigned",
                 Subject = "Test Subject",
                 Body = "Test Body",
                 Priority = "Normal",
-                TenantId = 1,
+                TenantId = _testTenantId,
                 CreatedAt = DateTime.UtcNow,
                 RequiresEmail = true,
                 IsDelivered = false,
@@ -195,7 +206,7 @@ namespace GrcMvc.Tests.Integration
             await _job.ExecuteAsync();
 
             // Assert
-            var updatedNotification = await _context.WorkflowNotifications.FindAsync(3);
+            var updatedNotification = await _context.WorkflowNotifications.FindAsync(_notificationId3);
             Assert.NotNull(updatedNotification);
             Assert.True(updatedNotification.IsDelivered); // Marked as delivered but not sent
             Assert.Contains("disabled", updatedNotification.DeliveryNote ?? "");
@@ -216,14 +227,14 @@ namespace GrcMvc.Tests.Integration
             // Arrange
             var normalNotification = new WorkflowNotification
             {
-                Id = 4,
-                WorkflowInstanceId = 1,
+                Id = _notificationId4,
+                WorkflowInstanceId = _testWorkflowId,
                 RecipientUserId = "test-user-1",
                 NotificationType = "TaskAssigned",
                 Subject = "Normal",
                 Body = "Normal priority",
                 Priority = "Normal",
-                TenantId = 1,
+                TenantId = _testTenantId,
                 CreatedAt = DateTime.UtcNow.AddMinutes(-10),
                 RequiresEmail = true,
                 IsDelivered = false
@@ -231,14 +242,14 @@ namespace GrcMvc.Tests.Integration
 
             var criticalNotification = new WorkflowNotification
             {
-                Id = 5,
-                WorkflowInstanceId = 1,
+                Id = _notificationId5,
+                WorkflowInstanceId = _testWorkflowId,
                 RecipientUserId = "test-user-1",
                 NotificationType = "SLA_Breach",
                 Subject = "Critical",
                 Body = "Critical priority",
                 Priority = "Critical",
-                TenantId = 1,
+                TenantId = _testTenantId,
                 CreatedAt = DateTime.UtcNow,
                 RequiresEmail = true,
                 IsDelivered = false
@@ -274,14 +285,14 @@ namespace GrcMvc.Tests.Integration
             // Arrange
             var notification = new WorkflowNotification
             {
-                Id = 6,
-                WorkflowInstanceId = 1,
+                Id = _notificationId6,
+                WorkflowInstanceId = _testWorkflowId,
                 RecipientUserId = "test-user-1",
                 NotificationType = "TaskAssigned",
                 Subject = "Test",
                 Body = "Test",
                 Priority = "Normal",
-                TenantId = 1,
+                TenantId = _testTenantId,
                 CreatedAt = DateTime.UtcNow,
                 RequiresEmail = true,
                 IsDelivered = false,

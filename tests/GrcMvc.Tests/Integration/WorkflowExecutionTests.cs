@@ -9,6 +9,7 @@ using GrcMvc.Data;
 using GrcMvc.Models.Entities;
 using GrcMvc.Services.Implementations;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Services.Interfaces.Workflows;
 
 namespace GrcMvc.Tests.Integration;
 
@@ -35,8 +36,17 @@ public class WorkflowExecutionTests : IDisposable
         // Setup dependencies
         var logger = new Mock<ILogger<WorkflowEngineService>>();
         var cache = new MemoryCache(new MemoryCacheOptions());
+        var bpmnParser = new Mock<BpmnParser>();
+        var assigneeResolver = new Mock<WorkflowAssigneeResolver>();
+        var auditService = new Mock<IWorkflowAuditService>();
 
-        _workflowService = new WorkflowEngineService(_context, logger.Object, cache);
+        _workflowService = new WorkflowEngineService(
+            _context,
+            logger.Object,
+            cache,
+            bpmnParser.Object,
+            assigneeResolver.Object,
+            auditService.Object);
 
         // Seed test data
         SeedTestData();

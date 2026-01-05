@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GrcMvc.Data;
 using GrcMvc.Models.Entities;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Application.Policy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,19 +24,22 @@ namespace GrcMvc.Services.Implementations
         private readonly IEmailService _emailService;
         private readonly IAuditEventService _auditService;
         private readonly ILogger<UserInvitationService> _logger;
+        private readonly PolicyEnforcementHelper _policyHelper;
 
         public UserInvitationService(
             GrcDbContext context,
             UserManager<ApplicationUser> userManager,
             IEmailService emailService,
             IAuditEventService auditService,
-            ILogger<UserInvitationService> logger)
+            ILogger<UserInvitationService> logger,
+            PolicyEnforcementHelper policyHelper)
         {
             _context = context;
             _userManager = userManager;
             _emailService = emailService;
             _auditService = auditService;
             _logger = logger;
+            _policyHelper = policyHelper;
         }
 
         public async Task<TenantUser> InviteUserAsync(
@@ -106,6 +110,13 @@ namespace GrcMvc.Services.Implementations
                 CreatedDate = DateTime.UtcNow,
                 CreatedBy = invitedBy
             };
+
+            // Enforce policy before creating user invitation
+            await _policyHelper.EnforceCreateAsync(
+                resourceType: "TenantUser",
+                resource: tenantUser,
+                dataClassification: "confidential",
+                owner: invitedBy);
 
             _context.TenantUsers.Add(tenantUser);
             await _context.SaveChangesAsync();

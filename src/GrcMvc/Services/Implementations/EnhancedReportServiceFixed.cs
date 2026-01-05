@@ -8,6 +8,7 @@ using GrcMvc.Data;
 using GrcMvc.Models.Entities;
 using GrcMvc.Models.Dtos;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Application.Policy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -24,6 +25,7 @@ namespace GrcMvc.Services.Implementations
         private readonly IReportGenerator _reportGenerator;
         private readonly IFileStorageService _fileStorage;
         private readonly ILogger<EnhancedReportServiceFixed> _logger;
+        private readonly PolicyEnforcementHelper _policyHelper;
 
         public EnhancedReportServiceFixed(
             IUnitOfWork unitOfWork,
@@ -31,7 +33,8 @@ namespace GrcMvc.Services.Implementations
             ICurrentUserService currentUser,
             IReportGenerator reportGenerator,
             IFileStorageService fileStorage,
-            ILogger<EnhancedReportServiceFixed> logger)
+            ILogger<EnhancedReportServiceFixed> logger,
+            PolicyEnforcementHelper policyHelper)
         {
             _unitOfWork = unitOfWork;
             _auditService = auditService;
@@ -39,6 +42,7 @@ namespace GrcMvc.Services.Implementations
             _reportGenerator = reportGenerator;
             _fileStorage = fileStorage;
             _logger = logger;
+            _policyHelper = policyHelper;
         }
 
         /// <summary>
@@ -117,6 +121,13 @@ namespace GrcMvc.Services.Implementations
                 report.FileSize = pdfContent.Length;
                 report.PageCount = CalculatePageCount(pdfContent.Length);
                 report.Status = "Generated";
+
+                // Enforce policy before saving report (reports may contain sensitive data)
+                await _policyHelper.EnforceCreateAsync(
+                    resourceType: "Report",
+                    resource: report,
+                    dataClassification: "confidential",
+                    owner: userName);
 
                 // Save report to database
                 await _unitOfWork.Reports.AddAsync(report);

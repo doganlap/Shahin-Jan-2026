@@ -78,7 +78,7 @@ public class ControlsController : Controller
     // POST: Controls/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([FromForm] Models.Entities.Catalogs.Control control)
+    public async Task<IActionResult> Create([FromForm] Models.Entities.Control control)
     {
         if (ModelState.IsValid)
         {
@@ -102,7 +102,7 @@ public class ControlsController : Controller
     // POST: Controls/Edit/{id}
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, [FromForm] Models.Entities.Catalogs.Control control)
+    public async Task<IActionResult> Edit(Guid id, [FromForm] Models.Entities.Control control)
     {
         if (id != control.Id)
             return NotFound();

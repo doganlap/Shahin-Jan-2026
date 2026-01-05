@@ -7,6 +7,7 @@ using GrcMvc.Models.Entities;
 using GrcMvc.Models.DTOs;
 using GrcMvc.Data;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Application.Policy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -21,15 +22,18 @@ namespace GrcMvc.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuditEventService _auditService;
         private readonly ILogger<PlanService> _logger;
+        private readonly PolicyEnforcementHelper _policyHelper;
 
         public PlanService(
             IUnitOfWork unitOfWork,
             IAuditEventService auditService,
-            ILogger<PlanService> logger)
+            ILogger<PlanService> logger,
+            PolicyEnforcementHelper policyHelper)
         {
             _unitOfWork = unitOfWork;
             _auditService = auditService;
             _logger = logger;
+            _policyHelper = policyHelper;
         }
 
         /// <summary>
@@ -76,6 +80,13 @@ namespace GrcMvc.Services.Implementations
                     CreatedDate = DateTime.UtcNow,
                     CreatedBy = createdBy
                 };
+
+                // Enforce policy before creating plan
+                await _policyHelper.EnforceCreateAsync(
+                    resourceType: "Plan",
+                    resource: plan,
+                    dataClassification: "internal",
+                    owner: createdBy);
 
                 await _unitOfWork.Plans.AddAsync(plan);
                 await _unitOfWork.SaveChangesAsync();

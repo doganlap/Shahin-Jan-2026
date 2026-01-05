@@ -7,6 +7,7 @@ using GrcMvc.Data;
 using GrcMvc.Models.DTOs;
 using GrcMvc.Models.Entities;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Application.Policy;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -17,12 +18,18 @@ namespace GrcMvc.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<WorkflowService> _logger;
+        private readonly PolicyEnforcementHelper _policyHelper;
 
-        public WorkflowService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<WorkflowService> logger)
+        public WorkflowService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            ILogger<WorkflowService> logger,
+            PolicyEnforcementHelper policyHelper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _policyHelper = policyHelper;
         }
 
         public async Task<IEnumerable<WorkflowDto>> GetAllAsync()
@@ -74,11 +81,24 @@ namespace GrcMvc.Services.Implementations
                     workflow.Steps = ValidateAndFormatSteps(createWorkflowDto.Steps);
                 }
 
+                // Enforce policy before creating workflow
+                await _policyHelper.EnforceCreateAsync(
+                    resourceType: "Workflow",
+                    resource: workflow,
+                    dataClassification: "internal",
+                    owner: "System");
+
                 await _unitOfWork.Workflows.AddAsync(workflow);
                 await _unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation("Workflow created with ID {WorkflowId}", workflow.Id);
                 return _mapper.Map<WorkflowDto>(workflow);
+            }
+            catch (PolicyViolationException pve)
+            {
+                _logger.LogWarning("Policy violation prevented workflow creation: {Message}. Rule: {RuleId}",
+                    pve.Message, pve.RuleId);
+                throw;
             }
             catch (Exception ex)
             {

@@ -2,6 +2,7 @@ using GrcMvc.Models.Dtos;
 using GrcMvc.Models.Entities;
 using GrcMvc.Data;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Application.Policy;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -16,15 +17,18 @@ namespace GrcMvc.Services.Implementations
         private readonly GrcDbContext _dbContext;
         private readonly IEmailService _emailService;
         private readonly ILogger<SubscriptionService> _logger;
+        private readonly PolicyEnforcementHelper _policyHelper;
 
         public SubscriptionService(
             GrcDbContext dbContext,
             IEmailService emailService,
-            ILogger<SubscriptionService> logger)
+            ILogger<SubscriptionService> logger,
+            PolicyEnforcementHelper policyHelper)
         {
             _dbContext = dbContext;
             _emailService = emailService;
             _logger = logger;
+            _policyHelper = policyHelper;
         }
 
         #region Subscription Plans
@@ -94,12 +98,24 @@ namespace GrcMvc.Services.Implementations
                     CreatedDate = DateTime.UtcNow
                 };
 
+                // Enforce policy before creating subscription
+                await _policyHelper.EnforceCreateAsync(
+                    resourceType: "Subscription",
+                    resource: subscription,
+                    dataClassification: "confidential",
+                    owner: tenantId.ToString());
+
                 _dbContext.Subscriptions.Add(subscription);
                 await _dbContext.SaveChangesAsync();
 
                 _logger.LogInformation($"Subscription created: {subscription.Id} for tenant {tenantId}");
 
                 return MapToDto(subscription);
+            }
+            catch (PolicyViolationException pve)
+            {
+                _logger.LogWarning($"Policy violation prevented subscription creation: {pve.Message}. Rule: {pve.RuleId}");
+                throw;
             }
             catch (Exception ex)
             {
@@ -277,6 +293,13 @@ namespace GrcMvc.Services.Implementations
                 PaymentDate = DateTime.UtcNow,
                 CreatedDate = DateTime.UtcNow
             };
+
+            // Enforce policy before recording payment (financial data)
+            await _policyHelper.EnforceCreateAsync(
+                resourceType: "Payment",
+                resource: payment,
+                dataClassification: "restricted",
+                owner: subscription.TenantId.ToString());
 
             _dbContext.Payments.Add(payment);
             await _dbContext.SaveChangesAsync();
