@@ -11,6 +11,93 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GrcMvc.Controllers
 {
+    /// <summary>
+    /// MVC Controller for Dashboard views
+    /// </summary>
+    [Authorize]
+    public class DashboardMvcController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<DashboardMvcController> _logger;
+
+        public DashboardMvcController(IUnitOfWork unitOfWork, ILogger<DashboardMvcController> logger)
+        {
+            _unitOfWork = unitOfWork;
+            _logger = logger;
+        }
+
+        /// <summary>
+        /// Display Dashboard with user name and baselines
+        /// </summary>
+        [HttpGet]
+        [Route("Dashboard")]
+        [Route("Dashboard/Index")]
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                // Get current user info
+                var userName = User.Identity?.Name ?? User.FindFirst("name")?.Value ?? "User";
+                var userEmail = User.FindFirst("email")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+
+                // Get tenant from TempData or claims
+                var tenantIdStr = TempData["TenantId"]?.ToString() ?? User.FindFirst("tenant_id")?.Value;
+                TempData.Keep("TenantId");
+
+                Guid? tenantId = null;
+                if (!string.IsNullOrEmpty(tenantIdStr) && Guid.TryParse(tenantIdStr, out var parsedTenantId))
+                {
+                    tenantId = parsedTenantId;
+                }
+
+                // Get baselines for this tenant
+                var baselines = new List<object>();
+                var orgName = TempData["OrganizationName"]?.ToString() ?? "Your Organization";
+                TempData.Keep("OrganizationName");
+
+                if (tenantId.HasValue)
+                {
+                    var tenantBaselines = await _unitOfWork.TenantBaselines
+                        .Query()
+                        .Where(b => b.TenantId == tenantId.Value && !b.IsDeleted)
+                        .ToListAsync();
+
+                    baselines = tenantBaselines.Select(b => new
+                    {
+                        b.Id,
+                        b.BaselineCode,
+                        b.ReasonJson,
+                        b.CreatedDate
+                    }).Cast<object>().ToList();
+
+                    // Get tenant name
+                    var tenant = await _unitOfWork.Tenants.GetByIdAsync(tenantId.Value);
+                    if (tenant != null)
+                    {
+                        orgName = tenant.OrganizationName;
+                    }
+                }
+
+                // Pass data to view
+                ViewBag.UserName = userName;
+                ViewBag.UserEmail = userEmail;
+                ViewBag.OrganizationName = orgName;
+                ViewBag.TenantId = tenantId;
+                ViewBag.Baselines = baselines;
+                ViewBag.SuccessMessage = TempData["SuccessMessage"];
+
+                return View("~/Views/Dashboard/Index.cshtml");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading dashboard");
+                ViewBag.UserName = "User";
+                ViewBag.Baselines = new List<object>();
+                return View("~/Views/Dashboard/Index.cshtml");
+            }
+        }
+    }
+
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]

@@ -37,5 +37,11 @@ namespace GrcMvc.Services.Interfaces
         /// Get derived scope (applicable baselines, packages, templates) for tenant.
         /// </summary>
         Task<OnboardingScopeDto> GetDerivedScopeAsync(Guid tenantId);
+
+        /// <summary>
+        /// Re-evaluate and refresh scope when profile or assets change.
+        /// Triggers rules engine to re-derive applicable baselines/packages/templates.
+        /// </summary>
+        Task<RuleExecutionLog> RefreshScopeAsync(Guid tenantId, string userId, string reason);
     }
 }

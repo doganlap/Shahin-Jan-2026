@@ -204,33 +204,26 @@ namespace GrcMvc.Controllers.Api
         {
             try
             {
-                // TODO: Implement update logic in ReportService
-                // For now, return the report as-is
-                var report = await _reportService.GetReportAsync(id);
-                if (report == null)
+                var updateDto = new UpdateReportDto
                 {
-                    return NotFound(new { error = _localizer["Error_NotFound"] });
-                }
-
-                var reportObj = report as dynamic;
-                var reportDto = new ReportDetailDto
-                {
-                    Id = Guid.Parse(id),
-                    ReportNumber = dto.ReportNumber,
                     Title = dto.Title,
-                    Type = dto.Type,
                     Description = dto.Description,
-                    Status = dto.Status,
                     ExecutiveSummary = dto.ExecutiveSummary,
                     KeyFindings = dto.KeyFindings,
                     Recommendations = dto.Recommendations,
-                    DeliveredTo = dto.DeliveredTo,
-                    DeliveryDate = dto.DeliveryDate,
-                    GeneratedDate = reportObj?.generatedDate != null ? (DateTime)reportObj.generatedDate : DateTime.UtcNow,
-                    GeneratedBy = "System"
+                    Status = dto.Status
                 };
 
-                return Ok(reportDto);
+                var result = await _reportService.UpdateReportAsync(id, updateDto);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -247,9 +240,8 @@ namespace GrcMvc.Controllers.Api
         {
             try
             {
-                // TODO: Implement soft delete in ReportService
-                var report = await _reportService.GetReportAsync(id);
-                if (report == null)
+                var result = await _reportService.DeleteReportAsync(id);
+                if (!result)
                 {
                     return NotFound(new { error = _localizer["Error_NotFound"] });
                 }
@@ -271,22 +263,14 @@ namespace GrcMvc.Controllers.Api
         {
             try
             {
-                var report = await _reportService.GetReportAsync(id);
-                if (report == null)
+                var result = await _reportService.DownloadReportAsync(id, format);
+                if (result == null)
                 {
                     return NotFound(new { error = _localizer["Error_NotFound"] });
                 }
 
-                var reportObj = report as dynamic;
-                var fileUrl = reportObj?.fileUrl?.ToString();
-
-                if (string.IsNullOrEmpty(fileUrl))
-                {
-                    return NotFound(new { error = _localizer["Error_NotFound"] });
-                }
-
-                // TODO: Return actual file stream
-                return Ok(new { downloadUrl = fileUrl, format });
+                var (fileData, fileName, contentType) = result.Value;
+                return File(fileData, contentType, fileName);
             }
             catch (Exception ex)
             {
@@ -303,14 +287,16 @@ namespace GrcMvc.Controllers.Api
         {
             try
             {
-                // TODO: Implement delivery logic in ReportService
-                var report = await _reportService.GetReportAsync(id);
-                if (report == null)
-                {
-                    return NotFound(new { error = _localizer["Error_NotFound"] });
-                }
-
-                return Ok(new { message = "Report marked as delivered" });
+                var result = await _reportService.DeliverReportAsync(id, dto.DeliveredTo, dto.Notes);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { error = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -394,6 +380,7 @@ namespace GrcMvc.Controllers.Api
     {
         public string DeliveredTo { get; set; } = string.Empty;
         public DateTime? DeliveryDate { get; set; }
+        public string? Notes { get; set; }
     }
 
     public class QuickGenerateReportDto

@@ -210,5 +210,51 @@ namespace GrcMvc.Services.Implementations
                 throw;
             }
         }
+
+        /// <summary>
+        /// Re-evaluate and refresh scope when profile or assets change.
+        /// </summary>
+        public async Task<RuleExecutionLog> RefreshScopeAsync(Guid tenantId, string userId, string reason)
+        {
+            try
+            {
+                var tenant = await _unitOfWork.Tenants.GetByIdAsync(tenantId);
+                if (tenant == null)
+                {
+                    throw new InvalidOperationException($"Tenant '{tenantId}' not found.");
+                }
+
+                _logger.LogInformation("Refreshing scope for tenant {TenantId}. Reason: {Reason}", tenantId, reason);
+
+                // Re-execute rules engine to derive updated scope
+                var executionLog = await _rulesEngine.DeriveAndPersistScopeAsync(tenantId, userId);
+
+                // Log audit event
+                await _auditService.LogEventAsync(
+                    tenantId: tenantId,
+                    eventType: "ScopeRefreshed",
+                    affectedEntityType: "Tenant",
+                    affectedEntityId: tenantId.ToString(),
+                    action: "RefreshScope",
+                    actor: userId,
+                    payloadJson: System.Text.Json.JsonSerializer.Serialize(new {
+                        Reason = reason,
+                        ExecutionLogId = executionLog?.Id,
+                        RefreshedAt = DateTime.UtcNow
+                    }),
+                    correlationId: tenant.CorrelationId
+                );
+
+                _logger.LogInformation("Scope refreshed for tenant {TenantId}. ExecutionLog: {LogId}",
+                    tenantId, executionLog?.Id);
+
+                return executionLog;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error refreshing scope for tenant {TenantId}", tenantId);
+                throw;
+            }
+        }
     }
 }

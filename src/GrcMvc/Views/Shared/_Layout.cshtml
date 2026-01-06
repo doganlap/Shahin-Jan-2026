@@ -53,6 +53,11 @@
                                 <i class="bi bi-rocket"></i> Onboarding
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" asp-area="" asp-controller="OrgSetup" asp-action="Index">
+                                <i class="bi bi-building-gear"></i> Org Setup
+                            </a>
+                        </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item dropdown">

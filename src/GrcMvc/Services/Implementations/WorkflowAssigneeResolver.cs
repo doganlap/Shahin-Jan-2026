@@ -164,7 +164,7 @@ namespace GrcMvc.Services.Implementations
                         // If role code specified, also check role
                         if (!string.IsNullOrEmpty(roleCode))
                         {
-                            if (tenantUser.RoleCode == roleCode && 
+                            if (tenantUser.RoleCode == roleCode &&
                                 appUser.Department.Equals(department, StringComparison.OrdinalIgnoreCase))
                             {
                                 _logger.LogDebug("Resolved assignee by department {Department} with role {RoleCode}: {UserId}",
@@ -215,26 +215,49 @@ namespace GrcMvc.Services.Implementations
 
             try
             {
-                var tenantUsers = await _context.TenantUsers
-                    .Where(tu => tu.TenantId == tenantId && !tu.IsDeleted)
-                    .ToListAsync();
-
-                // Filter by role if specified
-                if (!string.IsNullOrEmpty(roleCode))
+                // If department is specified, use TeamMember with Team.BusinessUnit for filtering
+                if (!string.IsNullOrEmpty(department))
                 {
-                    tenantUsers = tenantUsers
-                        .Where(tu => tu.RoleCode == roleCode)
-                        .ToList();
-                }
+                    var teamMembers = await _context.TeamMembers
+                        .Include(tm => tm.Team)
+                        .Where(tm => tm.TenantId == tenantId &&
+                                    tm.IsActive && !tm.IsDeleted &&
+                                    tm.Team != null &&
+                                    tm.Team.BusinessUnit == department)
+                        .ToListAsync();
 
-                // TODO: Filter by department when User entity has Department property
-                // For now, all users with the role are considered the "team"
-
-                foreach (var tenantUser in tenantUsers)
-                {
-                    if (Guid.TryParse(tenantUser.UserId, out var userId))
+                    // Further filter by role if specified
+                    if (!string.IsNullOrEmpty(roleCode))
                     {
-                        assignees.Add(userId);
+                        teamMembers = teamMembers
+                            .Where(tm => tm.RoleCode == roleCode)
+                            .ToList();
+                    }
+
+                    assignees = teamMembers.Select(tm => tm.UserId).Distinct().ToList();
+                }
+                else
+                {
+                    // No department filter - use TenantUsers with role filter
+                    var tenantUsers = await _context.TenantUsers
+                        .Where(tu => tu.TenantId == tenantId &&
+                                    tu.Status == "Active" && !tu.IsDeleted)
+                        .ToListAsync();
+
+                    // Filter by role if specified
+                    if (!string.IsNullOrEmpty(roleCode))
+                    {
+                        tenantUsers = tenantUsers
+                            .Where(tu => tu.RoleCode == roleCode)
+                            .ToList();
+                    }
+
+                    foreach (var tenantUser in tenantUsers)
+                    {
+                        if (Guid.TryParse(tenantUser.UserId, out var userId))
+                        {
+                            assignees.Add(userId);
+                        }
                     }
                 }
 

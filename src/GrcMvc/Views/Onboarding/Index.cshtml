@@ -1,45 +1,85 @@
 @using Microsoft.AspNetCore.Localization
+@using GrcMvc.Data
+@using Microsoft.EntityFrameworkCore
+@inject GrcMvc.Services.Interfaces.ICurrentUserService CurrentUserService
+@inject GrcDbContext DbContext
 @{
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var isArabic = requestCulture?.RequestCulture?.UICulture?.Name == "ar";
     ViewData["Title"] = isArabic ? "نظام GRC - التسجيل" : "GRC System - Onboarding";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Get current user's tenant ID or use default
+    var tenantId = Guid.Empty;
+    try { tenantId = CurrentUserService.GetTenantId(); } catch { }
+    if (tenantId == Guid.Empty) tenantId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+    // Get wizard progress from database
+    var wizard = await DbContext.OnboardingWizards.FirstOrDefaultAsync(w => w.TenantId == tenantId);
+    var completedSections = new List<string>();
+    var progressPercent = 0;
+    if (wizard != null)
+    {
+        progressPercent = wizard.ProgressPercent;
+        if (!string.IsNullOrEmpty(wizard.CompletedSectionsJson))
+        {
+            try { completedSections = System.Text.Json.JsonSerializer.Deserialize<List<string>>(wizard.CompletedSectionsJson) ?? new(); } catch { }
+        }
+    }
 }
 
 <div class="container-fluid py-5 bg-light">
     <div class="container">
         <div class="row">
-            <!-- Sidebar - Progress Steps -->
+            <!-- Sidebar - 12 Wizard Steps -->
             <div class="col-md-3">
                 <div class="card shadow-sm sticky-top" style="top: 20px;">
-                    <div class="card-body">
-                        <h5 class="card-title mb-4">Onboarding Steps</h5>
+                    <div class="card-body p-3">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-list-check text-primary me-2"></i>12-Step Wizard
+                        </h5>
 
-                        <div class="progress mb-3" style="height: 5px;">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: @progressPercent%">@progressPercent%</div>
                         </div>
 
-                        <div class="list-group list-group-flush">
-                            <a href="#" class="list-group-item list-group-item-action active" disabled>
-                                <i class="bi bi-circle text-primary"></i>
-                                <span class="ms-2">Welcome</span>
-                            </a>
-                            <a href="/onboarding/signup" class="list-group-item list-group-item-action disabled">
-                                <i class="bi bi-circle text-secondary"></i>
-                                <span class="ms-2">User Account</span>
-                            </a>
-                            <a href="/onboarding/org-profile" class="list-group-item list-group-item-action disabled">
-                                <i class="bi bi-circle text-secondary"></i>
-                                <span class="ms-2">Organization</span>
-                            </a>
-                            <a href="/onboarding/review-scope" class="list-group-item list-group-item-action disabled">
-                                <i class="bi bi-circle text-secondary"></i>
-                                <span class="ms-2">Compliance Scope</span>
-                            </a>
-                            <a href="/onboarding/create-plan" class="list-group-item list-group-item-action disabled">
-                                <i class="bi bi-circle text-secondary"></i>
-                                <span class="ms-2">Create Plan</span>
-                            </a>
+                        <div class="list-group list-group-flush small">
+                            @{
+                                var steps = new[] {
+                                    ("A", "building", "primary", "Organization Identity"),
+                                    ("B", "bullseye", "info", "Assurance Objective"),
+                                    ("C", "bank", "warning", "Regulatory Frameworks"),
+                                    ("D", "diagram-3", "success", "Scope Definition"),
+                                    ("E", "shield-exclamation", "danger", "Data & Risk Profile"),
+                                    ("F", "cpu", "secondary", "Technology Landscape"),
+                                    ("G", "person-badge", "primary", "Control Ownership"),
+                                    ("H", "people", "info", "Teams & Roles"),
+                                    ("I", "calendar-check", "warning", "Workflow Cadence"),
+                                    ("J", "file-earmark-check", "success", "Evidence Standards"),
+                                    ("K", "layers", "danger", "Baseline & Overlays"),
+                                    ("L", "rocket-takeoff", "primary", "Go-Live & Metrics")
+                                };
+                            }
+                            @foreach (var (letter, icon, color, name) in steps)
+                            {
+                                var isCompleted = completedSections.Contains(letter);
+                                var statusIcon = isCompleted ? "check-circle-fill text-success" : $"{icon} text-{color}";
+                                var bgClass = isCompleted ? "list-group-item-success" : "";
+                                <a href="/OnboardingWizard/Step@(letter)/@tenantId" class="list-group-item list-group-item-action py-2 @bgClass">
+                                    <i class="bi bi-@statusIcon me-2"></i>
+                                    <strong>@letter.</strong> @name
+                                    @if (isCompleted)
+                                    {
+                                        <i class="bi bi-check text-success float-end"></i>
+                                    }
+                                </a>
+                            }
+                        </div>
+
+                        <div class="mt-3 pt-2 border-top">
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i> Est. 15-20 minutes
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -56,38 +96,38 @@
                             <strong class="ms-2">Complete the onboarding process</strong> to set up your organization and derive your compliance scope.
                         </div>
 
-                        <div class="row mt-5">
+                        <div class="row mt-4">
                             <div class="col-md-6">
-                                <h5 class="mb-3">What You'll Do:</h5>
+                                <h5 class="mb-3"><i class="bi bi-check2-square text-success me-2"></i>What You'll Configure:</h5>
                                 <ul class="list-unstyled">
-                                    <li class="mb-3">
+                                    <li class="mb-2">
                                         <i class="bi bi-check-circle text-success"></i>
-                                        <span class="ms-2">Create your user account</span>
+                                        <span class="ms-2"><strong>A-C:</strong> Organization identity, objectives & regulators</span>
                                     </li>
-                                    <li class="mb-3">
+                                    <li class="mb-2">
                                         <i class="bi bi-check-circle text-success"></i>
-                                        <span class="ms-2">Set up your organization profile</span>
+                                        <span class="ms-2"><strong>D-F:</strong> Scope, data profile & technology stack</span>
                                     </li>
-                                    <li class="mb-3">
+                                    <li class="mb-2">
                                         <i class="bi bi-check-circle text-success"></i>
-                                        <span class="ms-2">Review your compliance scope</span>
+                                        <span class="ms-2"><strong>G-I:</strong> Control ownership, teams & workflows</span>
                                     </li>
-                                    <li class="mb-3">
+                                    <li class="mb-2">
                                         <i class="bi bi-check-circle text-success"></i>
-                                        <span class="ms-2">Create your GRC plan</span>
+                                        <span class="ms-2"><strong>J-L:</strong> Evidence standards, baselines & go-live</span>
                                     </li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
                                 <div class="card bg-light border-0">
                                     <div class="card-body">
-                                        <h6><strong>Estimated Time: 15 minutes</strong></h6>
-                                        <p class="text-muted mb-0">Our system will automatically determine applicable:</p>
+                                        <h6><i class="bi bi-magic text-primary me-2"></i><strong>Auto-Derived Outputs:</strong></h6>
                                         <ul class="text-muted small mt-2 mb-0">
-                                            <li>Compliance frameworks</li>
-                                            <li>Control baselines</li>
-                                            <li>Assessment templates</li>
-                                            <li>Audit packages</li>
+                                            <li><i class="bi bi-check text-success"></i> Applicable regulatory frameworks (NCA, SAMA, PDPL)</li>
+                                            <li><i class="bi bi-check text-success"></i> Control baselines & overlays</li>
+                                            <li><i class="bi bi-check text-success"></i> Assessment templates</li>
+                                            <li><i class="bi bi-check text-success"></i> Teams & RACI assignments</li>
+                                            <li><i class="bi bi-check text-success"></i> Evidence collection schedules</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -95,8 +135,18 @@
                         </div>
 
                         <div class="mt-5">
-                            <a href="/onboarding/signup" class="btn btn-primary btn-lg">
-                                <i class="bi bi-arrow-right"></i> Start Onboarding
+                            <!-- Always show wizard button - wizard handles its own auth -->
+                            <a href="/OnboardingWizard/StepA/@tenantId" class="btn btn-success btn-lg me-3">
+                                <i class="bi bi-rocket-takeoff"></i> Start 12-Step Wizard
+                            </a>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a href="/OrgSetup" class="btn btn-primary btn-lg me-3">
+                                    <i class="bi bi-building-gear"></i> Organization Setup
+                                </a>
+                            }
+                            <a href="/onboarding/signup" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-building"></i> New Organization
                             </a>
                         </div>
                     </div>

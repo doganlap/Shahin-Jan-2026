@@ -1,0 +1,261 @@
+@model StepBAssuranceObjectiveDto
+@using GrcMvc.Models.DTOs
+@{
+    ViewData["Title"] = "Assurance Objective - Onboarding Wizard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var summary = ViewData["WizardSummary"] as WizardSummaryDto;
+    var tenantId = summary?.TenantId ?? Guid.Empty;
+}
+
+<div class="d-flex">
+    @await Html.PartialAsync("_WizardSidebar", summary)
+
+    <div class="flex-grow-1 p-4">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-bullseye text-primary me-2"></i>
+                        Step B: Assurance Objective
+                    </h2>
+                    <p class="text-muted mb-0">
+                        هدف التأكيد | Questions 14-18 • Why are we doing this?
+                    </p>
+                </div>
+                <span class="badge bg-primary fs-6">Step 2 of 12</span>
+            </div>
+
+            <form asp-action="StepB" asp-route-tenantId="@tenantId" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="All" class="alert alert-danger" role="alert" style="display: none;"></div>
+
+                <!-- Primary Driver -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-flag me-2"></i>Primary Driver (Q14)</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">What is the main reason for implementing this GRC program?</p>
+                        <div class="row">
+                            @{
+                                var drivers = new[] {
+                                    ("regulator_exam", "Regulator Exam/Inspection", "fa-gavel", "Prepare for upcoming regulatory examination"),
+                                    ("internal_audit", "Internal Audit", "fa-search", "Support internal audit function"),
+                                    ("external_audit", "External Audit", "fa-user-tie", "Prepare for external audit engagement"),
+                                    ("certification", "Certification", "fa-certificate", "Achieve/maintain certifications (ISO, SOC)"),
+                                    ("customer_due_diligence", "Customer Due Diligence", "fa-handshake", "Respond to customer security questionnaires"),
+                                    ("board_reporting", "Board Reporting", "fa-chart-bar", "Provide governance reporting to board")
+                                };
+                            }
+                            @foreach (var (value, label, icon, desc) in drivers)
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check card h-100 p-3 @(Model.PrimaryDriver == value ? "border-primary bg-light" : "")">
+                                        <input class="form-check-input" type="radio" name="PrimaryDriver" 
+                                               value="@value" id="driver_@value"
+                                               @(Model.PrimaryDriver == value ? "checked" : "") required>
+                                        <label class="form-check-label d-block" for="driver_@value">
+                                            <i class="fas @icon text-primary me-2"></i>
+                                            <strong>@label</strong>
+                                            <small class="text-muted d-block mt-1">@desc</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <span asp-validation-for="PrimaryDriver" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Target Timeline -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Target Timeline (Q15)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label asp-for="TargetTimeline" class="form-label">
+                                    Target Go-Live / Audit Date
+                                </label>
+                                <input asp-for="TargetTimeline" type="date" class="form-control">
+                                <small class="text-muted">When do you need to be ready?</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Pain Points -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Current Pain Points (Q16)</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Rank your top 3 challenges (drag to reorder):</p>
+                        <div id="painPointsList">
+                            @{
+                                var painPoints = new[] {
+                                    ("evidence_collection", "Evidence Collection", "Difficulty gathering and organizing compliance evidence"),
+                                    ("mapping_frameworks", "Framework Mapping", "Confusion mapping controls across multiple frameworks"),
+                                    ("remediation_delays", "Remediation Delays", "Slow closure of findings and action items"),
+                                    ("outages", "System Outages", "Service disruptions affecting compliance"),
+                                    ("vendor_risk", "Vendor Risk", "Limited visibility into third-party risks"),
+                                    ("fraud_leakage", "Fraud/Data Leakage", "Security incidents or data breach concerns")
+                                };
+                            }
+                            @for (int i = 0; i < painPoints.Length; i++)
+                            {
+                                var (value, label, desc) = painPoints[i];
+                                <div class="pain-point-item card mb-2 p-3" data-value="@value">
+                                    <div class="d-flex align-items-center">
+                                        <span class="rank-badge badge bg-secondary me-3">@(i + 1)</span>
+                                        <div class="form-check flex-grow-1">
+                                            <input type="checkbox" class="form-check-input pain-checkbox" 
+                                                   id="pain_@value" value="@value">
+                                            <label class="form-check-label" for="pain_@value">
+                                                <strong>@label</strong>
+                                                <small class="text-muted d-block">@desc</small>
+                                            </label>
+                                        </div>
+                                        <i class="fas fa-grip-vertical text-muted drag-handle"></i>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <small class="text-muted">Select and rank your top 3 pain points.</small>
+                        <input type="hidden" name="CurrentPainPointsJson" id="currentPainPointsJson">
+                    </div>
+                </div>
+
+                <!-- Desired Maturity -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Desired Maturity (Q17)</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">What level of GRC maturity are you targeting?</p>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 @(Model.DesiredMaturity == "Foundation" ? "border-success bg-light" : "")">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="DesiredMaturity" value="Foundation" 
+                                               id="mat_foundation" class="btn-check"
+                                               @(Model.DesiredMaturity == "Foundation" ? "checked" : "")>
+                                        <label class="d-block cursor-pointer" for="mat_foundation">
+                                            <i class="fas fa-seedling fa-3x text-success mb-2"></i>
+                                            <h5>Foundation</h5>
+                                            <small class="text-muted">
+                                                Basic compliance tracking, manual processes, spreadsheet-based
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 @(Model.DesiredMaturity == "AssuranceOps" ? "border-success bg-light" : "")">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="DesiredMaturity" value="AssuranceOps" 
+                                               id="mat_assurance" class="btn-check"
+                                               @(Model.DesiredMaturity == "AssuranceOps" ? "checked" : "")>
+                                        <label class="d-block cursor-pointer" for="mat_assurance">
+                                            <i class="fas fa-cogs fa-3x text-primary mb-2"></i>
+                                            <h5>Assurance Ops</h5>
+                                            <small class="text-muted">
+                                                Automated workflows, integrated evidence, team collaboration
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 @(Model.DesiredMaturity == "ContinuousAssurance" ? "border-success bg-light" : "")">
+                                    <div class="card-body text-center">
+                                        <input type="radio" name="DesiredMaturity" value="ContinuousAssurance" 
+                                               id="mat_continuous" class="btn-check"
+                                               @(Model.DesiredMaturity == "ContinuousAssurance" ? "checked" : "")>
+                                        <label class="d-block cursor-pointer" for="mat_continuous">
+                                            <i class="fas fa-robot fa-3x text-warning mb-2"></i>
+                                            <h5>Continuous Assurance</h5>
+                                            <small class="text-muted">
+                                                Real-time monitoring, AI-driven insights, predictive analytics
+                                            </small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporting Audience -->
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Reporting Audience (Q18)</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Who will consume GRC reports and dashboards?</p>
+                        <div class="row">
+                            @{
+                                var audiences = new[] {
+                                    ("Board", "Board of Directors"), ("CRO", "Chief Risk Officer"),
+                                    ("CIO", "Chief Information Officer"), ("CISO", "Chief Information Security Officer"),
+                                    ("Internal_Audit", "Internal Audit"), ("Regulators", "Regulators"),
+                                    ("Compliance", "Compliance Team"), ("Legal", "Legal Counsel")
+                                };
+                            }
+                            @foreach (var (value, label) in audiences)
+                            {
+                                <div class="col-md-3 col-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" 
+                                               name="ReportingAudience" value="@value" id="aud_@value"
+                                               @(Model.ReportingAudience.Contains(value) ? "checked" : "")>
+                                        <label class="form-check-label" for="aud_@value">@label</label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="@Url.Action("StepA", new { tenantId })" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Step A
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Continue to Step C: Regulatory Applicability
+                        <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Handle pain points selection and ranking
+        document.querySelectorAll('.pain-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', updatePainPointsJson);
+        });
+
+        function updatePainPointsJson() {
+            const selected = [];
+            document.querySelectorAll('.pain-checkbox:checked').forEach(function(cb, index) {
+                selected.push({ Item: cb.value, Rank: index + 1 });
+            });
+            document.getElementById('currentPainPointsJson').value = JSON.stringify(selected);
+        }
+
+        // Maturity card selection styling
+        document.querySelectorAll('input[name="DesiredMaturity"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                document.querySelectorAll('input[name="DesiredMaturity"]').forEach(function(r) {
+                    r.closest('.card').classList.remove('border-success', 'bg-light');
+                });
+                this.closest('.card').classList.add('border-success', 'bg-light');
+            });
+        });
+    </script>
+}

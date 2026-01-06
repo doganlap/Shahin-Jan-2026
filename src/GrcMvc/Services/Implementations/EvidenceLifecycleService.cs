@@ -484,6 +484,12 @@ namespace GrcMvc.Services.Implementations
                 .Where(s => evidences.Any(e => e.Id == s.EvidenceId))
                 .ToList();
 
+            // Calculate overdue reviews based on SLA (default: 5 days for review)
+            const int SLA_REVIEW_DAYS = 5;
+            var overdueCount = evidences.Count(e =>
+                (e.VerificationStatus == STATUS_SUBMITTED || e.VerificationStatus == STATUS_IN_REVIEW) &&
+                (DateTime.UtcNow - e.CollectionDate).TotalDays > SLA_REVIEW_DAYS);
+
             return new EvidenceStatistics
             {
                 TotalEvidence = evidences.Count,
@@ -495,7 +501,7 @@ namespace GrcMvc.Services.Implementations
                 AverageScore = evidenceScores.Any() ? (decimal)evidenceScores.Average(s => s.Score) : 0,
                 PendingReview = evidences.Count(e => e.VerificationStatus == STATUS_SUBMITTED ||
                     e.VerificationStatus == STATUS_IN_REVIEW),
-                OverdueReview = 0 // TODO: Calculate based on SLA
+                OverdueReview = overdueCount
             };
         }
 

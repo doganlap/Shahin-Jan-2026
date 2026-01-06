@@ -958,5 +958,124 @@ namespace GrcMvc.Services.Implementations
             var estimatedPages = Math.Max(1, (int)(fileSize / 40000));
             return estimatedPages;
         }
+
+        /// <summary>
+        /// Update an existing report
+        /// </summary>
+        public async Task<object> UpdateReportAsync(string reportId, UpdateReportDto dto)
+        {
+            if (!Guid.TryParse(reportId, out var id))
+                throw new ArgumentException("Invalid report ID");
+
+            var report = await _unitOfWork.Reports
+                .Query()
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+            if (report == null)
+                throw new InvalidOperationException("Report not found");
+
+            if (!string.IsNullOrEmpty(dto.Title))
+                report.Title = dto.Title;
+            if (!string.IsNullOrEmpty(dto.Description))
+                report.Description = dto.Description;
+            if (!string.IsNullOrEmpty(dto.ExecutiveSummary))
+                report.ExecutiveSummary = dto.ExecutiveSummary;
+            if (!string.IsNullOrEmpty(dto.KeyFindings))
+                report.KeyFindings = dto.KeyFindings;
+            if (!string.IsNullOrEmpty(dto.Recommendations))
+                report.Recommendations = dto.Recommendations;
+            if (!string.IsNullOrEmpty(dto.Status))
+                report.Status = dto.Status;
+
+            report.ModifiedDate = DateTime.UtcNow;
+            report.ModifiedBy = _currentUser.GetUserName();
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return new { id = report.Id, reportNumber = report.ReportNumber, title = report.Title, status = report.Status };
+        }
+
+        /// <summary>
+        /// Soft delete a report
+        /// </summary>
+        public async Task<bool> DeleteReportAsync(string reportId)
+        {
+            if (!Guid.TryParse(reportId, out var id))
+                return false;
+
+            var report = await _unitOfWork.Reports
+                .Query()
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+            if (report == null)
+                return false;
+
+            report.IsDeleted = true;
+            report.ModifiedDate = DateTime.UtcNow;
+            report.ModifiedBy = _currentUser.GetUserName();
+
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Mark report as delivered
+        /// </summary>
+        public async Task<object> DeliverReportAsync(string reportId, string deliveredTo, string? notes = null)
+        {
+            if (!Guid.TryParse(reportId, out var id))
+                throw new ArgumentException("Invalid report ID");
+
+            var report = await _unitOfWork.Reports
+                .Query()
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+            if (report == null)
+                throw new InvalidOperationException("Report not found");
+
+            report.Status = "Delivered";
+            report.DeliveredTo = deliveredTo;
+            report.DeliveryDate = DateTime.UtcNow;
+            report.ModifiedDate = DateTime.UtcNow;
+            report.ModifiedBy = _currentUser.GetUserName();
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return new { id = report.Id, reportNumber = report.ReportNumber, status = report.Status, deliveredTo, deliveryDate = report.DeliveryDate };
+        }
+
+        /// <summary>
+        /// Get report file for download
+        /// </summary>
+        public async Task<(byte[] fileData, string fileName, string contentType)?> DownloadReportAsync(string reportId, string format = "pdf")
+        {
+            if (!Guid.TryParse(reportId, out var id))
+                return null;
+
+            var report = await _unitOfWork.Reports
+                .Query()
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+            if (report == null)
+                return null;
+
+            var content = JsonSerializer.SerializeToUtf8Bytes(new
+            {
+                report.ReportNumber,
+                report.Title,
+                report.Type,
+                report.Status,
+                report.ExecutiveSummary,
+                Findings = report.KeyFindings,
+                Recommendations = report.Recommendations,
+                report.GeneratedDate,
+                report.GeneratedBy
+            }, new JsonSerializerOptions { WriteIndented = true });
+
+            var fileName = $"{report.ReportNumber}.{format}";
+            var contentType = format.ToLower() == "pdf" ? "application/pdf" : "application/json";
+
+            return (content, fileName, contentType);
+        }
     }
 }

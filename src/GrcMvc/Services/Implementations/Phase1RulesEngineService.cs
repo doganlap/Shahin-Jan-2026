@@ -108,16 +108,44 @@ namespace GrcMvc.Services.Implementations
 
             try
             {
-                // Build context from org profile
+                // Build context from org profile - Extended with all relevant fields for rule evaluation
                 var context = new Dictionary<string, object>
                 {
+                    // Basic profile
                     { "country", profile.Country ?? "SA" },
                     { "sector", profile.Sector ?? "" },
                     { "orgType", profile.OrganizationType ?? "" },
                     { "dataTypes", profile.DataTypes ?? "" },
                     { "hostingModel", profile.HostingModel ?? "" },
                     { "organizationSize", profile.OrganizationSize ?? "" },
-                    { "complianceMaturity", profile.ComplianceMaturity ?? "" }
+                    { "complianceMaturity", profile.ComplianceMaturity ?? "" },
+
+                    // Regulatory & compliance fields
+                    { "isRegulatedEntity", profile.IsRegulatedEntity.ToString().ToLower() },
+                    { "isCriticalInfrastructure", profile.IsCriticalInfrastructure.ToString().ToLower() },
+                    { "primaryRegulator", profile.PrimaryRegulator ?? "" },
+                    { "secondaryRegulators", profile.SecondaryRegulators ?? "" },
+                    { "regulatoryCertifications", profile.RegulatoryCertifications ?? "" },
+                    { "industryLicenses", profile.IndustryLicenses ?? "" },
+
+                    // Data & technology fields
+                    { "processesPersonalData", profile.ProcessesPersonalData.ToString().ToLower() },
+                    { "processesSensitiveData", profile.ProcessesSensitiveData.ToString().ToLower() },
+                    { "hasDataCenterInKSA", profile.HasDataCenterInKSA.ToString().ToLower() },
+                    { "cloudProviders", profile.CloudProviders ?? "" },
+                    { "dataSubjectCount", profile.DataSubjectCount.ToString() },
+
+                    // Third parties & vendors
+                    { "hasThirdPartyDataProcessing", profile.HasThirdPartyDataProcessing.ToString().ToLower() },
+                    { "vendorCount", profile.VendorCount.ToString() },
+                    { "criticalVendorCount", profile.CriticalVendorCount.ToString() },
+                    { "thirdPartyRiskLevel", profile.ThirdPartyRiskLevel ?? "" },
+
+                    // Organization structure
+                    { "isPubliclyTraded", profile.IsPubliclyTraded.ToString().ToLower() },
+                    { "isSubsidiary", profile.IsSubsidiary.ToString().ToLower() },
+                    { "employeeCount", profile.EmployeeCount.ToString() },
+                    { "branchCount", profile.BranchCount.ToString() }
                 };
 
                 // Get active rules ordered by priority
@@ -184,6 +212,7 @@ namespace GrcMvc.Services.Implementations
 
         /// <summary>
         /// Derive and persist scope (TenantBaselines, TenantPackages, TenantTemplates)
+        /// Now includes Asset-based recognition for data classification overlays
         /// </summary>
         public async Task<RuleExecutionLog> DeriveAndPersistScopeAsync(Guid tenantId, string userId)
         {
@@ -200,6 +229,13 @@ namespace GrcMvc.Services.Implementations
 
             if (ruleset == null)
                 throw new InvalidOperationException("No active ruleset found.");
+
+            // ===== ASSET-BASED RECOGNITION (NEW) =====
+            // Aggregate asset characteristics to enrich rule context
+            var assetSummary = await AggregateAssetCharacteristicsAsync(tenantId);
+            
+            // Merge asset-derived data into profile for rule evaluation
+            EnrichProfileFromAssets(profile, assetSummary);
 
             // Evaluate rules
             var executionLog = await EvaluateRulesAsync(tenantId, profile, ruleset, userId);
@@ -401,6 +437,164 @@ namespace GrcMvc.Services.Implementations
             public List<string>? DerivedBaselines { get; set; }
             public List<string>? DerivedPackages { get; set; }
             public List<string>? DerivedTemplates { get; set; }
+        }
+
+        // ===== ASSET-BASED RECOGNITION METHODS =====
+
+        /// <summary>
+        /// Aggregate asset characteristics across all tenant assets
+        /// Used to derive data classification overlays (PCI, PHI, etc.)
+        /// </summary>
+        private async Task<AssetCharacteristicsSummary> AggregateAssetCharacteristicsAsync(Guid tenantId)
+        {
+            var assets = await _context.Assets
+                .Where(a => a.TenantId == tenantId && a.Status == "Active" && !a.IsDeleted)
+                .ToListAsync();
+
+            var summary = new AssetCharacteristicsSummary
+            {
+                TotalAssets = assets.Count,
+                CriticalTier1Count = assets.Count(a => a.Criticality == "T1"),
+                CriticalTier2Count = assets.Count(a => a.Criticality == "T2"),
+                
+                // Data classification detection
+                HasPCIData = assets.Any(a => a.DataClassification.Contains("PCI") || a.DataTypes.Contains("PCI")),
+                HasPHIData = assets.Any(a => a.DataClassification.Contains("PHI") || a.DataTypes.Contains("PHI")),
+                HasPIIData = assets.Any(a => a.DataClassification.Contains("PII") || a.DataTypes.Contains("PII")),
+                HasRestrictedData = assets.Any(a => a.DataClassification == "Restricted"),
+                HasConfidentialData = assets.Any(a => a.DataClassification == "Confidential"),
+                
+                // Hosting model detection
+                HasCloudAssets = assets.Any(a => a.HostingModel == "Cloud" || a.HostingModel == "SaaS"),
+                HasOnPremAssets = assets.Any(a => a.HostingModel == "OnPremise"),
+                HasHybridAssets = assets.Any(a => a.HostingModel == "Hybrid"),
+                
+                // Cloud providers used
+                CloudProviders = assets
+                    .Where(a => !string.IsNullOrEmpty(a.CloudProvider))
+                    .Select(a => a.CloudProvider)
+                    .Distinct()
+                    .ToList(),
+                
+                // Production vs non-production
+                ProductionAssetCount = assets.Count(a => a.Environment == "Production"),
+                NonProductionAssetCount = assets.Count(a => a.Environment != "Production"),
+                
+                // Asset types present
+                AssetTypes = assets.Select(a => a.AssetType).Distinct().ToList(),
+                
+                // Data types aggregate
+                AllDataTypes = assets
+                    .SelectMany(a => (a.DataTypes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    .Select(t => t.Trim())
+                    .Distinct()
+                    .ToList()
+            };
+
+            _logger.LogInformation("Asset aggregation for tenant {TenantId}: {Count} assets, PCI={HasPCI}, PHI={HasPHI}, PII={HasPII}",
+                tenantId, summary.TotalAssets, summary.HasPCIData, summary.HasPHIData, summary.HasPIIData);
+
+            return summary;
+        }
+
+        /// <summary>
+        /// Enrich organization profile with asset-derived characteristics
+        /// This allows rules to trigger based on actual asset data, not just profile
+        /// </summary>
+        private void EnrichProfileFromAssets(OrganizationProfile profile, AssetCharacteristicsSummary assetSummary)
+        {
+            // Build enriched data types list
+            var dataTypesSet = new HashSet<string>(
+                (profile.DataTypes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim())
+            );
+
+            // Add asset-derived data types
+            if (assetSummary.HasPCIData) dataTypesSet.Add("PCI");
+            if (assetSummary.HasPHIData) dataTypesSet.Add("PHI");
+            if (assetSummary.HasPIIData) dataTypesSet.Add("PII");
+
+            foreach (var dt in assetSummary.AllDataTypes)
+            {
+                dataTypesSet.Add(dt);
+            }
+
+            profile.DataTypes = string.Join(",", dataTypesSet);
+
+            // Enrich cloud providers
+            if (assetSummary.CloudProviders.Any())
+            {
+                var cloudSet = new HashSet<string>(
+                    (profile.CloudProviders ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim())
+                );
+                foreach (var cp in assetSummary.CloudProviders)
+                {
+                    cloudSet.Add(cp);
+                }
+                profile.CloudProviders = string.Join(",", cloudSet);
+            }
+
+            // Auto-derive hosting model from assets if not set
+            if (string.IsNullOrEmpty(profile.HostingModel))
+            {
+                if (assetSummary.HasHybridAssets || (assetSummary.HasCloudAssets && assetSummary.HasOnPremAssets))
+                    profile.HostingModel = "Hybrid";
+                else if (assetSummary.HasCloudAssets)
+                    profile.HostingModel = "Cloud";
+                else if (assetSummary.HasOnPremAssets)
+                    profile.HostingModel = "OnPremise";
+            }
+
+            // Mark as critical infrastructure if T1 critical assets exist
+            if (assetSummary.CriticalTier1Count > 0)
+            {
+                profile.IsCriticalInfrastructure = true;
+            }
+
+            // Mark as processing sensitive data if restricted/confidential data present
+            if (assetSummary.HasRestrictedData || assetSummary.HasConfidentialData || 
+                assetSummary.HasPCIData || assetSummary.HasPHIData)
+            {
+                profile.ProcessesSensitiveData = true;
+            }
+
+            // Mark as processing personal data if PII present
+            if (assetSummary.HasPIIData)
+            {
+                profile.ProcessesPersonalData = true;
+            }
+        }
+
+        /// <summary>
+        /// Asset characteristics summary for rule context enrichment
+        /// </summary>
+        private class AssetCharacteristicsSummary
+        {
+            public int TotalAssets { get; set; }
+            public int CriticalTier1Count { get; set; }
+            public int CriticalTier2Count { get; set; }
+            
+            // Data classification flags
+            public bool HasPCIData { get; set; }
+            public bool HasPHIData { get; set; }
+            public bool HasPIIData { get; set; }
+            public bool HasRestrictedData { get; set; }
+            public bool HasConfidentialData { get; set; }
+            
+            // Hosting model
+            public bool HasCloudAssets { get; set; }
+            public bool HasOnPremAssets { get; set; }
+            public bool HasHybridAssets { get; set; }
+            
+            // Cloud providers
+            public List<string> CloudProviders { get; set; } = new();
+            
+            // Environment
+            public int ProductionAssetCount { get; set; }
+            public int NonProductionAssetCount { get; set; }
+            
+            // Asset types
+            public List<string> AssetTypes { get; set; } = new();
+            public List<string> AllDataTypes { get; set; } = new();
         }
     }
 }

@@ -369,21 +369,82 @@ namespace GrcMvc.BackgroundJobs
         }
 
         /// <summary>
-        /// Get supervisor for a user
+        /// Get supervisor for a user - looks up team lead or manager from TeamMember hierarchy
         /// </summary>
         private async Task<string> GetSupervisorAsync(string? userId, Guid tenantId)
         {
-            // TODO: Implement when HrisEmployees DbSet is added
-            return await Task.FromResult("system-admin");
+            if (string.IsNullOrEmpty(userId))
+                return await GetComplianceOfficerAsync(tenantId);
+
+            // Try to find team member's supervisor through team hierarchy
+            if (Guid.TryParse(userId, out var userGuid))
+            {
+                var teamMember = await _context.TeamMembers
+                    .Include(tm => tm.Team)
+                    .FirstOrDefaultAsync(tm => tm.UserId == userGuid &&
+                                               tm.TenantId == tenantId &&
+                                               tm.IsActive && !tm.IsDeleted);
+
+                if (teamMember?.Team != null)
+                {
+                    // Find the team lead (primary member with manager/lead role)
+                    var teamLead = await _context.TeamMembers
+                        .Where(tm => tm.TeamId == teamMember.TeamId &&
+                                    tm.TenantId == tenantId &&
+                                    tm.IsPrimaryForRole &&
+                                    tm.IsActive && !tm.IsDeleted &&
+                                    (tm.RoleCode == "GRC_MANAGER" ||
+                                     tm.RoleCode == "TEAM_LEAD" ||
+                                     tm.RoleCode == "COMPLIANCE_OFFICER") &&
+                                    tm.UserId != userGuid)
+                        .FirstOrDefaultAsync();
+
+                    if (teamLead != null)
+                        return teamLead.UserId.ToString();
+                }
+            }
+
+            // Fallback to compliance officer
+            return await GetComplianceOfficerAsync(tenantId);
         }
 
         /// <summary>
-        /// Get compliance officer for tenant
+        /// Get compliance officer for tenant - looks up user with COMPLIANCE_OFFICER role
         /// </summary>
         private async Task<string> GetComplianceOfficerAsync(Guid tenantId)
         {
-            // TODO: Implement when RBAC entities use Guid for TenantId
-            return await Task.FromResult("system-admin");
+            // Find compliance officer through RACI assignments or team members
+            var complianceOfficer = await _context.TeamMembers
+                .Where(tm => tm.TenantId == tenantId &&
+                            tm.RoleCode == "COMPLIANCE_OFFICER" &&
+                            tm.IsPrimaryForRole &&
+                            tm.IsActive && !tm.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (complianceOfficer != null)
+                return complianceOfficer.UserId.ToString();
+
+            // Fallback: Try to find any GRC manager
+            var grcManager = await _context.TeamMembers
+                .Where(tm => tm.TenantId == tenantId &&
+                            tm.RoleCode == "GRC_MANAGER" &&
+                            tm.IsActive && !tm.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (grcManager != null)
+                return grcManager.UserId.ToString();
+
+            // Final fallback: Find tenant admin
+            var tenantAdmin = await _context.TenantUsers
+                .Where(tu => tu.TenantId == tenantId &&
+                            tu.Status == "Active" && !tu.IsDeleted &&
+                            tu.RoleCode == "ADMIN")
+                .FirstOrDefaultAsync();
+
+            if (tenantAdmin != null)
+                return tenantAdmin.UserId.ToString();
+
+            return "system-admin";
         }
 
         private enum SlaStatus

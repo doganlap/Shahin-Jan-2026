@@ -27,6 +27,15 @@ namespace GrcMvc.Data
         IGenericRepository<Tenant> Tenants { get; }
         IGenericRepository<TenantUser> TenantUsers { get; }
         IGenericRepository<OrganizationProfile> OrganizationProfiles { get; }
+        IGenericRepository<OnboardingWizard> OnboardingWizards { get; }
+
+        // Teams & RACI (Role-based workflow routing)
+        IGenericRepository<Team> Teams { get; }
+        IGenericRepository<TeamMember> TeamMembers { get; }
+        IGenericRepository<RACIAssignment> RACIAssignments { get; }
+
+        // Asset inventory (for recognition & scoping)
+        IGenericRepository<Asset> Assets { get; }
         IGenericRepository<Ruleset> Rulesets { get; }
         IGenericRepository<Rule> Rules { get; }
         IGenericRepository<RuleExecutionLog> RuleExecutionLogs { get; }

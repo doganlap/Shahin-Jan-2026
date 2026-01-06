@@ -32,6 +32,16 @@ namespace GrcMvc.Data
         private IGenericRepository<Tenant>? _tenants;
         private IGenericRepository<TenantUser>? _tenantUsers;
         private IGenericRepository<OrganizationProfile>? _organizationProfiles;
+        private IGenericRepository<OnboardingWizard>? _onboardingWizards;
+
+        // Teams & RACI (Role-based workflow routing)
+        private IGenericRepository<Team>? _teams;
+        private IGenericRepository<TeamMember>? _teamMembers;
+        private IGenericRepository<RACIAssignment>? _raciAssignments;
+
+        // Asset inventory
+        private IGenericRepository<Asset>? _assets;
+
         private IGenericRepository<Ruleset>? _rulesets;
         private IGenericRepository<Rule>? _rules;
         private IGenericRepository<RuleExecutionLog>? _ruleExecutionLogs;
@@ -113,6 +123,23 @@ namespace GrcMvc.Data
 
         public IGenericRepository<OrganizationProfile> OrganizationProfiles =>
             _organizationProfiles ??= new GenericRepository<OrganizationProfile>(_context);
+
+        public IGenericRepository<OnboardingWizard> OnboardingWizards =>
+            _onboardingWizards ??= new GenericRepository<OnboardingWizard>(_context);
+
+        // Teams & RACI properties
+        public IGenericRepository<Team> Teams =>
+            _teams ??= new GenericRepository<Team>(_context);
+
+        public IGenericRepository<TeamMember> TeamMembers =>
+            _teamMembers ??= new GenericRepository<TeamMember>(_context);
+
+        public IGenericRepository<RACIAssignment> RACIAssignments =>
+            _raciAssignments ??= new GenericRepository<RACIAssignment>(_context);
+
+        // Asset inventory property
+        public IGenericRepository<Asset> Assets =>
+            _assets ??= new GenericRepository<Asset>(_context);
 
         public IGenericRepository<Ruleset> Rulesets =>
             _rulesets ??= new GenericRepository<Ruleset>(_context);

@@ -43,5 +43,35 @@ namespace GrcMvc.Services.Interfaces
         /// List all generated reports
         /// </summary>
         Task<List<object>> ListReportsAsync();
+
+        /// <summary>
+        /// Update an existing report
+        /// </summary>
+        Task<object> UpdateReportAsync(string reportId, UpdateReportDto dto);
+
+        /// <summary>
+        /// Soft delete a report
+        /// </summary>
+        Task<bool> DeleteReportAsync(string reportId);
+
+        /// <summary>
+        /// Mark report as delivered
+        /// </summary>
+        Task<object> DeliverReportAsync(string reportId, string deliveredTo, string? notes = null);
+
+        /// <summary>
+        /// Get report file for download
+        /// </summary>
+        Task<(byte[] fileData, string fileName, string contentType)?> DownloadReportAsync(string reportId, string format = "pdf");
+    }
+
+    public class UpdateReportDto
+    {
+        public string? Title { get; set; }
+        public string? Description { get; set; }
+        public string? ExecutiveSummary { get; set; }
+        public string? KeyFindings { get; set; }
+        public string? Recommendations { get; set; }
+        public string? Status { get; set; }
     }
 }

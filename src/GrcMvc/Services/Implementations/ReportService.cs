@@ -19,15 +19,18 @@ namespace GrcMvc.Services.Implementations
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuditEventService _auditService;
+        private readonly ICurrentUserService _currentUserService;
         private readonly ILogger<ReportService> _logger;
 
         public ReportService(
             IUnitOfWork unitOfWork,
             IAuditEventService auditService,
+            ICurrentUserService currentUserService,
             ILogger<ReportService> logger)
         {
             _unitOfWork = unitOfWork;
             _auditService = auditService;
+            _currentUserService = currentUserService;
             _logger = logger;
         }
 
@@ -38,8 +41,9 @@ namespace GrcMvc.Services.Implementations
         {
             try
             {
-                // TODO: Get tenant ID from current context
-                var tenantId = Guid.Empty; // Placeholder - should come from current user context
+                // Get tenant ID and user from current context
+                var tenantId = _currentUserService.GetTenantId();
+                var currentUser = _currentUserService.GetUserName();
 
                 var report = new Report
                 {
@@ -52,10 +56,10 @@ namespace GrcMvc.Services.Implementations
                     Scope = "All compliance requirements",
                     ReportPeriodStart = startDate,
                     ReportPeriodEnd = endDate,
-                    GeneratedBy = "System", // TODO: Get from current user
+                    GeneratedBy = currentUser,
                     GeneratedDate = DateTime.UtcNow,
                     CreatedDate = DateTime.UtcNow,
-                    CreatedBy = "System",
+                    CreatedBy = currentUser,
                     CorrelationId = Guid.NewGuid().ToString()
                 };
 
@@ -115,7 +119,7 @@ namespace GrcMvc.Services.Implementations
         {
             try
             {
-                var tenantId = Guid.Empty; // TODO: Get from current user context
+                var tenantId = _currentUserService.GetTenantId();
 
                 var report = new Report
                 {
@@ -309,7 +313,7 @@ namespace GrcMvc.Services.Implementations
         {
             try
             {
-                var tenantId = Guid.Empty; // TODO: Get from current user context
+                var tenantId = _currentUserService.GetTenantId();
 
                 var risks = await _unitOfWork.Risks
                     .Query()
@@ -402,7 +406,7 @@ namespace GrcMvc.Services.Implementations
         {
             try
             {
-                var tenantId = Guid.Empty; // TODO: Get from current user context
+                var tenantId = _currentUserService.GetTenantId();
 
                 var reports = await _unitOfWork.Reports
                     .Query()
@@ -514,6 +518,219 @@ namespace GrcMvc.Services.Implementations
 
             var sequence = reportsThisYear + 1;
             return $"{prefix}-{year}-{sequence:D3}";
+        }
+
+        /// <summary>
+        /// Update an existing report
+        /// </summary>
+        public async Task<object> UpdateReportAsync(string reportId, UpdateReportDto dto)
+        {
+            try
+            {
+                if (!Guid.TryParse(reportId, out var id))
+                    throw new ArgumentException("Invalid report ID");
+
+                var report = await _unitOfWork.Reports
+                    .Query()
+                    .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+                if (report == null)
+                    throw new InvalidOperationException("Report not found");
+
+                // Update fields
+                if (!string.IsNullOrEmpty(dto.Title))
+                    report.Title = dto.Title;
+                if (!string.IsNullOrEmpty(dto.Description))
+                    report.Description = dto.Description;
+                if (!string.IsNullOrEmpty(dto.ExecutiveSummary))
+                    report.ExecutiveSummary = dto.ExecutiveSummary;
+                if (!string.IsNullOrEmpty(dto.KeyFindings))
+                    report.KeyFindings = dto.KeyFindings;
+                if (!string.IsNullOrEmpty(dto.Recommendations))
+                    report.Recommendations = dto.Recommendations;
+                if (!string.IsNullOrEmpty(dto.Status))
+                    report.Status = dto.Status;
+
+                report.ModifiedDate = DateTime.UtcNow;
+                report.ModifiedBy = _currentUserService.GetUserName();
+
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Report {ReportId} updated successfully", reportId);
+
+                return new
+                {
+                    id = report.Id,
+                    reportNumber = report.ReportNumber,
+                    title = report.Title,
+                    status = report.Status,
+                    modifiedDate = report.ModifiedDate
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating report {ReportId}", reportId);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Soft delete a report
+        /// </summary>
+        public async Task<bool> DeleteReportAsync(string reportId)
+        {
+            try
+            {
+                if (!Guid.TryParse(reportId, out var id))
+                    return false;
+
+                var report = await _unitOfWork.Reports
+                    .Query()
+                    .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+                if (report == null)
+                    return false;
+
+                report.IsDeleted = true;
+                report.ModifiedDate = DateTime.UtcNow;
+                report.ModifiedBy = _currentUserService.GetUserName();
+
+                await _unitOfWork.SaveChangesAsync();
+
+                _logger.LogInformation("Report {ReportId} deleted (soft)", reportId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting report {ReportId}", reportId);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Mark report as delivered
+        /// </summary>
+        public async Task<object> DeliverReportAsync(string reportId, string deliveredTo, string? notes = null)
+        {
+            try
+            {
+                if (!Guid.TryParse(reportId, out var id))
+                    throw new ArgumentException("Invalid report ID");
+
+                var report = await _unitOfWork.Reports
+                    .Query()
+                    .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+                if (report == null)
+                    throw new InvalidOperationException("Report not found");
+
+                report.Status = "Delivered";
+                report.DeliveredTo = deliveredTo;
+                report.DeliveryDate = DateTime.UtcNow;
+                report.ModifiedDate = DateTime.UtcNow;
+                report.ModifiedBy = _currentUserService.GetUserName();
+
+                await _unitOfWork.SaveChangesAsync();
+
+                // Log audit event
+                await _auditService.LogEventAsync(
+                    tenantId: report.TenantId,
+                    eventType: "ReportDelivered",
+                    affectedEntityType: "Report",
+                    affectedEntityId: report.Id.ToString(),
+                    action: "Deliver",
+                    actor: _currentUserService.GetUserName(),
+                    payloadJson: System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        DeliveredTo = deliveredTo,
+                        Notes = notes,
+                        DeliveryDate = report.DeliveryDate
+                    }),
+                    correlationId: report.CorrelationId
+                );
+
+                _logger.LogInformation("Report {ReportId} delivered to {DeliveredTo}", reportId, deliveredTo);
+
+                return new
+                {
+                    id = report.Id,
+                    reportNumber = report.ReportNumber,
+                    status = report.Status,
+                    deliveredTo = report.DeliveredTo,
+                    deliveryDate = report.DeliveryDate
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error delivering report {ReportId}", reportId);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get report file for download
+        /// </summary>
+        public async Task<(byte[] fileData, string fileName, string contentType)?> DownloadReportAsync(
+            string reportId, string format = "pdf")
+        {
+            try
+            {
+                if (!Guid.TryParse(reportId, out var id))
+                    return null;
+
+                var report = await _unitOfWork.Reports
+                    .Query()
+                    .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+                if (report == null)
+                    return null;
+
+                // Generate report content
+                var content = GenerateReportContent(report, format);
+                var fileName = $"{report.ReportNumber}.{format}";
+                var contentType = format.ToLower() switch
+                {
+                    "pdf" => "application/pdf",
+                    "xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "csv" => "text/csv",
+                    "json" => "application/json",
+                    _ => "application/octet-stream"
+                };
+
+                _logger.LogInformation("Report {ReportId} downloaded as {Format}", reportId, format);
+
+                return (content, fileName, contentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading report {ReportId}", reportId);
+                throw;
+            }
+        }
+
+        private byte[] GenerateReportContent(Report report, string format)
+        {
+            // Generate a simple text/JSON representation for now
+            // In production, use a proper PDF/Excel generator
+            var content = new
+            {
+                ReportNumber = report.ReportNumber,
+                Title = report.Title,
+                Type = report.Type,
+                Status = report.Status,
+                ExecutiveSummary = report.ExecutiveSummary,
+                Findings = report.KeyFindings,
+                Recommendations = report.Recommendations,
+                GeneratedDate = report.GeneratedDate,
+                GeneratedBy = report.GeneratedBy,
+                Scope = report.Scope,
+                ReportPeriod = new { Start = report.ReportPeriodStart, End = report.ReportPeriodEnd }
+            };
+
+            var json = System.Text.Json.JsonSerializer.Serialize(content,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+
+            return System.Text.Encoding.UTF8.GetBytes(json);
         }
     }
 }

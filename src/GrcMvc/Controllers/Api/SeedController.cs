@@ -1,3 +1,5 @@
+using GrcMvc.Data;
+using GrcMvc.Data.Seeds;
 using GrcMvc.Services.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,17 +17,20 @@ namespace GrcMvc.Controllers.Api
         private readonly CatalogSeederService _catalogSeeder;
         private readonly WorkflowDefinitionSeederService _workflowSeeder;
         private readonly FrameworkControlImportService _controlImporter;
+        private readonly GrcDbContext _context;
         private readonly ILogger<SeedController> _logger;
 
         public SeedController(
             CatalogSeederService catalogSeeder,
             WorkflowDefinitionSeederService workflowSeeder,
             FrameworkControlImportService controlImporter,
+            GrcDbContext context,
             ILogger<SeedController> logger)
         {
             _catalogSeeder = catalogSeeder;
             _workflowSeeder = workflowSeeder;
             _controlImporter = controlImporter;
+            _context = context;
             _logger = logger;
         }
 
@@ -68,7 +73,7 @@ namespace GrcMvc.Controllers.Api
         }
 
         /// <summary>
-        /// Seed all data (catalogs + workflows)
+        /// Seed all data (catalogs + workflows + regulators + KSA frameworks)
         /// </summary>
         [HttpPost("all")]
         [AllowAnonymous] // For initial setup - should be secured in production
@@ -76,17 +81,74 @@ namespace GrcMvc.Controllers.Api
         {
             try
             {
+                // Seed catalogs (roles, titles, baselines, packages, templates, evidence types)
                 await _catalogSeeder.SeedAllCatalogsAsync();
+                
+                // Seed workflow definitions
                 await _workflowSeeder.SeedAllWorkflowDefinitionsAsync();
+                
+                // Seed regulators (92 KSA + International)
+                await RegulatorSeeds.SeedRegulatorsAsync(_context, _logger);
+                
+                // Seed KSA framework controls (NCA-ECC, SAMA-CSF, PDPL)
+                await KsaFrameworkSeeds.SeedAllFrameworksAsync(_context, _logger);
+                
                 return Ok(new {
                     message = "All seed data created successfully",
                     catalogs = new[] { "Roles", "Titles", "Baselines", "Packages", "Templates", "EvidenceTypes" },
+                    regulators = "92 regulators (62 Saudi, 20 International, 10 Regional)",
+                    frameworks = new[] { "NCA-ECC (30 controls)", "SAMA-CSF (11 controls)", "PDPL (10 controls)" },
                     workflows = new[] { "NCA ECC", "SAMA CSF", "PDPL PIA", "ERM", "Evidence Review", "Audit Remediation", "Policy Review" }
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding all data");
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Seed KSA regulators (NCA, SAMA, SDAIA, CMA, CST, + 57 more)
+        /// </summary>
+        [HttpPost("regulators")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SeedRegulators()
+        {
+            try
+            {
+                await RegulatorSeeds.SeedRegulatorsAsync(_context, _logger);
+                return Ok(new { message = "92 regulators seeded successfully (62 Saudi, 20 International, 10 Regional)" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error seeding regulators");
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Seed KSA framework controls (NCA-ECC, SAMA-CSF, PDPL)
+        /// </summary>
+        [HttpPost("ksa-frameworks")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SeedKsaFrameworks()
+        {
+            try
+            {
+                await KsaFrameworkSeeds.SeedAllFrameworksAsync(_context, _logger);
+                return Ok(new { 
+                    message = "KSA framework controls seeded successfully",
+                    frameworks = new {
+                        NCA_ECC = "30 controls (sample - full 109 via CSV import)",
+                        SAMA_CSF = "11 controls (sample)",
+                        PDPL = "10 controls"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error seeding KSA frameworks");
                 return BadRequest(new { error = ex.Message });
             }
         }

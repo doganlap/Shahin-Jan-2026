@@ -65,6 +65,10 @@ public class SmartOnboardingService : ISmartOnboardingService
             // Step 3: Get derived scope
             var scope = await _onboardingService.GetDerivedScopeAsync(tenantId);
 
+            // Step 3.5: Provision default team and RACI assignments
+            var defaultTeam = await ProvisionDefaultTeamAndRACIAsync(tenantId, userId);
+            _logger.LogInformation($"Default team provisioned: {defaultTeam.Id}");
+
             // Step 4: Generate assessment templates based on profile and KSA frameworks
             var templates = await GenerateAssessmentTemplatesAsync(tenantId);
             _logger.LogInformation($"Generated {templates.Count} assessment templates");
@@ -786,6 +790,142 @@ public class SmartOnboardingService : ISmartOnboardingService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in full smart onboarding for tenant {TenantId}", tenantId);
+            throw;
+        }
+    }
+
+    #endregion
+
+    #region Auto-Team and RACI Provisioning
+
+    /// <summary>
+    /// Create default GRC team and RACI assignments for a tenant during onboarding
+    /// </summary>
+    public async Task<Team> ProvisionDefaultTeamAndRACIAsync(Guid tenantId, string createdBy)
+    {
+        try
+        {
+            _logger.LogInformation("Provisioning default team and RACI for tenant {TenantId}", tenantId);
+
+            // Check if default team already exists
+            var existingTeam = await _unitOfWork.Teams
+                .Query()
+                .FirstOrDefaultAsync(t => t.TenantId == tenantId && t.IsDefaultFallback && !t.IsDeleted);
+
+            if (existingTeam != null)
+            {
+                _logger.LogInformation("Default team already exists for tenant {TenantId}", tenantId);
+                return existingTeam;
+            }
+
+            // Create default GRC team
+            var team = new Team
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                TeamCode = "GRC-DEFAULT",
+                Name = "GRC Team",
+                NameAr = "فريق الحوكمة والمخاطر والامتثال",
+                Purpose = "Default GRC team for compliance, risk, and governance activities",
+                Description = "Auto-provisioned default team for handling GRC workflows and tasks",
+                TeamType = "Governance",
+                BusinessUnit = "Compliance",
+                IsDefaultFallback = true,
+                IsActive = true,
+                CreatedDate = DateTime.UtcNow,
+                CreatedBy = createdBy
+            };
+
+            await _unitOfWork.Teams.AddAsync(team);
+
+            // Create default RACI assignments for common scopes
+            var raciScopes = new[]
+            {
+                ("ControlFamily", "Cybersecurity", "R"),
+                ("ControlFamily", "DataProtection", "R"),
+                ("ControlFamily", "AccessControl", "R"),
+                ("ControlFamily", "RiskManagement", "R"),
+                ("Framework", "NCA-ECC", "R"),
+                ("Framework", "PDPL", "R"),
+                ("Framework", "SAMA-CSF", "R"),
+                ("Assessment", "Default", "R"),
+                ("Evidence", "Default", "R")
+            };
+
+            foreach (var (scopeType, scopeId, raci) in raciScopes)
+            {
+                var raciAssignment = new RACIAssignment
+                {
+                    Id = Guid.NewGuid(),
+                    TenantId = tenantId,
+                    TeamId = team.Id,
+                    ScopeType = scopeType,
+                    ScopeId = scopeId,
+                    RACI = raci,
+                    RoleCode = "COMPLIANCE_OFFICER",
+                    Priority = 1,
+                    IsActive = true,
+                    CreatedDate = DateTime.UtcNow,
+                    CreatedBy = createdBy
+                };
+
+                await _unitOfWork.RACIAssignments.AddAsync(raciAssignment);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Created default team {TeamId} with {RaciCount} RACI assignments for tenant {TenantId}",
+                team.Id, raciScopes.Length, tenantId);
+
+            return team;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error provisioning default team and RACI for tenant {TenantId}", tenantId);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Add team member with role during onboarding
+    /// </summary>
+    public async Task<TeamMember> AddTeamMemberAsync(
+        Guid tenantId,
+        Guid teamId,
+        Guid userId,
+        string roleCode,
+        bool isPrimary,
+        string createdBy)
+    {
+        try
+        {
+            var teamMember = new TeamMember
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                TeamId = teamId,
+                UserId = userId,
+                RoleCode = roleCode,
+                IsPrimaryForRole = isPrimary,
+                CanApprove = roleCode is "COMPLIANCE_OFFICER" or "GRC_MANAGER" or "APPROVER",
+                CanDelegate = roleCode is "COMPLIANCE_OFFICER" or "GRC_MANAGER",
+                JoinedDate = DateTime.UtcNow,
+                IsActive = true,
+                CreatedDate = DateTime.UtcNow,
+                CreatedBy = createdBy
+            };
+
+            await _unitOfWork.TeamMembers.AddAsync(teamMember);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Added team member {UserId} with role {RoleCode} to team {TeamId}",
+                userId, roleCode, teamId);
+
+            return teamMember;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding team member");
             throw;
         }
     }

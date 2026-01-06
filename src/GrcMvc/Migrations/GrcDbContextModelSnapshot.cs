@@ -1549,6 +1549,147 @@ namespace GrcMvc.Migrations
                     b.ToTable("AssessmentScopes");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.Asset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApplicableFrameworks")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AssetCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AttributesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("BusinessOwner")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CloudProvider")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("CommissionedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Criticality")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DataClassification")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DataTypes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DecommissionedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Environment")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HostingModel")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsInScope")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastRiskAssessmentDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LastSyncDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastSyncStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("OwnerTeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("OwnerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("RiskScore")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SourceSystem")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SubType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SystemId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TagsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TechnicalOwner")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerTeamId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("Assets");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.Audit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6723,6 +6864,544 @@ namespace GrcMvc.Migrations
                     b.ToTable("MappingWorkflowTemplates");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.OnboardingWizard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AcceptableEvidenceTypesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AccessReviewsFrequency")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("AdoptDefaultBaseline")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("AllAnswersJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ApprovalGatesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("ApprovalGatesNeeded")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("AuditRequestHandling")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("AuditScopeType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("BackupDrTooling")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("BackupReviewFrequency")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal?>("BaselineAuditPrepHoursPerMonth")
+                        .HasColumnType("numeric");
+
+                    b.Property<int?>("BaselineOverdueControlsPerMonth")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal?>("BaselineRemediationClosureDays")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("BusinessLinesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CertificationsHeldJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CiCdTooling")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ClientSpecificControlsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CloudProvidersJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CmdbSource")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CompletedByUserId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CompletedSectionsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConfidentialEvidenceAccessJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("ConfidentialEvidenceEncryption")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ControlEffectivenessSignoffRole")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ControlOwnershipApproach")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CorporateEmailDomainsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CountryOfIncorporation")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<bool>("CreateTeamsNow")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CrossBorderTransferCountriesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CurrentPainPointsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("CurrentStep")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CustomerVolumeTier")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("DataResidencyCountriesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DataTypesProcessedJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DefaultControlOwnerTeam")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("DefaultTimezone")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("DelegationRulesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("DesiredMaturity")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("DomainVerificationMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("DrExerciseCadence")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("EdrPlatform")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ErpSystem")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("EscalationDaysOverdue")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EscalationTarget")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("EvidenceAccessRulesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("EvidenceFrequencyDefaultsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("EvidenceNamingConventionRequired")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("EvidenceNamingPattern")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("EvidenceRepository")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("EvidenceRetentionYears")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EvidenceSlaSubmitDays")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EvidenceStorageLocationJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ExceptionApproverRole")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("ExceptionExpiryDays")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ExclusionsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("HasClientSpecificControls")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasCrossBorderDataTransfers")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasDataResidencyRequirement")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasInternetFacingSystems")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasPaymentCardData")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("HasThirdPartyDataProcessing")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("IdentityProvider")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ImportantBusinessServicesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InScopeBusinessUnitsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InScopeEnvironments")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("InScopeLegalEntitiesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InScopeLocationsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InScopeProcessesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InScopeSystemsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("IncidentTabletopCadence")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("IndustrySector")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("InternalAuditStakeholder")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("InternalPoliciesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("InternetFacingSystemsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ItsmPlatform")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("LastStepSavedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MandatoryFrameworksJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NotificationPreference")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("OperatingCountriesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OptionalFrameworksJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OrgAdminsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OrganizationLegalNameAr")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("OrganizationLegalNameEn")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("OrganizationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("PaymentCardDataLocationsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PilotScopeJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PrimaryDriver")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("PrimaryHqLocation")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("PrimaryLanguage")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("PrimaryRegulatorsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProgressPercent")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RaciMappingJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("RaciMappingNeeded")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RegulatoryInterpretationApproverRole")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RemediationSlaJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReportingAudienceJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RestoreTestCadence")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("RiskCommitteeAttendeesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RiskCommitteeCadence")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("SamplingGuidanceJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("ScimProvisioningAvailable")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecondaryRegulatorsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SelectedOverlaysJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SelectedRoleCatalogJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SiemPlatform")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("SsoEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SuccessMetricsTop3Json")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SystemCriticalityTiersJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TargetImprovementJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("TargetTimeline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TeamListJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TeamMembersJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ThirdPartyDataProcessorsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TradeName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("TransactionVolumeTier")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ValidationErrorsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("VulnerabilityManagementTool")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("VulnerabilityPatchReviewFrequency")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("WizardStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrentStep");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.HasIndex("WizardStatus");
+
+                    b.ToTable("OnboardingWizards");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.OnePageGuide", b =>
                 {
                     b.Property<Guid>("Id")
@@ -8013,6 +8692,61 @@ namespace GrcMvc.Migrations
                         .IsUnique();
 
                     b.ToTable("PolicyViolations");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.RACIAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RACI")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ScopeId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ScopeType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("RACIAssignments");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.RegulatoryRequirement", b =>
@@ -10946,6 +11680,135 @@ namespace GrcMvc.Migrations
                     b.HasIndex("TenantId", "IsActive", "IsRevoked");
 
                     b.ToTable("TaskDelegations");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.Team", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BusinessUnit")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDefaultFallback")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("ManagerUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TeamCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TeamType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.TeamMember", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("CanApprove")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("CanDelegate")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrimaryForRole")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("JoinedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LeftDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RoleCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TeamMembers");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.TeamsNotificationConfig", b =>
@@ -13901,6 +14764,23 @@ namespace GrcMvc.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.Asset", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.Team", "OwnerTeam")
+                        .WithMany()
+                        .HasForeignKey("OwnerTeamId");
+
+                    b.HasOne("GrcMvc.Models.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OwnerTeam");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.AuditEvent", b =>
                 {
                     b.HasOne("GrcMvc.Models.Entities.Tenant", "Tenant")
@@ -14470,6 +15350,17 @@ namespace GrcMvc.Migrations
                     b.Navigation("Mapping");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.OnboardingWizard", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.OnePageGuide", b =>
                 {
                     b.HasOne("GrcMvc.Models.Entities.Tenant", "Tenant")
@@ -14633,6 +15524,17 @@ namespace GrcMvc.Migrations
                         .IsRequired();
 
                     b.Navigation("Policy");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.RACIAssignment", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.Team", "Team")
+                        .WithMany("RACIAssignments")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.Report", b =>
@@ -15000,6 +15902,36 @@ namespace GrcMvc.Migrations
                     b.Navigation("Task");
 
                     b.Navigation("WorkflowInstance");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.Team", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.TeamMember", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.Team", "Team")
+                        .WithMany("Members")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GrcMvc.Models.Entities.TenantUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.TeamsNotificationConfig", b =>
@@ -15609,6 +16541,13 @@ namespace GrcMvc.Migrations
             modelBuilder.Entity("GrcMvc.Models.Entities.SupportConversation", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.Team", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("RACIAssignments");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.Tenant", b =>

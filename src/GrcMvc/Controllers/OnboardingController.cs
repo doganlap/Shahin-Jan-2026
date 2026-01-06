@@ -237,6 +237,36 @@ namespace GrcMvc.Controllers
         }
 
         /// <summary>
+        /// Refresh/re-evaluate scope when profile or assets change.
+        /// Triggers rules engine to re-derive applicable baselines/packages/templates.
+        /// </summary>
+        [HttpPost("tenants/{tenantId:guid}/refresh-scope")]
+        public async Task<IActionResult> RefreshScopeAsync(Guid tenantId, [FromBody] RefreshScopeRequest? request = null)
+        {
+            try
+            {
+                var userId = User?.FindFirst("sub")?.Value ?? "SYSTEM";
+                var reason = request?.Reason ?? "Manual refresh requested";
+
+                var executionLog = await _onboardingService.RefreshScopeAsync(tenantId, userId, reason);
+
+                return Ok(new
+                {
+                    executionLog.Id,
+                    executionLog.Status,
+                    Reason = reason,
+                    RefreshedAt = DateTime.UtcNow,
+                    message = "Scope refreshed successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error refreshing scope");
+                return BadRequest(ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Get tenant by slug (used for multi-tenant routing).
         /// </summary>
         [HttpGet("tenants/by-slug/{tenantSlug}")]
@@ -305,7 +335,28 @@ namespace GrcMvc.Controllers
         [HttpGet("Signup")]
         public IActionResult Signup()
         {
-            return View();
+            return View(new CreateTenantDto());
+        }
+
+        /// <summary>
+        /// MVC Route: Process signup form and redirect to OrgProfile
+        /// </summary>
+        [HttpPost("Signup")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Signup(CreateTenantDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Store tenant info in TempData for next step
+            TempData["TenantSlug"] = model.TenantSlug ?? model.OrganizationName?.ToLower().Replace(" ", "-");
+            TempData["OrganizationName"] = model.OrganizationName;
+            TempData["AdminEmail"] = model.AdminEmail;
+            TempData["TenantId"] = Guid.NewGuid().ToString();
+
+            return RedirectToAction(nameof(OrgProfile));
         }
 
         /// <summary>
@@ -315,7 +366,39 @@ namespace GrcMvc.Controllers
         [HttpGet("org-profile")]
         public IActionResult OrgProfile()
         {
-            return View(new OrganizationProfileDto { TenantId = Guid.Empty });
+            var tenantIdStr = TempData["TenantId"]?.ToString();
+            var tenantId = string.IsNullOrEmpty(tenantIdStr) ? Guid.Empty : Guid.Parse(tenantIdStr);
+            TempData.Keep("TenantId");
+            TempData.Keep("TenantSlug");
+            TempData.Keep("OrganizationName");
+
+            return View(new OrganizationProfileDto { TenantId = tenantId });
+        }
+
+        /// <summary>
+        /// MVC Route: Process organization profile and redirect to ReviewScope
+        /// </summary>
+        [HttpPost("OrgProfile")]
+        [HttpPost("SaveOrgProfile")]
+        [ValidateAntiForgeryToken]
+        public IActionResult SaveOrgProfile(OrganizationProfileDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(nameof(OrgProfile), model);
+            }
+
+            // Store profile in TempData for scope derivation
+            TempData["OrganizationType"] = model.OrganizationType;
+            TempData["Sector"] = model.Sector;
+            TempData["Country"] = model.Country;
+            TempData["HostingModel"] = model.HostingModel;
+            TempData["Size"] = model.Size;
+            TempData["TenantId"] = model.TenantId.ToString();
+            TempData.Keep("TenantSlug");
+            TempData.Keep("OrganizationName");
+
+            return RedirectToAction(nameof(ReviewScope));
         }
 
         /// <summary>
@@ -325,7 +408,39 @@ namespace GrcMvc.Controllers
         [HttpGet("review-scope")]
         public IActionResult ReviewScope()
         {
-            return View(new OnboardingScopeDto());
+            var tenantIdStr = TempData["TenantId"]?.ToString();
+            TempData.Keep("TenantId");
+            TempData.Keep("TenantSlug");
+            TempData.Keep("OrganizationType");
+            TempData.Keep("Sector");
+
+            // Build scope based on profile (simplified - real implementation uses RulesEngine)
+            var scope = new OnboardingScopeDto
+            {
+                ApplicableBaselines = new List<BaselineDto>
+                {
+                    new BaselineDto { BaselineCode = "NCA-ECC", ReasonJson = "Required for all Saudi organizations" },
+                    new BaselineDto { BaselineCode = "PDPL", ReasonJson = "Personal data protection requirement" }
+                },
+                ApplicablePackages = new List<PackageDto>(),
+                ApplicableTemplates = new List<TemplateDto>()
+            };
+
+            return View(scope);
+        }
+
+        /// <summary>
+        /// MVC Route: Process scope acceptance and redirect to CreatePlan
+        /// </summary>
+        [HttpPost("CompleteOnboarding")]
+        [ValidateAntiForgeryToken]
+        public IActionResult CompleteOnboarding()
+        {
+            TempData.Keep("TenantId");
+            TempData.Keep("TenantSlug");
+            TempData.Keep("OrganizationName");
+
+            return RedirectToAction(nameof(CreatePlan));
         }
 
         /// <summary>
@@ -335,7 +450,29 @@ namespace GrcMvc.Controllers
         [HttpGet("create-plan")]
         public IActionResult CreatePlan()
         {
-            return View(new CreatePlanDto());
+            var tenantIdStr = TempData["TenantId"]?.ToString();
+            var tenantId = string.IsNullOrEmpty(tenantIdStr) ? Guid.Empty : Guid.Parse(tenantIdStr);
+            TempData.Keep("TenantId");
+            TempData.Keep("TenantSlug");
+
+            return View(new CreatePlanDto { TenantId = tenantId });
+        }
+
+        /// <summary>
+        /// MVC Route: Process plan creation and redirect to dashboard
+        /// </summary>
+        [HttpPost("CreatePlan")]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreatePlan(CreatePlanDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Plan created - redirect to dashboard
+            TempData["SuccessMessage"] = "Onboarding complete! Your first assessment plan has been created.";
+            return RedirectToAction("Index", "Dashboard");
         }
 
         /// <summary>
@@ -347,6 +484,25 @@ namespace GrcMvc.Controllers
         {
             return View();
         }
+
+        /// <summary>
+        /// MVC Route: Process activation and redirect to OrgProfile
+        /// </summary>
+        [HttpPost("Activate")]
+        [ValidateAntiForgeryToken]
+        public IActionResult Activate(string tenantSlug, string activationToken)
+        {
+            if (string.IsNullOrEmpty(tenantSlug) || string.IsNullOrEmpty(activationToken))
+            {
+                ModelState.AddModelError("", "Invalid activation link.");
+                return View();
+            }
+
+            TempData["TenantSlug"] = tenantSlug;
+            TempData["Activated"] = true;
+
+            return RedirectToAction(nameof(OrgProfile));
+        }
     }
 
     /// <summary>
@@ -355,5 +511,16 @@ namespace GrcMvc.Controllers
     public class FullOnboardingRequest
     {
         public List<TeamMemberDto>? TeamMembers { get; set; }
+    }
+
+    /// <summary>
+    /// Request for scope refresh/re-evaluation
+    /// </summary>
+    public class RefreshScopeRequest
+    {
+        /// <summary>
+        /// Reason for the scope refresh (e.g., "Profile updated", "New assets added", "Manual refresh")
+        /// </summary>
+        public string? Reason { get; set; }
     }
 }

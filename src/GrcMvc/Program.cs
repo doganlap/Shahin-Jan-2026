@@ -349,14 +349,22 @@ builder.Services.AddTransient<IAppEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IFrameworkService, Phase1FrameworkService>();
 builder.Services.AddScoped<IHRISService, HRISService>();
 builder.Services.AddScoped<IAuditTrailService, AuditTrailService>();
-builder.Services.AddScoped<IRulesEngineService, StubRulesEngineService>();
+// Use Phase1RulesEngineService (with asset-based recognition) instead of stub
+builder.Services.AddScoped<IRulesEngineService, Phase1RulesEngineService>();
 
 // Register new STAGE 1 services
 builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
+builder.Services.AddScoped<IOnboardingWizardService, OnboardingWizardService>();
 builder.Services.AddScoped<IAuditEventService, AuditEventService>();
 builder.Services.AddScoped<IEmailService, StubEmailService>();
 builder.Services.AddScoped<IPlanService, PlanService>();
+
+// Onboarding Provisioning Service (auto-creates default teams + RACI)
+builder.Services.AddScoped<IOnboardingProvisioningService, OnboardingProvisioningService>();
+
+// Asset Service (asset management for scope derivation)
+builder.Services.AddScoped<IAssetService, AssetService>();
 
 // Register PHASE 2 - 10 WORKFLOW TYPES
 builder.Services.AddScoped<IControlImplementationWorkflowService, ControlImplementationWorkflowService>();
@@ -406,6 +414,9 @@ builder.Services.AddScoped<ISupportAgentService, SupportAgentService>();
 
 // Workspace Service (Role-based pre-mapping)
 builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
+
+// Workflow Routing Service (Role-based assignee resolution - never breaks when teams change)
+builder.Services.AddScoped<IWorkflowRoutingService, WorkflowRoutingService>();
 
 // Expert Framework Mapping Service (Sector-driven compliance blueprints)
 builder.Services.AddScoped<IExpertFrameworkMappingService, ExpertFrameworkMappingService>();
@@ -508,6 +519,18 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // PHASE 10: Admin Catalog Management Service
 builder.Services.AddScoped<IAdminCatalogService, AdminCatalogService>();
+
+// =============================================================================
+// ORGANIZATION SETUP SERVICES (Post-Onboarding Configuration)
+// =============================================================================
+// OrgSetupController uses: GrcDbContext, ICurrentUserService, IOnboardingProvisioningService
+// All these services are already registered above
+
+// =============================================================================
+// ONBOARDING WIZARD SERVICES (12-Step Wizard)
+// =============================================================================
+// OnboardingWizardController uses: GrcDbContext, IOnboardingProvisioningService, IRulesEngineService
+// All these services are already registered above
 
 // Register validators
 builder.Services.AddScoped<IValidator<CreateRiskDto>, CreateRiskDtoValidator>();
@@ -743,6 +766,25 @@ appLogger.LogInformation("⚠️ Hangfire dashboard disabled (Hangfire temporari
 // 14. ENDPOINT MAPPING
 // =============================================================================
 
+// Onboarding Wizard Routes (12-step wizard)
+app.MapControllerRoute(
+    name: "onboarding-wizard",
+    pattern: "OnboardingWizard/{action=Index}/{tenantId?}",
+    defaults: new { controller = "OnboardingWizard" });
+
+// Organization Setup Routes (post-onboarding configuration)
+app.MapControllerRoute(
+    name: "org-setup",
+    pattern: "OrgSetup/{action=Index}/{id?}",
+    defaults: new { controller = "OrgSetup" });
+
+// Onboarding Routes (legacy flow)
+app.MapControllerRoute(
+    name: "onboarding",
+    pattern: "Onboarding/{action=Index}/{id?}",
+    defaults: new { controller = "Onboarding" });
+
+// Default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

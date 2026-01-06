@@ -22,6 +22,15 @@ namespace GrcMvc.Data
         public DbSet<Tenant> Tenants { get; set; } = null!;
         public DbSet<TenantUser> TenantUsers { get; set; } = null!;
         public DbSet<OrganizationProfile> OrganizationProfiles { get; set; } = null!;
+        public DbSet<OnboardingWizard> OnboardingWizards { get; set; } = null!;
+
+        // Teams & RACI (Role-based workflow routing)
+        public DbSet<Team> Teams { get; set; } = null!;
+        public DbSet<TeamMember> TeamMembers { get; set; } = null!;
+        public DbSet<RACIAssignment> RACIAssignments { get; set; } = null!;
+
+        // Asset inventory (for recognition & scoping)
+        public DbSet<Asset> Assets { get; set; } = null!;
 
         // Rules engine (Layer 2)
         public DbSet<Ruleset> Rulesets { get; set; } = null!;
@@ -470,6 +479,90 @@ namespace GrcMvc.Data
                 entity.HasOne(e => e.Tenant)
                     .WithOne(t => t.OrganizationProfile)
                     .HasForeignKey<OrganizationProfile>(e => e.TenantId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configure OnboardingWizard - Comprehensive 12-step wizard (Sections A-L)
+            modelBuilder.Entity<OnboardingWizard>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                
+                // Section A: Organization Identity
+                entity.Property(e => e.OrganizationLegalNameEn).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.OrganizationLegalNameAr).HasMaxLength(255);
+                entity.Property(e => e.TradeName).HasMaxLength(255);
+                entity.Property(e => e.CountryOfIncorporation).HasMaxLength(10);
+                entity.Property(e => e.PrimaryHqLocation).HasMaxLength(255);
+                entity.Property(e => e.DefaultTimezone).HasMaxLength(50);
+                entity.Property(e => e.PrimaryLanguage).HasMaxLength(20);
+                entity.Property(e => e.DomainVerificationMethod).HasMaxLength(50);
+                entity.Property(e => e.OrganizationType).HasMaxLength(50);
+                entity.Property(e => e.IndustrySector).HasMaxLength(100);
+                
+                // Section B: Assurance Objective
+                entity.Property(e => e.PrimaryDriver).HasMaxLength(100);
+                entity.Property(e => e.DesiredMaturity).HasMaxLength(50);
+                
+                // Section C: Regulatory Applicability
+                entity.Property(e => e.AuditScopeType).HasMaxLength(50);
+                
+                // Section D: Scope Definition
+                entity.Property(e => e.InScopeEnvironments).HasMaxLength(50);
+                
+                // Section E: Data & Risk Profile
+                entity.Property(e => e.CustomerVolumeTier).HasMaxLength(50);
+                entity.Property(e => e.TransactionVolumeTier).HasMaxLength(50);
+                
+                // Section F: Technology Landscape
+                entity.Property(e => e.IdentityProvider).HasMaxLength(100);
+                entity.Property(e => e.ItsmPlatform).HasMaxLength(100);
+                entity.Property(e => e.EvidenceRepository).HasMaxLength(100);
+                entity.Property(e => e.SiemPlatform).HasMaxLength(100);
+                entity.Property(e => e.VulnerabilityManagementTool).HasMaxLength(100);
+                entity.Property(e => e.EdrPlatform).HasMaxLength(100);
+                entity.Property(e => e.ErpSystem).HasMaxLength(100);
+                entity.Property(e => e.CmdbSource).HasMaxLength(100);
+                entity.Property(e => e.CiCdTooling).HasMaxLength(100);
+                entity.Property(e => e.BackupDrTooling).HasMaxLength(100);
+                
+                // Section G: Control Ownership
+                entity.Property(e => e.ControlOwnershipApproach).HasMaxLength(50);
+                entity.Property(e => e.DefaultControlOwnerTeam).HasMaxLength(100);
+                entity.Property(e => e.ExceptionApproverRole).HasMaxLength(100);
+                entity.Property(e => e.RegulatoryInterpretationApproverRole).HasMaxLength(100);
+                entity.Property(e => e.ControlEffectivenessSignoffRole).HasMaxLength(100);
+                entity.Property(e => e.InternalAuditStakeholder).HasMaxLength(255);
+                entity.Property(e => e.RiskCommitteeCadence).HasMaxLength(50);
+                
+                // Section H: Teams & Roles
+                entity.Property(e => e.NotificationPreference).HasMaxLength(50);
+                entity.Property(e => e.EscalationTarget).HasMaxLength(100);
+                
+                // Section I: Workflow Cadence
+                entity.Property(e => e.AccessReviewsFrequency).HasMaxLength(50);
+                entity.Property(e => e.VulnerabilityPatchReviewFrequency).HasMaxLength(50);
+                entity.Property(e => e.BackupReviewFrequency).HasMaxLength(50);
+                entity.Property(e => e.RestoreTestCadence).HasMaxLength(50);
+                entity.Property(e => e.DrExerciseCadence).HasMaxLength(50);
+                entity.Property(e => e.IncidentTabletopCadence).HasMaxLength(50);
+                entity.Property(e => e.AuditRequestHandling).HasMaxLength(50);
+                
+                // Section J: Evidence Standards
+                entity.Property(e => e.EvidenceNamingPattern).HasMaxLength(255);
+                
+                // Wizard Metadata
+                entity.Property(e => e.WizardStatus).HasMaxLength(50);
+                entity.Property(e => e.CompletedByUserId).HasMaxLength(100);
+                
+                // Indexes
+                entity.HasIndex(e => e.TenantId).IsUnique();
+                entity.HasIndex(e => e.WizardStatus);
+                entity.HasIndex(e => e.CurrentStep);
+                entity.HasQueryFilter(e => !e.IsDeleted);
+
+                entity.HasOne(e => e.Tenant)
+                    .WithMany()
+                    .HasForeignKey(e => e.TenantId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
