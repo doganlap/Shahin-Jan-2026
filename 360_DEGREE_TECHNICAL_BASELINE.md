@@ -1,7 +1,7 @@
 # 360-Degree Codebase Discovery and Technical Baseline
 
-**Date:** 2025-01-22  
-**System:** GRC System (grc-system)  
+**Date:** 2025-01-22
+**System:** GRC System (grc-system)
 **Scope:** Complete end-to-end technical baseline
 
 ---
@@ -106,35 +106,35 @@ flowchart TB
     User[User<br/>Browser]
     Admin[Platform Admin]
     TenantUser[Tenant User]
-    
+
     subgraph System["GRC System"]
         WebApp[GrcMvc<br/>ASP.NET Core 8 MVC]
     end
-    
+
     subgraph DataLayer["Data Layer"]
         PG[(PostgreSQL<br/>Primary DB)]
         CH[(ClickHouse<br/>Analytics)]
         Redis[(Redis<br/>Cache)]
     end
-    
+
     subgraph Messaging["Messaging"]
         Kafka[(Kafka<br/>Message Broker)]
         ZK[Zookeeper<br/>Coordinator]
     end
-    
+
     subgraph Background["Background Jobs"]
         Hangfire[Hangfire<br/>Job Server]
     end
-    
+
     subgraph External["External Services"]
         SMTP[SMTP<br/>Email Server]
         Claude[Claude AI<br/>API]
     end
-    
+
     User --> WebApp
     Admin --> WebApp
     TenantUser --> WebApp
-    
+
     WebApp --> PG
     WebApp --> CH
     WebApp --> Redis
@@ -142,7 +142,7 @@ flowchart TB
     WebApp --> Hangfire
     WebApp --> SMTP
     WebApp --> Claude
-    
+
     Hangfire --> PG
     Kafka --> ZK
     Kafka --> PG
@@ -156,35 +156,35 @@ flowchart TB
         subgraph AppContainer["Application Container"]
             GrcMvc[grcmvc<br/>Port: 8888/8443<br/>ASP.NET Core 8]
         end
-        
+
         subgraph DataContainers["Data Containers"]
             PG[db<br/>PostgreSQL 15<br/>Port: 5433]
             CH[clickhouse<br/>ClickHouse<br/>Port: 8123/9000]
             Redis[redis<br/>Redis 7<br/>Port: 6379]
         end
-        
+
         subgraph MessagingContainers["Messaging Containers"]
             Kafka[kafka<br/>Port: 9092]
             ZK[zookeeper<br/>Port: 2181]
             Connect[kafka-connect<br/>Debezium<br/>Port: 8083]
         end
     end
-    
+
     subgraph Volumes["Persistent Volumes"]
         DBVol[grc_db_data<br/>PostgreSQL Data]
         CHVol[clickhouse_data<br/>ClickHouse Data]
         RedisVol[redis_data<br/>Redis Data]
     end
-    
+
     GrcMvc --> PG
     GrcMvc --> CH
     GrcMvc --> Redis
     GrcMvc --> Kafka
-    
+
     Kafka --> ZK
     Connect --> Kafka
     Connect --> PG
-    
+
     PG -.-> DBVol
     CH -.-> CHVol
     Redis -.-> RedisVol
@@ -204,25 +204,25 @@ flowchart TB
             MC[MVC Controllers<br/>Evidence, Risk, Audit, etc.]
             AC[API Controllers<br/>REST Endpoints]
         end
-        
+
         subgraph Services["Services Layer<br/>183 Services"]
             BS[Business Services<br/>Domain Logic]
             WS[Workflow Services<br/>State Management]
             IS[Integration Services<br/>External APIs]
         end
-        
+
         subgraph Application["Application Layer"]
             PE[Policy Engine<br/>Enforcement]
             Perm[Permissions<br/>RBAC]
             Valid[Validators<br/>FluentValidation]
         end
-        
+
         subgraph Data["Data Layer"]
             DB[DbContext<br/>EF Core]
             Repo[Repositories<br/>Data Access]
             Seeds[Seeders<br/>Initialization]
         end
-        
+
         subgraph Middleware["Middleware"]
             Auth[Authentication<br/>JWT/Identity]
             AuthZ[Authorization<br/>Policy]
@@ -230,7 +230,7 @@ flowchart TB
             Log[Logging<br/>Serilog]
         end
     end
-    
+
     Controllers --> Services
     Services --> Application
     Services --> Data
@@ -255,7 +255,7 @@ sequenceDiagram
     participant AuthDB as GrcAuthDbContext
     participant JWT as JWT Service
     participant Session as Session Store
-    
+
     User->>WebApp: POST /Account/Login
     WebApp->>AuthDB: Validate Credentials
     AuthDB-->>WebApp: User Identity
@@ -276,7 +276,7 @@ sequenceDiagram
     participant Policy as PolicyEnforcer
     participant Service as RiskService
     participant DB as GrcDbContext
-    
+
     User->>Controller: POST /Risks/Create
     Controller->>Policy: EnforceCreateAsync
     Policy-->>Controller: Allow/Deny
@@ -299,7 +299,7 @@ sequenceDiagram
     participant StateMachine as State Engine
     participant DB as GrcDbContext
     participant Hangfire as Background Job
-    
+
     User->>Controller: POST /Workflow/Execute
     Controller->>WService: ExecuteWorkflowAsync
     WService->>StateMachine: Transition State
@@ -322,7 +322,7 @@ sequenceDiagram
     participant Service as EvidenceService
     participant Storage as File Storage
     participant DB as GrcDbContext
-    
+
     User->>Controller: POST /Evidence/Upload (multipart)
     Controller->>Policy: EnforceCreateAsync
     Policy-->>Controller: Allow
@@ -345,18 +345,18 @@ flowchart TB
         DevCompose[Docker Compose<br/>All Services]
         DevDB[(PostgreSQL<br/>Local Volume)]
     end
-    
+
     subgraph Staging["Staging Environment<br/>(Unverified)"]
         StagingApp[App Instance]
         StagingDB[(Database)]
     end
-    
+
     subgraph Prod["Production Environment<br/>(Unverified)"]
         ProdApp[App Instance]
         ProdDB[(Database)]
         ProdCDN[Cloudflare<br/>CDN/Proxy]
     end
-    
+
     DevCompose --> DevDB
     StagingApp --> StagingDB
     ProdCDN --> ProdApp
@@ -551,7 +551,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 | System.Threading.RateLimiting | 8.0.0 | Rate limiting | `GrcMvc.csproj` **L59** |
 | Microsoft.AspNetCore.DataProtection | 8.0.0 | Data encryption | `GrcMvc.csproj` **L62** |
 
-**Total Packages:** 31  
+**Total Packages:** 31
 **Evidence:** `src/GrcMvc/GrcMvc.csproj` **L20-82**
 
 ### C.5 Code Conventions and Standards
@@ -616,7 +616,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
   - Connection string: `src/GrcMvc/Program.cs` **L182**
   - Docker env: `docker-compose.yml` **L14, L44-45**
   - Volume: `grc-system_grc_db_data` persists old credentials
-- **Mitigation:** 
+- **Mitigation:**
   1. Reset PostgreSQL password to match environment variable
   2. Clear persistent volume if credentials changed
   3. Add connection string validation on startup
