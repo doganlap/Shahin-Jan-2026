@@ -1,0 +1,77 @@
+@{
+    ViewData["Title"] = "مركز المساعدة - شاهين";
+    Layout = "~/Views/Landing/_LandingLayout.cshtml";
+}
+
+<main class="help-page">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">مركز المساعدة</h1>
+            <p class="lead text-muted">نحن هنا لمساعدتك في كل خطوة</p>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-book text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">التوثيق</h5>
+                        <p class="card-text text-muted">استكشف الأدلة التفصيلية والتوثيق الشامل للمنصة</p>
+                        <a href="/docs" class="btn btn-outline-primary">استعرض التوثيق</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-question-circle text-success" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">الأسئلة الشائعة</h5>
+                        <p class="card-text text-muted">إجابات سريعة للأسئلة الأكثر شيوعاً</p>
+                        <a href="/faq" class="btn btn-outline-success">اقرأ الأسئلة الشائعة</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="bi bi-chat-dots text-info" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">تواصل معنا</h5>
+                        <p class="card-text text-muted">فريق الدعم متاح للإجابة على استفساراتك</p>
+                        <a href="/contact" class="btn btn-outline-info">تواصل الآن</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0"><i class="bi bi-envelope me-2"></i>الدعم عبر البريد الإلكتروني</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>للاستفسارات العامة والدعم الفني:</p>
+                        <a href="mailto:support@shahin-ai.com" class="h5 text-decoration-none">support@shahin-ai.com</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0"><i class="bi bi-activity me-2"></i>حالة النظام</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>تحقق من حالة خدماتنا في أي وقت:</p>
+                        <a href="/status" class="btn btn-primary">عرض حالة النظام</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
