@@ -13,6 +13,11 @@ using RazorLight;
 using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.Identity.Client;
+using Azure.Identity;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
+using Microsoft.Graph.Users.Item.SendMail;
 
 namespace GrcMvc.Services.Implementations
 {
@@ -35,11 +40,47 @@ namespace GrcMvc.Services.Implementations
             _logger = logger;
             _templatePath = Path.Combine(environment.ContentRootPath, "Views", "EmailTemplates");
 
+            // Ensure the EmailTemplates directory exists
+            if (!Directory.Exists(_templatePath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(_templatePath);
+                    _logger.LogInformation("Created EmailTemplates directory at {Path}", _templatePath);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to create EmailTemplates directory at {Path}. Email templates may not work.", _templatePath);
+                }
+            }
+
             // Initialize Razor template engine
-            _razorEngine = new RazorLightEngineBuilder()
-                .UseFileSystemProject(_templatePath)
-                .UseMemoryCachingProvider()
-                .Build();
+            try
+            {
+                // Only use FileSystemProject if directory exists, otherwise use embedded
+                if (Directory.Exists(_templatePath))
+                {
+                    _razorEngine = new RazorLightEngineBuilder()
+                        .UseFileSystemProject(_templatePath)
+                        .UseMemoryCachingProvider()
+                        .Build();
+                    _logger.LogInformation("RazorLight initialized with EmailTemplates directory at {Path}", _templatePath);
+                }
+                else
+                {
+                    _logger.LogWarning("EmailTemplates directory not found at {Path}. Using embedded templates.", _templatePath);
+                    _razorEngine = new RazorLightEngineBuilder()
+                        .UseMemoryCachingProvider()
+                        .Build();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to initialize RazorLight with EmailTemplates directory. Falling back to embedded templates.");
+                _razorEngine = new RazorLightEngineBuilder()
+                    .UseMemoryCachingProvider()
+                    .Build();
+            }
         }
 
         /// <summary>
@@ -167,7 +208,7 @@ namespace GrcMvc.Services.Implementations
                         bodyBuilder.Attachments.Add(
                             attachment.FileName,
                             attachment.Content,
-                            ContentType.Parse(attachment.ContentType ?? "application/octet-stream"));
+                            MimeKit.ContentType.Parse(attachment.ContentType ?? "application/octet-stream"));
                     }
                     else if (!string.IsNullOrEmpty(attachment.FilePath))
                     {
@@ -260,32 +301,104 @@ namespace GrcMvc.Services.Implementations
         }
 
         /// <summary>
-        /// Send the MimeMessage via SMTP
+        /// Send the MimeMessage via Microsoft Graph API or SMTP
         /// </summary>
         private async Task SendMessageAsync(MimeMessage message)
         {
+            // Use Microsoft Graph API for Office 365 (recommended)
+            if (_settings.UseOAuth2 && !string.IsNullOrEmpty(_settings.TenantId) 
+                && !string.IsNullOrEmpty(_settings.ClientId) && !string.IsNullOrEmpty(_settings.ClientSecret))
+            {
+                await SendViaGraphApiAsync(message);
+                return;
+            }
+
+            // Fallback to SMTP with Basic Auth
             using var client = new MailKit.Net.Smtp.SmtpClient();
 
             try
             {
-                // Connect to SMTP server
                 await client.ConnectAsync(
                     _settings.Host,
                     _settings.Port,
                     _settings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
 
-                // Authenticate if credentials provided
                 if (!string.IsNullOrEmpty(_settings.Username) && !string.IsNullOrEmpty(_settings.Password))
                 {
                     await client.AuthenticateAsync(_settings.Username, _settings.Password);
+                    _logger.LogInformation("Authenticated with Basic Auth");
                 }
 
-                // Send message
                 await client.SendAsync(message);
             }
             finally
             {
                 await client.DisconnectAsync(true);
+            }
+        }
+
+        /// <summary>
+        /// Send email via Microsoft Graph API (recommended for Office 365)
+        /// </summary>
+        private async Task SendViaGraphApiAsync(MimeMessage mimeMessage)
+        {
+            try
+            {
+                _logger.LogInformation("Sending email via Microsoft Graph API...");
+
+                var credential = new ClientSecretCredential(
+                    _settings.TenantId,
+                    _settings.ClientId,
+                    _settings.ClientSecret);
+
+                var graphClient = new GraphServiceClient(credential);
+
+                // Convert MimeMessage to Graph Message
+                var graphMessage = new Message
+                {
+                    Subject = mimeMessage.Subject,
+                    Body = new ItemBody
+                    {
+                        ContentType = mimeMessage.HtmlBody != null ? Microsoft.Graph.Models.BodyType.Html : Microsoft.Graph.Models.BodyType.Text,
+                        Content = mimeMessage.HtmlBody ?? mimeMessage.TextBody ?? ""
+                    },
+                    ToRecipients = mimeMessage.To.Mailboxes.Select(m => new Recipient
+                    {
+                        EmailAddress = new Microsoft.Graph.Models.EmailAddress
+                        {
+                            Address = m.Address,
+                            Name = m.Name
+                        }
+                    }).ToList()
+                };
+
+                // Add CC recipients if any
+                if (mimeMessage.Cc.Any())
+                {
+                    graphMessage.CcRecipients = mimeMessage.Cc.Mailboxes.Select(m => new Recipient
+                    {
+                        EmailAddress = new Microsoft.Graph.Models.EmailAddress
+                        {
+                            Address = m.Address,
+                            Name = m.Name
+                        }
+                    }).ToList();
+                }
+
+                // Send via Graph API
+                await graphClient.Users[_settings.FromEmail].SendMail.PostAsync(new SendMailPostRequestBody
+                {
+                    Message = graphMessage,
+                    SaveToSentItems = true
+                });
+
+                _logger.LogInformation("Email sent successfully via Microsoft Graph API to {Recipients}",
+                    string.Join(", ", mimeMessage.To.Mailboxes.Select(m => m.Address)));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send email via Microsoft Graph API");
+                throw;
             }
         }
 

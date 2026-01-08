@@ -71,15 +71,9 @@ namespace GrcMvc.Services.Implementations
                 tenant.Status = "Active"; // Auto-activate owner-created tenants
                 tenant.ActivatedAt = DateTime.UtcNow;
                 tenant.ActivatedBy = ownerId.ToString();
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "audit-session", runId = "run1", hypothesisId = "B", location = "OwnerTenantService.CreateTenantWithFullFeaturesAsync:flags-set", message = "Tenant flags set before save", data = new { tenantId = tenant.Id, isOwnerCreated = tenant.IsOwnerCreated, bypassPayment = tenant.BypassPayment, subscriptionTier = tenant.SubscriptionTier, status = tenant.Status, credentialExpiresAt = tenant.CredentialExpiresAt }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
 
                 await _unitOfWork.Tenants.UpdateAsync(tenant);
                 await _unitOfWork.SaveChangesAsync();
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "audit-session", runId = "run1", hypothesisId = "B", location = "OwnerTenantService.CreateTenantWithFullFeaturesAsync:flags-saved", message = "Tenant flags saved to database", data = new { tenantId = tenant.Id, isOwnerCreated = tenant.IsOwnerCreated, bypassPayment = tenant.BypassPayment, subscriptionTier = tenant.SubscriptionTier }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
 
                 // Log audit event
                 await _auditService.LogEventAsync(
@@ -134,26 +128,17 @@ namespace GrcMvc.Services.Implementations
 
                 // Generate secure username: admin-{tenant-slug}
                 var username = $"admin-{tenant.TenantSlug}";
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "audit-session", runId = "run1", hypothesisId = "C", location = "OwnerTenantService.GenerateTenantAdminAccountAsync:username-generated", message = "Initial username generated", data = new { tenantId, username, tenantSlug = tenant.TenantSlug }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
-                
+
                 // Check if username already exists
                 var existingUser = await _userManager.FindByNameAsync(username);
                 if (existingUser != null)
                 {
                     // Append random suffix if exists
                     username = $"admin-{tenant.TenantSlug}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
-                    // #region agent log
-                    System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "audit-session", runId = "run1", hypothesisId = "C", location = "OwnerTenantService.GenerateTenantAdminAccountAsync:username-conflict", message = "Username conflict detected, using suffix", data = new { originalUsername = $"admin-{tenant.TenantSlug}", newUsername = username }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                    // #endregion
                 }
 
                 // Generate secure password (12+ chars, mixed case, numbers, symbols)
                 var password = GenerateSecurePassword(16);
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "audit-session", runId = "run1", hypothesisId = "C", location = "OwnerTenantService.GenerateTenantAdminAccountAsync:password-generated", message = "Password generated", data = new { passwordLength = password.Length, hasUpper = password.Any(char.IsUpper), hasLower = password.Any(char.IsLower), hasDigit = password.Any(char.IsDigit), hasSymbol = password.Any(c => !char.IsLetterOrDigit(c)) }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
 
                 // Create ApplicationUser
                 var user = new ApplicationUser

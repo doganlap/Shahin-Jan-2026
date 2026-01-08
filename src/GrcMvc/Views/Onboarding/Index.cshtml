@@ -89,45 +89,45 @@
             <div class="col-md-9">
                 <div class="card shadow">
                     <div class="card-body p-5">
-                        <h1 class="mb-4">Welcome to GRC Management System</h1>
+                        <h1 class="mb-4">مرحباً بك في نظام إدارة الحوكمة والمخاطر والامتثال</h1>
 
                         <div class="alert alert-info border-0" role="alert">
                             <i class="bi bi-info-circle"></i>
-                            <strong class="ms-2">Complete the onboarding process</strong> to set up your organization and derive your compliance scope.
+                            <strong class="ms-2">أكمل عملية الإعداد</strong> لتهيئة مؤسستك وتحديد نطاق الامتثال الخاص بك.
                         </div>
 
                         <div class="row mt-4">
                             <div class="col-md-6">
-                                <h5 class="mb-3"><i class="bi bi-check2-square text-success me-2"></i>What You'll Configure:</h5>
+                                <h5 class="mb-3"><i class="bi bi-check2-square text-success me-2"></i>ما ستقوم بتهيئته:</h5>
                                 <ul class="list-unstyled">
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle text-success"></i>
-                                        <span class="ms-2"><strong>A-C:</strong> Organization identity, objectives & regulators</span>
+                                        <span class="ms-2"><strong>أ-ج:</strong> هوية المؤسسة والأهداف والجهات التنظيمية</span>
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle text-success"></i>
-                                        <span class="ms-2"><strong>D-F:</strong> Scope, data profile & technology stack</span>
+                                        <span class="ms-2"><strong>د-و:</strong> النطاق وملف البيانات والبنية التقنية</span>
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle text-success"></i>
-                                        <span class="ms-2"><strong>G-I:</strong> Control ownership, teams & workflows</span>
+                                        <span class="ms-2"><strong>ز-ط:</strong> ملكية الضوابط والفرق وسير العمل</span>
                                     </li>
                                     <li class="mb-2">
                                         <i class="bi bi-check-circle text-success"></i>
-                                        <span class="ms-2"><strong>J-L:</strong> Evidence standards, baselines & go-live</span>
+                                        <span class="ms-2"><strong>ي-ل:</strong> معايير الأدلة والخطوط الأساسية والانطلاق</span>
                                     </li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
                                 <div class="card bg-light border-0">
                                     <div class="card-body">
-                                        <h6><i class="bi bi-magic text-primary me-2"></i><strong>Auto-Derived Outputs:</strong></h6>
+                                        <h6><i class="bi bi-magic text-primary me-2"></i><strong>المخرجات المُشتقة تلقائياً:</strong></h6>
                                         <ul class="text-muted small mt-2 mb-0">
-                                            <li><i class="bi bi-check text-success"></i> Applicable regulatory frameworks (NCA, SAMA, PDPL)</li>
-                                            <li><i class="bi bi-check text-success"></i> Control baselines & overlays</li>
-                                            <li><i class="bi bi-check text-success"></i> Assessment templates</li>
-                                            <li><i class="bi bi-check text-success"></i> Teams & RACI assignments</li>
-                                            <li><i class="bi bi-check text-success"></i> Evidence collection schedules</li>
+                                            <li><i class="bi bi-check text-success"></i> الأُطر التنظيمية المطبقة (NCA, SAMA, PDPL)</li>
+                                            <li><i class="bi bi-check text-success"></i> الخطوط الأساسية والإضافات للضوابط</li>
+                                            <li><i class="bi bi-check text-success"></i> قوالب التقييم</li>
+                                            <li><i class="bi bi-check text-success"></i> الفرق ومصفوفة RACI</li>
+                                            <li><i class="bi bi-check text-success"></i> جداول جمع الأدلة</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -136,17 +136,17 @@
 
                         <div class="mt-5">
                             <!-- Always show wizard button - wizard handles its own auth -->
-                            <a href="/OnboardingWizard/StepA/@tenantId" class="btn btn-success btn-lg me-3">
-                                <i class="bi bi-rocket-takeoff"></i> Start 12-Step Wizard
+                            <a href="/OnboardingWizard/StepA/@tenantId" class="btn btn-success btn-lg me-3" id="btn-start-wizard" data-button-type="wizard">
+                                <i class="bi bi-rocket-takeoff"></i> ابدأ المعالج من 12 خطوة
                             </a>
                             @if (User.Identity?.IsAuthenticated == true)
                             {
-                                <a href="/OrgSetup" class="btn btn-primary btn-lg me-3">
-                                    <i class="bi bi-building-gear"></i> Organization Setup
+                                <a href="/OrgSetup" class="btn btn-primary btn-lg me-3" id="btn-org-setup" data-button-type="orgsetup">
+                                    <i class="bi bi-building-gear"></i> إعداد المؤسسة
                                 </a>
                             }
-                            <a href="/onboarding/signup" class="btn btn-outline-secondary btn-lg">
-                                <i class="bi bi-building"></i> New Organization
+                            <a href="@Url.Action("Signup", "Onboarding")" class="btn btn-outline-secondary btn-lg" id="btn-new-org" data-button-type="neworg">
+                                <i class="bi bi-building"></i> مؤسسة جديدة
                             </a>
                         </div>
                     </div>
@@ -164,6 +164,39 @@
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                 });
+            });
+
+            // Track button clicks for debugging
+            ['btn-start-wizard', 'btn-org-setup', 'btn-new-org'].forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.addEventListener('click', function(e) {
+                        const buttonType = this.getAttribute('data-button-type');
+                        const href = this.getAttribute('href');
+                        
+                        // Log to server via fetch
+                        fetch('http://localhost:7256/ingest/e0dc8edc-729f-42ea-a384-254fbd926e6a', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                sessionId: 'debug-session',
+                                runId: 'run1',
+                                hypothesisId: 'BUTTON_CLICK',
+                                location: 'Onboarding/Index.cshtml',
+                                message: 'Button clicked',
+                                data: {
+                                    buttonType: buttonType,
+                                    buttonId: btnId,
+                                    href: href,
+                                    userId: '@(User.Identity?.Name ?? "anonymous")',
+                                    isAuthenticated: @(User.Identity?.IsAuthenticated == true ? "true" : "false"),
+                                    tenantId: '@tenantId'
+                                },
+                                timestamp: Date.now()
+                            })
+                        }).catch(() => {});
+                    });
+                }
             });
         });
     </script>

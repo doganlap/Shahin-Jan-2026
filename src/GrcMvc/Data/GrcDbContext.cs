@@ -196,6 +196,14 @@ namespace GrcMvc.Data
         // Framework Controls (Layer 1: Global - Immutable regulatory content)
         public DbSet<FrameworkControl> FrameworkControls { get; set; } = null!;
 
+        // Sector-Framework Index (Fast lookup for onboarding)
+        public DbSet<SectorFrameworkIndex> SectorFrameworkIndexes { get; set; } = null!;
+        public DbSet<EvidenceScoringCriteria> EvidenceScoringCriteria { get; set; } = null!;
+        public DbSet<TenantEvidenceRequirement> TenantEvidenceRequirements { get; set; } = null!;
+        
+        // GOSI Sub-Sector Mappings (70+ sub-sectors → 18 main sectors)
+        public DbSet<GrcSubSectorMapping> GrcSubSectorMappings { get; set; } = null!;
+
         // Assessment Requirements (Layer 3: Operational)
         public DbSet<AssessmentRequirement> AssessmentRequirements { get; set; } = null!;
 
@@ -254,6 +262,18 @@ namespace GrcMvc.Data
         public DbSet<SuiteControlEntry> SuiteControlEntries { get; set; } = null!;
         public DbSet<SuiteEvidenceRequest> SuiteEvidenceRequests { get; set; } = null!;
         public DbSet<OrganizationEntity> OrganizationEntities { get; set; } = null!;
+
+        // Trial Edition
+        public DbSet<TrialRequest> TrialRequests { get; set; } = null!;
+
+        // Email Operations (Shahin + Dogan Consult)
+        public DbSet<Models.Entities.EmailOperations.EmailMailbox> EmailMailboxes { get; set; } = null!;
+        public DbSet<Models.Entities.EmailOperations.EmailThread> EmailThreads { get; set; } = null!;
+        public DbSet<Models.Entities.EmailOperations.EmailMessage> EmailMessages { get; set; } = null!;
+        public DbSet<Models.Entities.EmailOperations.EmailTask> EmailTasks { get; set; } = null!;
+        public DbSet<Models.Entities.EmailOperations.EmailAttachment> EmailAttachments { get; set; } = null!;
+        public DbSet<Models.Entities.EmailOperations.EmailTemplate> EmailTemplates { get; set; } = null!;
+        public DbSet<Models.Entities.EmailOperations.EmailAutoReplyRule> EmailAutoReplyRules { get; set; } = null!;
 
         // Autonomous Risk & Resilience
         public DbSet<RiskIndicator> RiskIndicators { get; set; } = null!;
@@ -1369,6 +1389,86 @@ namespace GrcMvc.Data
             // Tenant lookup tables - no TenantId filter (cross-tenant lookup allowed)
             modelBuilder.Entity<TenantUser>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Tenant>().HasQueryFilter(e => !e.IsDeleted);
+
+            // =====================================================
+            // SECTOR-FRAMEWORK INDEX CONFIGURATION (Fast Lookup)
+            // =====================================================
+            
+            // SectorFrameworkIndex - Fast sector→framework lookups for onboarding
+            modelBuilder.Entity<SectorFrameworkIndex>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.SectorCode).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.FrameworkCode).IsRequired().HasMaxLength(50);
+                
+                // Composite indexes for fast lookup
+                entity.HasIndex(e => new { e.SectorCode, e.OrgType })
+                    .HasDatabaseName("IX_SectorFrameworkIndex_Sector_OrgType");
+                entity.HasIndex(e => new { e.SectorCode, e.FrameworkCode })
+                    .HasDatabaseName("IX_SectorFrameworkIndex_Sector_Framework");
+                entity.HasIndex(e => e.FrameworkCode)
+                    .HasDatabaseName("IX_SectorFrameworkIndex_Framework");
+                entity.HasIndex(e => e.IsActive)
+                    .HasDatabaseName("IX_SectorFrameworkIndex_Active");
+            });
+
+            // EvidenceScoringCriteria - Evidence scoring rules
+            modelBuilder.Entity<EvidenceScoringCriteria>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.EvidenceTypeCode).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.EvidenceTypeName).IsRequired().HasMaxLength(200);
+                
+                entity.HasIndex(e => e.EvidenceTypeCode)
+                    .IsUnique()
+                    .HasDatabaseName("IX_EvidenceScoringCriteria_TypeCode");
+                entity.HasIndex(e => e.Category)
+                    .HasDatabaseName("IX_EvidenceScoringCriteria_Category");
+                entity.HasIndex(e => e.IsActive)
+                    .HasDatabaseName("IX_EvidenceScoringCriteria_Active");
+            });
+
+            // TenantEvidenceRequirement - Per-tenant evidence requirements (auto-generated)
+            modelBuilder.Entity<TenantEvidenceRequirement>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.EvidenceTypeCode).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.FrameworkCode).HasMaxLength(50);
+                entity.Property(e => e.ControlNumber).HasMaxLength(50);
+                entity.Property(e => e.Status).HasMaxLength(30);
+                
+                // Indexes for fast tenant-specific queries
+                entity.HasIndex(e => e.TenantId)
+                    .HasDatabaseName("IX_TenantEvidenceRequirement_Tenant");
+                entity.HasIndex(e => new { e.TenantId, e.FrameworkCode })
+                    .HasDatabaseName("IX_TenantEvidenceRequirement_Tenant_Framework");
+                entity.HasIndex(e => new { e.TenantId, e.Status })
+                    .HasDatabaseName("IX_TenantEvidenceRequirement_Tenant_Status");
+                entity.HasIndex(e => new { e.TenantId, e.DueDate })
+                    .HasDatabaseName("IX_TenantEvidenceRequirement_Tenant_DueDate");
+                entity.HasIndex(e => e.WorkspaceId)
+                    .HasDatabaseName("IX_TenantEvidenceRequirement_Workspace");
+                entity.HasIndex(e => e.AssignedToUserId)
+                    .HasDatabaseName("IX_TenantEvidenceRequirement_AssignedTo");
+                    
+                // Unique constraint to prevent duplicates
+                entity.HasIndex(e => new { e.TenantId, e.FrameworkCode, e.ControlNumber, e.EvidenceTypeCode })
+                    .IsUnique()
+                    .HasDatabaseName("IX_TenantEvidenceRequirement_Unique");
+            });
+
+            // FrameworkControl - Add indexes for fast evidence lookup
+            modelBuilder.Entity<FrameworkControl>(entity =>
+            {
+                entity.HasIndex(e => e.FrameworkCode)
+                    .HasDatabaseName("IX_FrameworkControl_Framework");
+                entity.HasIndex(e => new { e.FrameworkCode, e.Version })
+                    .HasDatabaseName("IX_FrameworkControl_Framework_Version");
+                entity.HasIndex(e => e.ControlType)
+                    .HasDatabaseName("IX_FrameworkControl_Type");
+                entity.HasIndex(e => e.Domain)
+                    .HasDatabaseName("IX_FrameworkControl_Domain");
+            });
         }
 
         /// <summary>

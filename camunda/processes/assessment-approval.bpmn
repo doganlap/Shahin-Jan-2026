@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  id="Definitions_Assessment"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  
+  <bpmn:process id="grc-assessment-approval" name="GRC Assessment Approval" isExecutable="true">
+    
+    <!-- Start Event -->
+    <bpmn:startEvent id="StartEvent" name="Assessment Submitted">
+      <bpmn:outgoing>Flow_Start_Review</bpmn:outgoing>
+    </bpmn:startEvent>
+    
+    <!-- Review Task -->
+    <bpmn:userTask id="Task_Review" name="Review Assessment" camunda:assignee="${reviewerId}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="approved" label="Approve?" type="boolean" />
+          <camunda:formField id="comments" label="Comments" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Start_Review</bpmn:incoming>
+      <bpmn:incoming>Flow_Resubmit</bpmn:incoming>
+      <bpmn:outgoing>Flow_Review_Gateway</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <!-- Approval Decision Gateway -->
+    <bpmn:exclusiveGateway id="Gateway_Approval" name="Approved?">
+      <bpmn:incoming>Flow_Review_Gateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Approved</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Rejected</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    
+    <!-- Notify Approval -->
+    <bpmn:serviceTask id="Task_NotifyApproved" name="Notify Approval" 
+                      camunda:type="external" camunda:topic="grc-notification">
+      <bpmn:incoming>Flow_Approved</bpmn:incoming>
+      <bpmn:outgoing>Flow_UpdateStatus</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <!-- Update Assessment Status -->
+    <bpmn:serviceTask id="Task_UpdateStatus" name="Update Assessment Status"
+                      camunda:type="external" camunda:topic="grc-assessment-update">
+      <bpmn:incoming>Flow_UpdateStatus</bpmn:incoming>
+      <bpmn:outgoing>Flow_End_Approved</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <!-- Revision Task -->
+    <bpmn:userTask id="Task_Revise" name="Revise Assessment" camunda:assignee="${submitterId}">
+      <bpmn:incoming>Flow_Rejected</bpmn:incoming>
+      <bpmn:outgoing>Flow_Revision_Gateway</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <!-- Resubmit Gateway -->
+    <bpmn:exclusiveGateway id="Gateway_Resubmit" name="Resubmit?">
+      <bpmn:incoming>Flow_Revision_Gateway</bpmn:incoming>
+      <bpmn:outgoing>Flow_Resubmit</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Cancel</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    
+    <!-- End Events -->
+    <bpmn:endEvent id="EndEvent_Approved" name="Assessment Approved">
+      <bpmn:incoming>Flow_End_Approved</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <bpmn:endEvent id="EndEvent_Cancelled" name="Assessment Cancelled">
+      <bpmn:incoming>Flow_Cancel</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <!-- Sequence Flows -->
+    <bpmn:sequenceFlow id="Flow_Start_Review" sourceRef="StartEvent" targetRef="Task_Review" />
+    <bpmn:sequenceFlow id="Flow_Review_Gateway" sourceRef="Task_Review" targetRef="Gateway_Approval" />
+    <bpmn:sequenceFlow id="Flow_Approved" sourceRef="Gateway_Approval" targetRef="Task_NotifyApproved">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${approved == true}
+      </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Rejected" sourceRef="Gateway_Approval" targetRef="Task_Revise">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${approved == false}
+      </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_UpdateStatus" sourceRef="Task_NotifyApproved" targetRef="Task_UpdateStatus" />
+    <bpmn:sequenceFlow id="Flow_End_Approved" sourceRef="Task_UpdateStatus" targetRef="EndEvent_Approved" />
+    <bpmn:sequenceFlow id="Flow_Revision_Gateway" sourceRef="Task_Revise" targetRef="Gateway_Resubmit" />
+    <bpmn:sequenceFlow id="Flow_Resubmit" sourceRef="Gateway_Resubmit" targetRef="Task_Review">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${resubmit == true}
+      </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Cancel" sourceRef="Gateway_Resubmit" targetRef="EndEvent_Cancelled">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${resubmit == false}
+      </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    
+  </bpmn:process>
+</bpmn:definitions>

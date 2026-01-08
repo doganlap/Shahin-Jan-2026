@@ -1,7 +1,9 @@
 @using Microsoft.AspNetCore.Localization
 @using Microsoft.AspNetCore.Mvc.Localization
 @using GrcMvc.Resources
+@using GrcMvc.Services
 @inject IHtmlLocalizer<SharedResource> L
+@inject IAppInfoService AppInfo
 @{
     var requestCulture = Context.Features.Get<IRequestCultureFeature>();
     var currentCulture = requestCulture?.RequestCulture?.UICulture?.Name ?? "ar";
@@ -14,7 +16,13 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - @L["AppName"]</title>
+    <title>@ViewData["Title"] - @AppInfo.Name</title>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/brand/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="~/images/brand/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="128x128" href="~/images/brand/favicon-128.png" />
+    <meta name="application-name" content="@AppInfo.Name" />
+    <meta name="author" content="@AppInfo.CompanyName" />
     <!-- Google Fonts for Arabic -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,8 +49,9 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-shield-check"></i> GRC System
+                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/brand/favicon-32.png" alt="@AppInfo.Name" width="28" height="28" class="me-2" />
+                    <span>@AppInfo.Name</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -51,20 +60,29 @@
                     <ul class="navbar-nav flex-grow-1">
                         @if (User.Identity?.IsAuthenticated != true)
                         {
-                            <!-- Unauthenticated: Show only Login and Onboarding -->
+                            <!-- Unauthenticated: Only show Start Free Trial (login is in top right) -->
                             <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Account" asp-action="Login">
-                                    <i class="bi bi-box-arrow-in-right"></i> @L["Nav_Login"]
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-area="" asp-controller="Onboarding" asp-action="Index">
-                                    <i class="bi bi-rocket"></i> @L["Nav_Onboarding"]
+                                <a class="nav-link btn btn-warning text-dark fw-bold px-3 mx-2" href="/trial">
+                                    <i class="bi bi-rocket-takeoff-fill me-1"></i> ابدأ التجربة المجانية
                                 </a>
                             </li>
                         }
+                        @{
+                            // Define role-based access - check user roles
+                            var isAdmin = User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || User.IsInRole("PlatformAdmin") || User.IsInRole("TenantAdmin"));
+                            var isComplianceUser = isAdmin || (User.Identity?.IsAuthenticated == true && (User.IsInRole("ComplianceManager") || User.IsInRole("Auditor")));
+                            var isRiskUser = isAdmin || (User.Identity?.IsAuthenticated == true && (User.IsInRole("RiskManager") || User.IsInRole("ComplianceManager")));
+                            var isPolicyUser = isAdmin || (User.Identity?.IsAuthenticated == true && (User.IsInRole("ComplianceManager") || User.IsInRole("PolicyManager")));
+                            var isAuditUser = isAdmin || (User.Identity?.IsAuthenticated == true && (User.IsInRole("Auditor") || User.IsInRole("ComplianceManager")));
+                            var isEvidenceUser = isAdmin || (User.Identity?.IsAuthenticated == true && (User.IsInRole("EvidenceOfficer") || User.IsInRole("ComplianceManager") || User.IsInRole("Auditor")));
+                            var isWorkflowUser = isAdmin || (User.Identity?.IsAuthenticated == true && (User.IsInRole("ComplianceManager") || User.IsInRole("RiskManager")));
+                            var isReportsUser = isAdmin || (User.Identity?.IsAuthenticated == true && (User.IsInRole("ComplianceManager") || User.IsInRole("RiskManager") || User.IsInRole("Auditor") || User.IsInRole("Viewer")));
+                        }
                         @if (User.Identity?.IsAuthenticated == true)
                         {
+                            @* Risk Management - Only for Risk/Compliance roles *@
+                            @if (isRiskUser)
+                            {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-exclamation-triangle"></i> @L["Nav_RiskManagement"]
@@ -78,71 +96,133 @@
                                     <li><a class="dropdown-item" asp-controller="Risk" asp-action="Report"><i class="bi bi-bar-chart me-2"></i>@L["RiskReports"]</a></li>
                                 </ul>
                             </li>
+                            }
+                            
+                            @* Compliance - Only for Compliance/Audit roles *@
+                            @if (isComplianceUser)
+                            {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-clipboard-check"></i> @L["Nav_Compliance"]
                                 </a>
                                 <ul class="dropdown-menu">
+                                    @if (isPolicyUser)
+                                    {
                                     <li><a class="dropdown-item" asp-controller="Policy" asp-action="Index"><i class="bi bi-file-text me-2"></i>@L["Policies"]</a></li>
+                                    }
+                                    @if (isAuditUser)
+                                    {
                                     <li><a class="dropdown-item" asp-controller="Audit" asp-action="Index"><i class="bi bi-search me-2"></i>@L["Audits"]</a></li>
+                                    }
+                                    @if (isEvidenceUser)
+                                    {
                                     <li><a class="dropdown-item" asp-controller="Evidence" asp-action="Index"><i class="bi bi-file-earmark-check me-2"></i>@L["Evidence"]</a></li>
                                     <li><a class="dropdown-item" href="/evidence/lifecycle"><i class="bi bi-arrow-repeat me-2"></i>@L["EvidenceLifecycle"]</a></li>
+                                    }
                                     <li><hr class="dropdown-divider"></li>
+                                    @if (isPolicyUser)
+                                    {
                                     <li><a class="dropdown-item" asp-controller="Policy" asp-action="Statistics"><i class="bi bi-pie-chart me-2"></i>@L["PolicyStatistics"]</a></li>
+                                    }
+                                    @if (isAuditUser)
+                                    {
                                     <li><a class="dropdown-item" asp-controller="Audit" asp-action="Statistics"><i class="bi bi-bar-chart me-2"></i>@L["AuditStatistics"]</a></li>
+                                    }
+                                    @if (isEvidenceUser)
+                                    {
                                     <li><a class="dropdown-item" asp-controller="Evidence" asp-action="Statistics"><i class="bi bi-graph-up me-2"></i>@L["EvidenceStatistics"]</a></li>
+                                    }
                                 </ul>
                             </li>
+                            }
+                            @* Dashboards - Available to all authenticated users *@
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-speedometer2"></i> @L["Nav_Dashboards"]
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-graph-up me-2"></i>@L["MainDashboard"]</a></li>
-                                    <li><a class="dropdown-item" href="/dashboard/executive"><i class="bi bi-speedometer2 me-2"></i>@L["ExecutiveDashboard"]</a></li>
+                                    @if (isAdmin || User.IsInRole("Executive") || User.IsInRole("ComplianceManager"))
+                                    {
+                                    <li><a class="dropdown-item" href="/dashboard/executive"><i class="bi bi-speedometer2 me-2"></i>لوحة التنفيذية</a></li>
+                                    }
+                                    @if (isAdmin || User.IsInRole("ComplianceManager") || User.IsInRole("WorkflowManager"))
+                                    {
+                                    <li><a class="dropdown-item" href="/dashboard/operations"><i class="bi bi-gear-wide-connected me-2"></i>لوحة العمليات</a></li>
+                                    }
+                                    @if (isAdmin || User.IsInRole("SecurityAnalyst"))
+                                    {
+                                    <li><a class="dropdown-item" href="/dashboard/security"><i class="bi bi-shield-lock me-2"></i>لوحة الأمان</a></li>
+                                    }
+                                    @if (isAdmin || User.IsInRole("ComplianceManager"))
+                                    {
+                                    <li><a class="dropdown-item" href="/dashboard/data-quality"><i class="bi bi-database-check me-2"></i>جودة البيانات</a></li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="/inbox"><i class="bi bi-inbox me-2"></i>@L["Inbox"]</a></li>
                                 </ul>
                             </li>
+                            
+                            @* Shahin-AI - Only for Compliance/Risk/Admin roles *@
+                            @if (isComplianceUser || isRiskUser)
+                            {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-shield-alt"></i> Shahin-AI
+                                    <i class="fas fa-shield-alt"></i> @L["Nav_ShahinAI"]
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Index"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
-                                    <li><a class="dropdown-item" asp-controller="ShahinAIIntegration" asp-action="Index"><i class="fas fa-project-diagram me-2 text-info"></i>Integrated Flow</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Index"><i class="fas fa-tachometer-alt me-2"></i>@L["Nav_Dashboard"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ShahinAIIntegration" asp-action="Index"><i class="fas fa-project-diagram me-2 text-info"></i>@L["IntegratedFlow"]</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Map"><i class="fas fa-map me-2 text-primary"></i>MAP - Control Library</a></li>
-                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Apply"><i class="fas fa-check-circle me-2 text-success"></i>APPLY - Scope</a></li>
-                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Prove"><i class="fas fa-file-alt me-2" style="color:#9B59B6;"></i>PROVE - Evidence</a></li>
-                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Watch"><i class="fas fa-eye me-2 text-danger"></i>WATCH - Monitoring</a></li>
-                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Fix"><i class="fas fa-wrench me-2 text-warning"></i>FIX - Remediation</a></li>
-                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Vault"><i class="fas fa-lock me-2" style="color:#1ABC9C;"></i>VAULT - Repository</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Map"><i class="fas fa-map me-2 text-primary"></i>@L["MAP_ControlLibrary"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Apply"><i class="fas fa-check-circle me-2 text-success"></i>@L["APPLY_Scope"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Prove"><i class="fas fa-file-alt me-2" style="color:#9B59B6;"></i>@L["PROVE_Evidence"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Watch"><i class="fas fa-eye me-2 text-danger"></i>@L["WATCH_Monitoring"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Fix"><i class="fas fa-wrench me-2 text-warning"></i>@L["FIX_Remediation"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ShahinAI" asp-action="Vault"><i class="fas fa-lock me-2" style="color:#1ABC9C;"></i>@L["VAULT_Repository"]</a></li>
                                 </ul>
                             </li>
+                            }
+                            
+                            @* Manage - Only for Admin/Manager roles *@
+                            @if (isAdmin || User.IsInRole("ComplianceManager") || User.IsInRole("RiskManager"))
+                            {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-cogs"></i> Manage
+                                <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-cogs"></i> @L["Nav_Manage"]
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-controller="RoleProfile" asp-action="Index"><i class="fas fa-user-shield me-2 text-primary"></i>Role Profiles</a></li>
-                                    <li><a class="dropdown-item" asp-controller="AssessmentTemplate" asp-action="Index"><i class="fas fa-clipboard-list me-2 text-info"></i>Assessment Templates</a></li>
-                                    <li><a class="dropdown-item" asp-controller="DocumentFlow" asp-action="Index"><i class="fas fa-file-upload me-2 text-success"></i>Document Flow</a></li>
+                                    @if (isAdmin)
+                                    {
+                                    <li><a class="dropdown-item" asp-controller="RoleProfile" asp-action="Index"><i class="fas fa-user-shield me-2 text-primary"></i>@L["RoleProfiles"]</a></li>
+                                    }
+                                    <li><a class="dropdown-item" asp-controller="AssessmentTemplate" asp-action="Index"><i class="fas fa-clipboard-list me-2 text-info"></i>@L["AssessmentTemplates"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="DocumentFlow" asp-action="Index"><i class="fas fa-file-upload me-2 text-success"></i>@L["DocumentFlow"]</a></li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" asp-controller="CCM" asp-action="Index"><i class="fas fa-robot me-2 text-info"></i>CCM Tests</a></li>
-                                    <li><a class="dropdown-item" asp-controller="KRIDashboard" asp-action="Index"><i class="fas fa-chart-line me-2 text-danger"></i>KRI/KPI Dashboard</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Exception" asp-action="Index"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>Exceptions</a></li>
-                                    <li><a class="dropdown-item" asp-controller="AuditPackage" asp-action="Index"><i class="fas fa-archive me-2 text-success"></i>Audit Packages</a></li>
+                                    <li><a class="dropdown-item" asp-controller="CCM" asp-action="Index"><i class="fas fa-robot me-2 text-info"></i>@L["CCMTests"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="KRIDashboard" asp-action="Index"><i class="fas fa-chart-line me-2 text-danger"></i>@L["KRIDashboard"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Exception" asp-action="Index"><i class="fas fa-exclamation-triangle me-2 text-warning"></i>@L["Exceptions"]</a></li>
+                                    @if (isAuditUser)
+                                    {
+                                    <li><a class="dropdown-item" asp-controller="AuditPackage" asp-action="Index"><i class="fas fa-archive me-2 text-success"></i>@L["AuditPackages"]</a></li>
+                                    }
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" asp-controller="Invitation" asp-action="Index"><i class="fas fa-user-plus me-2 text-primary"></i>Invitations</a></li>
-                                    <li><a class="dropdown-item" asp-controller="Reports" asp-action="Index"><i class="fas fa-chart-bar me-2" style="color:#9B59B6;"></i>Reports</a></li>
-                                    <li><a class="dropdown-item" asp-controller="RoleProfile" asp-action="MyProfile"><i class="fas fa-user me-2"></i>My Profile</a></li>
+                                    @if (isAdmin)
+                                    {
+                                    <li><a class="dropdown-item" asp-controller="Invitation" asp-action="Index"><i class="fas fa-user-plus me-2 text-primary"></i>@L["Invitations"]</a></li>
+                                    }
+                                    @if (isReportsUser)
+                                    {
+                                    <li><a class="dropdown-item" asp-controller="Reports" asp-action="Index"><i class="fas fa-chart-bar me-2" style="color:#9B59B6;"></i>@L["Reports"]</a></li>
+                                    }
+                                    <li><a class="dropdown-item" asp-controller="RoleProfile" asp-action="MyProfile"><i class="fas fa-user me-2"></i>@L["MyProfile"]</a></li>
                                 </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" href="/users">
-                                    <i class="bi bi-people"></i> @L["Nav_Users"]
-                                </a>
-                            </li>
+                            }
+                            
+                            @* Workflows - Only for users with workflow access *@
+                            @if (isWorkflowUser)
+                            {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-diagram-3"></i> @L["Nav_Workflows"]
@@ -153,6 +233,7 @@
                                     <li><a class="dropdown-item" asp-controller="Workflow" asp-action="Statistics"><i class="bi bi-bar-chart me-2"></i>@L["Statistics"]</a></li>
                                 </ul>
                             </li>
+                            }
                             <li class="nav-item dropdown help-menu">
                                 <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-question-circle"></i> @L["Nav_Help"]
@@ -186,12 +267,18 @@
                                     </li>
                                 </ul>
                             </li>
+                            @* Reports link - Only for users with report access *@
+                            @if (isReportsUser)
+                            {
                             <li class="nav-item">
                                 <a class="nav-link text-light" asp-controller="Home" asp-action="Reports">
                                     <i class="bi bi-file-earmark-bar-graph"></i> @L["Reports"]
                                 </a>
                             </li>
-                            @if (User.IsInRole("Admin"))
+                            }
+                            
+                            @* Admin Menu - Only for Admin roles *@
+                            @if (isAdmin)
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown">
@@ -207,6 +294,8 @@
                                         <li><a class="dropdown-item" asp-controller="Subscription" asp-action="WebhookLogs"><i class="fas fa-plug me-2 text-secondary"></i>@L["WebhookLogs"]</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" asp-controller="Analytics" asp-action="Index"><i class="fas fa-chart-pie me-2" style="color:#9B59B6;"></i>@L["Analytics"]</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" asp-controller="EmailOperations" asp-action="Index"><i class="fas fa-envelope-open-text me-2 text-info"></i>عمليات البريد</a></li>
                                     </ul>
                                 </li>
                             }
@@ -266,15 +355,67 @@
                         {
                             @await Component.InvokeAsync("WorkspaceSwitcher")
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-person-circle"></i> @User.Identity.Name
+                                <a class="nav-link dropdown-toggle text-light d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                                    <span class="user-avatar bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                        @{
+                                            var userName = User.Identity?.Name ?? "";
+                                            var initials = userName.Length > 0 ? userName.Substring(0, 1).ToUpper() : "U";
+                                            if (userName.Contains(" "))
+                                            {
+                                                var parts = userName.Split(' ');
+                                                initials = parts[0].Substring(0, 1).ToUpper();
+                                                if (parts.Length > 1 && parts[1].Length > 0)
+                                                {
+                                                    initials += parts[1].Substring(0, 1).ToUpper();
+                                                }
+                                            }
+                                            else if (userName.Contains("@@"))
+                                            {
+                                                initials = userName.Substring(0, 1).ToUpper();
+                                            }
+                                        }
+                                        @initials
+                                    </span>
+                                    @{
+                                        // Get display name - prefer actual name over email
+                                        var displayName = User.FindFirst("FullName")?.Value 
+                                            ?? User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value
+                                            ?? User.FindFirst("name")?.Value;
+                                        var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.Identity?.Name ?? "";
+                                        
+                                        // If no name claim, extract from email
+                                        if (string.IsNullOrEmpty(displayName) && !string.IsNullOrEmpty(userEmail))
+                                        {
+                                            var emailPart = userEmail.Split('@')[0];
+                                            // Convert "john.doe" or "johndoe" to "John Doe"
+                                            if (!string.IsNullOrEmpty(emailPart))
+                                            {
+                                                var parts = emailPart.Split(new[] { '.', '_', '-' }, StringSplitOptions.RemoveEmptyEntries);
+                                                displayName = string.Join(" ", parts.Select(p => 
+                                                    !string.IsNullOrEmpty(p) ? char.ToUpper(p[0]) + (p.Length > 1 ? p.Substring(1).ToLower() : "") : ""));
+                                            }
+                                        }
+                                    }
+                                    <span class="fw-bold d-none d-lg-inline">@displayName</span>
                                 </a>
                                 <ul class="dropdown-menu @(isRtl ? "dropdown-menu-start" : "dropdown-menu-end")">
-                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">@L["Nav_Profile"]</a></li>
+                                    <li class="dropdown-header">
+                                        <div class="d-flex align-items-center">
+                                            <span class="user-avatar bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; font-size: 1rem;">@initials</span>
+                                            <div>
+                                                <div class="fw-bold">@displayName</div>
+                                                <small class="text-muted">@userEmail</small>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-speedometer2 me-2"></i>@L["Dashboard"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile"><i class="bi bi-person me-2"></i>@L["Nav_Profile"]</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Inbox" asp-action="Index"><i class="bi bi-inbox me-2"></i>@L["Inbox"]</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post">
-                                            <button type="submit" class="dropdown-item">@L["Nav_Logout"]</button>
+                                            <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>@L["Nav_Logout"]</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -282,14 +423,10 @@
                         }
                         else
                         {
+                            <!-- Simple login link for unauthenticated users -->
                             <li class="nav-item">
                                 <a class="nav-link text-light" asp-controller="Account" asp-action="Login">
-                                    <i class="bi bi-box-arrow-in-right"></i> @L["Nav_Login"]
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-light" asp-controller="Account" asp-action="Register">
-                                    <i class="bi bi-person-plus"></i> @L["Nav_Register"]
+                                    <i class="bi bi-person-circle me-1"></i> تسجيل الدخول
                                 </a>
                             </li>
                         }
@@ -322,15 +459,25 @@
 
     <footer class="border-top footer text-muted bg-dark mt-5">
         <div class="container-fluid py-3">
-            <div class="row">
-                <div class="col-md-6">
-                    <span class="text-light">&copy; @DateTime.Now.Year - @L["AppName"] - Version 1.0.0</span>
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center">
+                        <img src="~/images/brand/favicon-32.png" alt="@AppInfo.Name" width="24" height="24" class="me-2 opacity-75" />
+                        <span class="text-light">@AppInfo.FooterText</span>
+                    </div>
                 </div>
-                <div class="col-md-6 @(isRtl ? "text-start" : "text-end")">
-                    <a asp-controller="Help" asp-action="Index" class="text-light text-decoration-none @(isRtl ? "ms-3" : "me-3")">@L["Nav_Help"]</a>
-                    <a asp-controller="Help" asp-action="FAQ" class="text-light text-decoration-none @(isRtl ? "ms-3" : "me-3")">@L["FAQ"]</a>
-                    <a asp-controller="Help" asp-action="Glossary" class="text-light text-decoration-none @(isRtl ? "ms-3" : "me-3")">@L["Glossary"]</a>
-                    <a asp-controller="Help" asp-action="Contact" class="text-light text-decoration-none">@L["ContactSupport"]</a>
+                <div class="col-md-4 text-center">
+                    <span class="text-secondary" style="font-size: 0.85rem;">
+                        Powered by 
+                        <a href="@AppInfo.CompanyUrl" target="_blank" rel="noopener" class="text-info text-decoration-none fw-bold">
+                            <i class="bi bi-lightning-charge-fill"></i> @AppInfo.CompanyName
+                        </a>
+                    </span>
+                </div>
+                <div class="col-md-4 @(isRtl ? "text-start" : "text-end")">
+                    <span class="text-secondary small me-3">@AppInfo.VersionDisplay</span>
+                    <a asp-controller="Help" asp-action="Index" class="text-light text-decoration-none @(isRtl ? "ms-3" : "me-3")">المساعدة</a>
+                    <a asp-controller="Help" asp-action="Contact" class="text-light text-decoration-none">الدعم الفني</a>
                 </div>
             </div>
         </div>
@@ -390,6 +537,24 @@
             }
         });
     </script>
+
+    <!-- Toast Notifications -->
+    @await Html.PartialAsync("_ToastNotifications")
+
+    <!-- Loading Indicator -->
+    @await Html.PartialAsync("_LoadingIndicator")
+
+    <!-- Form Validation -->
+    @await Html.PartialAsync("_FormValidation")
+
+    <!-- AI Assistant (Shahin) -->
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        @await Html.PartialAsync("_AIAssistant")
+    }
+
+    <!-- Theme Toggle and Mobile Optimizations -->
+    @await Html.PartialAsync("_ThemeAndMobile")
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

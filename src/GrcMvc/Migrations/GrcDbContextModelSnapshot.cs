@@ -6093,6 +6093,742 @@ namespace GrcMvc.Migrations
                     b.ToTable("ERPSystemConfigs");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ContentId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("GraphAttachmentId")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsInline")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LocalPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("MessageId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
+
+                    b.ToTable("EmailAttachments");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailAutoReplyRule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Action")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AiPromptTemplate")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BodyPattern")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("FollowUpAfterHours")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FromPattern")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("MailboxId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("MaxAutoRepliesPerThread")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReplyContent")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("SubjectPattern")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TemplateName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int[]>("TriggerClassifications")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<bool>("UseAiGeneration")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailboxId");
+
+                    b.ToTable("EmailAutoReplyRules");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailMailbox", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AutoReplyEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ClientId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DefaultSlaHours")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("DraftModeDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("EncryptedClientSecret")
+                        .HasColumnType("text");
+
+                    b.Property<string>("GraphUserId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastSyncAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<int>("SlaFirstResponseHours")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SlaResolutionHours")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TenantId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("WebhookExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("WebhookSubscriptionId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmailMailboxes");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AiPromptUsed")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApprovedByUserName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("AttachmentsJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BodyContent")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BodyContentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("BodyPreview")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("CcRecipients")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Direction")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FromEmail")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("FromName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("GraphMessageId")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("HasAttachments")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Importance")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("InternetMessageId")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsAiGenerated")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ToRecipients")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ThreadId");
+
+                    b.ToTable("EmailMessages");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailTask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedToUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssignedToUserName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CompletedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CompletedByUserName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DueAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ReminderAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ScheduledJobId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TaskType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ThreadId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ThreadId");
+
+                    b.ToTable("EmailTasks");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AvailableVariables")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("BodyTemplate")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int[]>("ForClassifications")
+                        .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("SubjectTemplate")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmailTemplates");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailThread", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedToUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssignedToUserName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("Classification")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ClassificationConfidence")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConversationId")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ExtractedDataJson")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("FirstResponseAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("FollowUpCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FromEmail")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("FromName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("InternalNotes")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("MailboxId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("NextFollowUpAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<bool>("SlaFirstResponseBreached")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("SlaFirstResponseDeadline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("SlaResolutionBreached")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("SlaResolutionDeadline")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Tags")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailboxId");
+
+                    b.ToTable("EmailThreads");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.EscalationRule", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6751,6 +7487,143 @@ namespace GrcMvc.Migrations
                     b.ToTable("EvidencePackFamilies");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.EvidenceScoringCriteria", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AllowedFileTypes")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ApplicableFrameworks")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ApplicableSectors")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("BaseScore")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CollectionFrequency")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DefaultValidityDays")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DescriptionAr")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("DescriptionEn")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EvidenceTypeCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("EvidenceTypeName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<int>("MaxFileSizeMB")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MaxScore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinimumScore")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("RequiresApproval")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("RequiresDigitalSignature")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("RequiresExpiry")
+                        .HasColumnType("boolean");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ScoringRulesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Category")
+                        .HasDatabaseName("IX_EvidenceScoringCriteria_Category");
+
+                    b.HasIndex("EvidenceTypeCode")
+                        .IsUnique()
+                        .HasDatabaseName("IX_EvidenceScoringCriteria_TypeCode");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_EvidenceScoringCriteria_Active");
+
+                    b.ToTable("EvidenceScoringCriteria");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.EvidenceSourceIntegration", b =>
                 {
                     b.Property<Guid>("Id")
@@ -7138,11 +8011,19 @@ namespace GrcMvc.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Domain");
+                    b.HasIndex("ControlType")
+                        .HasDatabaseName("IX_FrameworkControl_Type");
 
-                    b.HasIndex("FrameworkCode");
+                    b.HasIndex("Domain")
+                        .HasDatabaseName("IX_FrameworkControl_Domain");
+
+                    b.HasIndex("FrameworkCode")
+                        .HasDatabaseName("IX_FrameworkControl_Framework");
 
                     b.HasIndex("Status");
+
+                    b.HasIndex("FrameworkCode", "Version")
+                        .HasDatabaseName("IX_FrameworkControl_Framework_Version");
 
                     b.HasIndex("FrameworkCode", "ControlNumber", "Version")
                         .IsUnique();
@@ -7527,6 +8408,69 @@ namespace GrcMvc.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("GovernanceRhythmTemplates");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.GrcSubSectorMapping", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("GosiCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("IsicSection")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)");
+
+                    b.Property<string>("MainSectorCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("MainSectorNameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("MainSectorNameEn")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PrimaryRegulator")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("RegulatoryNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("SubSectorNameAr")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<string>("SubSectorNameEn")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GrcSubSectorMappings");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.HumanRetainedResponsibility", b =>
@@ -12888,6 +13832,167 @@ namespace GrcMvc.Migrations
                     b.ToTable("Rulesets");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.SectorFrameworkIndex", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ComputedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ComputedHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ControlCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CriticalControlCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DeadlinesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EstimatedImplementationDays")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EvidenceTypeCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EvidenceTypesJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FrameworkCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("FrameworkNameEn")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("ImplementationGuidanceEn")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsMandatory")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("OrgType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("OrgTypeNameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("OrgTypeNameEn")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReasonAr")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("ReasonEn")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<double>("ScoringWeight")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("SectorCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("SectorNameAr")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("SectorNameEn")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FrameworkCode")
+                        .HasDatabaseName("IX_SectorFrameworkIndex_Framework");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_SectorFrameworkIndex_Active");
+
+                    b.HasIndex("SectorCode", "FrameworkCode")
+                        .HasDatabaseName("IX_SectorFrameworkIndex_Sector_Framework");
+
+                    b.HasIndex("SectorCode", "OrgType")
+                        .HasDatabaseName("IX_SectorFrameworkIndex_Sector_OrgType");
+
+                    b.HasIndex(new[] { "FrameworkCode" }, "IX_SectorFrameworkIndex_Framework");
+
+                    b.HasIndex(new[] { "SectorCode", "FrameworkCode" }, "IX_SectorFrameworkIndex_Sector_Framework");
+
+                    b.HasIndex(new[] { "SectorCode", "OrgType" }, "IX_SectorFrameworkIndex_Sector_OrgType");
+
+                    b.ToTable("SectorFrameworkIndex");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.ShahinAIBrandConfig", b =>
                 {
                     b.Property<Guid>("Id")
@@ -15070,6 +16175,10 @@ namespace GrcMvc.Migrations
                     b.Property<Guid?>("AssessmentTemplateId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("BillingStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("BypassPayment")
                         .HasColumnType("boolean");
 
@@ -15108,6 +16217,9 @@ namespace GrcMvc.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsOwnerCreated")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsTrial")
                         .HasColumnType("boolean");
 
                     b.Property<string>("LabelsJson")
@@ -15162,6 +16274,12 @@ namespace GrcMvc.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime?>("TrialEndsAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("TrialStartsAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -15245,6 +16363,132 @@ namespace GrcMvc.Migrations
                         .IsUnique();
 
                     b.ToTable("TenantBaselines");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.TenantEvidenceRequirement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedToUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CollectionFrequency")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ControlNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CurrentScore")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DefaultValidityDays")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EvidenceTypeCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("EvidenceTypeName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FrameworkCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastApprovedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("LastSubmittedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MinimumScore")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedToUserId")
+                        .HasDatabaseName("IX_TenantEvidenceRequirement_AssignedTo");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_TenantEvidenceRequirement_Tenant");
+
+                    b.HasIndex("WorkspaceId")
+                        .HasDatabaseName("IX_TenantEvidenceRequirement_Workspace");
+
+                    b.HasIndex("TenantId", "DueDate")
+                        .HasDatabaseName("IX_TenantEvidenceRequirement_Tenant_DueDate");
+
+                    b.HasIndex("TenantId", "FrameworkCode")
+                        .HasDatabaseName("IX_TenantEvidenceRequirement_Tenant_Framework");
+
+                    b.HasIndex("TenantId", "Status")
+                        .HasDatabaseName("IX_TenantEvidenceRequirement_Tenant_Status");
+
+                    b.HasIndex("TenantId", "FrameworkCode", "ControlNumber", "EvidenceTypeCode")
+                        .IsUnique()
+                        .HasDatabaseName("IX_TenantEvidenceRequirement_Unique");
+
+                    b.ToTable("TenantEvidenceRequirements");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.TenantPackage", b =>
@@ -15798,6 +17042,121 @@ namespace GrcMvc.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("ThirdPartyConcentrations");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.TrialRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AdminEmail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("AdminName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DataClassification")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LabelsJson")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("OrganizationName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Owner")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PaymentMethodId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("PaymentVerificationStatus")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ProviderCustomerId")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<Guid?>("ProvisionedTenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RequestIp")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<Guid?>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("TermsAcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("TrialRequests");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.TriggerExecutionLog", b =>
@@ -19622,6 +20981,61 @@ namespace GrcMvc.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailAttachment", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.EmailOperations.EmailMessage", "Message")
+                        .WithMany("Attachments")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Message");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailAutoReplyRule", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.EmailOperations.EmailMailbox", "Mailbox")
+                        .WithMany("AutoReplyRules")
+                        .HasForeignKey("MailboxId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mailbox");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailMessage", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.EmailOperations.EmailThread", "Thread")
+                        .WithMany("Messages")
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Thread");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailTask", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.EmailOperations.EmailThread", "Thread")
+                        .WithMany("Tasks")
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Thread");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailThread", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.EmailOperations.EmailMailbox", "Mailbox")
+                        .WithMany("Threads")
+                        .HasForeignKey("MailboxId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mailbox");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.EventDeliveryLog", b =>
                 {
                     b.HasOne("GrcMvc.Models.Entities.DomainEvent", "Event")
@@ -20603,6 +22017,15 @@ namespace GrcMvc.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("GrcMvc.Models.Entities.TrialRequest", b =>
+                {
+                    b.HasOne("GrcMvc.Models.Entities.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("GrcMvc.Models.Entities.TriggerExecutionLog", b =>
                 {
                     b.HasOne("GrcMvc.Models.Entities.TriggerRule", "TriggerRule")
@@ -21029,6 +22452,25 @@ namespace GrcMvc.Migrations
             modelBuilder.Entity("GrcMvc.Models.Entities.ERPSystemConfig", b =>
                 {
                     b.Navigation("ExtractConfigs");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailMailbox", b =>
+                {
+                    b.Navigation("AutoReplyRules");
+
+                    b.Navigation("Threads");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailMessage", b =>
+                {
+                    b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("GrcMvc.Models.Entities.EmailOperations.EmailThread", b =>
+                {
+                    b.Navigation("Messages");
+
+                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("GrcMvc.Models.Entities.EvidencePack", b =>

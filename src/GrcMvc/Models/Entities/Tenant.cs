@@ -43,6 +43,30 @@ namespace GrcMvc.Models.Entities
         public DateTime? AdminAccountGeneratedAt { get; set; } // When credentials were generated
 
         // =============================================================================
+        // TRIAL EDITION FIELDS
+        // =============================================================================
+
+        /// <summary>
+        /// Indicates if this is a trial tenant
+        /// </summary>
+        public bool IsTrial { get; set; } = false;
+
+        /// <summary>
+        /// Trial period start date
+        /// </summary>
+        public DateTime? TrialStartsAt { get; set; }
+
+        /// <summary>
+        /// Trial period end date (typically 7 days from start)
+        /// </summary>
+        public DateTime? TrialEndsAt { get; set; }
+
+        /// <summary>
+        /// Billing status: Trialing, Active, Suspended, Expired
+        /// </summary>
+        public string BillingStatus { get; set; } = "Active";
+
+        // =============================================================================
         // ONBOARDING LINKAGE (One workspace per tenant, created during finalization)
         // =============================================================================
 

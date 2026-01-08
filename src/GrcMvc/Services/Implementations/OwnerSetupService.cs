@@ -39,19 +39,13 @@ namespace GrcMvc.Services.Implementations
         {
             try
             {
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "check-owner", hypothesisId = "A", location = "OwnerSetupService.OwnerExistsAsync:entry", message = "Checking if owner exists", data = new { }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
-
                 // Check if PlatformAdmin or Owner role exists
                 var superAdminRole = await _roleManager.FindByNameAsync("PlatformAdmin");
                 var ownerRole = await _roleManager.FindByNameAsync("Owner");
 
                 if (superAdminRole == null && ownerRole == null)
                 {
-                    // #region agent log
-                    System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "check-owner", hypothesisId = "A", location = "OwnerSetupService.OwnerExistsAsync:no-roles", message = "No owner roles exist", data = new { }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                    // #endregion
+                    _logger.LogDebug("No owner roles exist");
                     return false;
                 }
 
@@ -77,19 +71,13 @@ namespace GrcMvc.Services.Implementations
                 }
 
                 var ownerExists = ownerUserIds.Any();
-
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "check-owner", hypothesisId = "A", location = "OwnerSetupService.OwnerExistsAsync:result", message = "Owner existence check result", data = new { ownerExists, ownerUserIdsCount = ownerUserIds.Count, hasPlatformAdminRole = superAdminRole != null, hasOwnerRole = ownerRole != null }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
+                _logger.LogDebug("Owner existence check: {OwnerExists}, Count: {Count}", ownerExists, ownerUserIds.Count);
 
                 return ownerExists;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error checking if owner exists");
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "check-owner", hypothesisId = "A", location = "OwnerSetupService.OwnerExistsAsync:error", message = "Error checking owner existence", data = new { error = ex.Message }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
                 // On error, assume owner exists to prevent unauthorized setup
                 return true;
             }
@@ -107,18 +95,14 @@ namespace GrcMvc.Services.Implementations
         {
             try
             {
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:entry", message = "Creating first owner account", data = new { email, firstName, lastName, organizationName, hasPassword = !string.IsNullOrEmpty(password) }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
+                _logger.LogInformation("Creating first owner account for {Email}", email);
 
                 // Double-check: owner should not exist
                 var ownerExists = await OwnerExistsAsync();
                 if (ownerExists)
                 {
                     var error = "Owner account already exists. Setup is only allowed once.";
-                    // #region agent log
-                    System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:owner-exists", message = "Owner already exists, setup blocked", data = new { }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                    // #endregion
+                    _logger.LogWarning("Owner already exists, setup blocked");
                     return (false, error, null);
                 }
 
@@ -127,9 +111,7 @@ namespace GrcMvc.Services.Implementations
                 if (existingUser != null)
                 {
                     var error = "An account with this email already exists.";
-                    // #region agent log
-                    System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:email-exists", message = "Email already exists", data = new { email }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                    // #endregion
+                    _logger.LogWarning("Email {Email} already exists", email);
                     return (false, error, null);
                 }
 
@@ -149,15 +131,11 @@ namespace GrcMvc.Services.Implementations
                 if (!createResult.Succeeded)
                 {
                     var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
-                    // #region agent log
-                    System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:create-failed", message = "User creation failed", data = new { errors }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                    // #endregion
+                    _logger.LogError("User creation failed: {Errors}", errors);
                     return (false, errors, null);
                 }
 
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:user-created", message = "User created successfully", data = new { userId = user.Id, email }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
+                _logger.LogInformation("User created successfully: {UserId}", user.Id);
 
                 // Ensure PlatformAdmin role exists
                 var superAdminRole = await _roleManager.FindByNameAsync("PlatformAdmin");
@@ -168,9 +146,7 @@ namespace GrcMvc.Services.Implementations
                     if (!roleResult.Succeeded)
                     {
                         var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-                        // #region agent log
-                        System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:role-create-failed", message = "PlatformAdmin role creation failed", data = new { errors }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                        // #endregion
+                        _logger.LogError("PlatformAdmin role creation failed: {Errors}", errors);
                         return (false, $"Failed to create PlatformAdmin role: {errors}", null);
                     }
                 }
@@ -180,15 +156,9 @@ namespace GrcMvc.Services.Implementations
                 if (!addToRoleResult.Succeeded)
                 {
                     var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
-                    // #region agent log
-                    System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:add-role-failed", message = "Failed to add user to PlatformAdmin role", data = new { errors }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                    // #endregion
+                    _logger.LogError("Failed to add user to PlatformAdmin role: {Errors}", errors);
                     return (false, $"Failed to assign PlatformAdmin role: {errors}", null);
                 }
-
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:success", message = "First owner created successfully", data = new { userId = user.Id, email, roleAssigned = true }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
 
                 _logger.LogInformation("First owner account created: {Email} (ID: {UserId})", email, user.Id);
                 return (true, null, user.Id);
@@ -196,9 +166,6 @@ namespace GrcMvc.Services.Implementations
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating first owner account");
-                // #region agent log
-                System.IO.File.AppendAllText("/home/dogan/grc-system/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "owner-setup", runId = "create-owner", hypothesisId = "B", location = "OwnerSetupService.CreateFirstOwnerAsync:exception", message = "Exception creating owner", data = new { error = ex.Message, stackTrace = ex.StackTrace }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
-                // #endregion
                 return (false, $"Error: {ex.Message}", null);
             }
         }

@@ -22,9 +22,57 @@ html {
     }
 }
 
+/* Arabic and RTL font support */
 body {
     margin-bottom: 60px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+                 "Noto Sans Arabic", "Tajawal", "Cairo", "Almarai", sans-serif;
+}
+
+/* RTL-specific body styles */
+html[dir="rtl"] body {
+    font-family: "Tajawal", "Cairo", "Almarai", "Noto Sans Arabic", -apple-system,
+                 BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Arabic text rendering improvements */
+html[dir="rtl"] {
+    text-align: right;
+}
+
+html[dir="rtl"] .navbar-nav {
+    padding-right: 0;
+}
+
+html[dir="rtl"] .dropdown-menu {
+    text-align: right;
+}
+
+/* RTL Dashboard card border adjustment */
+html[dir="rtl"] .dashboard-card {
+    border-left: none;
+    border-right: 4px solid;
+}
+
+html[dir="rtl"] .dashboard-card-primary { border-right-color: var(--primary-color); border-left-color: transparent; }
+html[dir="rtl"] .dashboard-card-success { border-right-color: var(--success-color); border-left-color: transparent; }
+html[dir="rtl"] .dashboard-card-warning { border-right-color: var(--warning-color); border-left-color: transparent; }
+html[dir="rtl"] .dashboard-card-danger { border-right-color: var(--danger-color); border-left-color: transparent; }
+html[dir="rtl"] .dashboard-card-info { border-right-color: var(--info-color); border-left-color: transparent; }
+
+/* RTL icon spacing */
+html[dir="rtl"] .bi,
+html[dir="rtl"] .fas,
+html[dir="rtl"] .fa {
+    margin-left: 0.25rem;
+    margin-right: 0;
+}
+
+html[dir="ltr"] .bi,
+html[dir="ltr"] .fas,
+html[dir="ltr"] .fa {
+    margin-right: 0.25rem;
+    margin-left: 0;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {

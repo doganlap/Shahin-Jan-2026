@@ -21,14 +21,14 @@ public static class PlatformAdminSeeds
     {
         logger.LogInformation("🔐 Seeding Platform Admin...");
 
-        // Check if platform admin already exists
-        var existingAdmin = await context.PlatformAdmins
+        // Check if ANY platform admin already exists - we only need one owner
+        var anyExistingAdmin = await context.PlatformAdmins
             .IgnoreQueryFilters()
-            .FirstOrDefaultAsync(p => p.ContactEmail == OwnerEmail);
+            .AnyAsync();
 
-        if (existingAdmin != null)
+        if (anyExistingAdmin)
         {
-            logger.LogInformation("✅ Platform Admin already exists: {Email}", OwnerEmail);
+            logger.LogInformation("✅ Platform Admin already exists, skipping seed");
             return;
         }
 

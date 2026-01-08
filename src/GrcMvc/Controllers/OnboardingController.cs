@@ -10,6 +10,23 @@ using Microsoft.Extensions.Logging;
 namespace GrcMvc.Controllers
 {
     /// <summary>
+    /// MVC Controller for guided onboarding UI
+    /// </summary>
+    [Authorize]
+    [Route("[controller]")]
+    public class OnboardingUiController : Controller
+    {
+        /// <summary>
+        /// Guided onboarding welcome page with microcopy
+        /// </summary>
+        [HttpGet("guided")]
+        public IActionResult GuidedWelcome()
+        {
+            return View("GuidedWelcome");
+        }
+    }
+
+    /// <summary>
     /// API Controller for onboarding endpoints
     /// </summary>
     [Authorize]
@@ -317,8 +334,8 @@ namespace GrcMvc.Controllers
 
     /// <summary>
     /// MVC Controller for onboarding pages (views)
+    /// Note: Most actions are public (trial/registration flow), specific actions require auth
     /// </summary>
-    [Authorize]
     [Route("[controller]")]
     public class OnboardingController : Controller
     {
@@ -338,17 +355,155 @@ namespace GrcMvc.Controllers
         /// </summary>
         [HttpGet]
         [HttpGet("Index")]
+        [AllowAnonymous] // Allow access for trial users before they complete onboarding
         public IActionResult Index()
         {
             return View(nameof(Index));
         }
 
         /// <summary>
+        /// MVC Route: Start onboarding for trial users
+        /// Called after trial registration - receives tenantSlug from redirect
+        /// </summary>
+        [HttpGet("Start/{tenantSlug}")]
+        [AllowAnonymous] // Trial users just registered and signed in
+        public async Task<IActionResult> Start(string tenantSlug)
+        {
+            // #region agent log
+            try {
+                using var logFile = System.IO.File.AppendText("/home/dogan/grc-system/.cursor/debug.log");
+                await logFile.WriteLineAsync(System.Text.Json.JsonSerializer.Serialize(new {
+                    sessionId = "debug-session",
+                    runId = "run1",
+                    hypothesisId = "A",
+                    location = "OnboardingController.cs:352",
+                    message = "Start action called",
+                    data = new { tenantSlug, isEmpty = string.IsNullOrWhiteSpace(tenantSlug) },
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                }));
+            } catch {}
+            // #endregion
+
+            if (string.IsNullOrWhiteSpace(tenantSlug))
+            {
+                _logger.LogWarning("Start called with empty tenantSlug");
+                return RedirectToAction("Index");
+            }
+
+            try
+            {
+                // Get tenant by slug
+                var tenant = await _tenantService.GetTenantBySlugAsync(tenantSlug);
+
+                // #region agent log
+                try {
+                    using var logFile = System.IO.File.AppendText("/home/dogan/grc-system/.cursor/debug.log");
+                    await logFile.WriteLineAsync(System.Text.Json.JsonSerializer.Serialize(new {
+                        sessionId = "debug-session",
+                        runId = "run1",
+                        hypothesisId = "B",
+                        location = "OnboardingController.cs:365",
+                        message = "Tenant lookup result",
+                        data = new { tenantSlug, found = tenant != null, tenantId = tenant != null ? tenant.Id.ToString() : null, orgName = tenant?.OrganizationName },
+                        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    }));
+                } catch {}
+                // #endregion
+                if (tenant == null)
+                {
+                    _logger.LogWarning("Tenant not found for slug: {TenantSlug}", tenantSlug);
+                    TempData["ErrorMessage"] = "Organization not found. Please try again.";
+                    return RedirectToAction("Index");
+                }
+
+                // Set ViewBag for the view
+                ViewBag.TenantSlug = tenantSlug;
+                ViewBag.TenantId = tenant.Id;
+                ViewBag.OrganizationName = tenant.OrganizationName;
+                ViewBag.IsTrial = tenant.IsTrial;
+                ViewBag.TrialEndsAt = tenant.TrialEndsAt;
+                ViewBag.TrialDaysRemaining = tenant.TrialEndsAt.HasValue 
+                    ? (int)(tenant.TrialEndsAt.Value - DateTime.UtcNow).TotalDays 
+                    : 0;
+
+                // Store in TempData for subsequent steps
+                TempData["TenantId"] = tenant.Id.ToString();
+                TempData["TenantSlug"] = tenantSlug;
+                TempData["OrganizationName"] = tenant.OrganizationName;
+
+                // #region agent log
+                try {
+                    using var logFile = System.IO.File.AppendText("/home/dogan/grc-system/.cursor/debug.log");
+                    await logFile.WriteLineAsync(System.Text.Json.JsonSerializer.Serialize(new {
+                        sessionId = "debug-session",
+                        runId = "run1",
+                        hypothesisId = "C",
+                        location = "OnboardingController.cs:374",
+                        message = "ViewBag set",
+                        data = new {
+                            tenantSlug = ViewBag.TenantSlug?.ToString(),
+                            tenantId = ViewBag.TenantId?.ToString(),
+                            orgName = ViewBag.OrganizationName?.ToString(),
+                            isTrial = ViewBag.IsTrial?.ToString(),
+                            trialEndsAt = ViewBag.TrialEndsAt?.ToString(),
+                            trialDaysRemaining = ViewBag.TrialDaysRemaining?.ToString()
+                        },
+                        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    }));
+                } catch {}
+                // #endregion
+
+                _logger.LogInformation("Starting onboarding for trial tenant: {TenantSlug} ({TenantId})", 
+                    tenantSlug, tenant.Id);
+
+                // Reuse existing Index view which shows the 12-step wizard
+                return View("Index");
+            }
+            catch (Exception ex)
+            {
+                // #region agent log
+                try {
+                    using var logFile = System.IO.File.AppendText("/home/dogan/grc-system/.cursor/debug.log");
+                    var stackTrace = ex.StackTrace ?? string.Empty;
+                    await logFile.WriteLineAsync(System.Text.Json.JsonSerializer.Serialize(new {
+                        sessionId = "debug-session",
+                        runId = "run1",
+                        hypothesisId = "B",
+                        location = "OnboardingController.cs:403",
+                        message = "Start action exception",
+                        data = new { tenantSlug, error = ex.Message, stackTrace = stackTrace.Substring(0, Math.Min(500, stackTrace.Length)) },
+                        timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                    }));
+                } catch {}
+                // #endregion
+                _logger.LogError(ex, "Error starting onboarding for tenant: {TenantSlug}", tenantSlug);
+                TempData["ErrorMessage"] = "An error occurred. Please try again.";
+                return RedirectToAction("Index");
+            }
+        }
+
+        /// <summary>
         /// MVC Route: Display signup page
         /// </summary>
         [HttpGet("Signup")]
+        [AllowAnonymous] // Must be public for new organization registration
         public IActionResult Signup()
         {
+            // #region agent log
+            try {
+                using var logFile = System.IO.File.AppendText("/home/dogan/grc-system/.cursor/debug.log");
+                logFile.WriteLine(System.Text.Json.JsonSerializer.Serialize(new {
+                    sessionId = "debug-session",
+                    runId = "run1",
+                    hypothesisId = "BUTTON_TEST",
+                    location = "OnboardingController.cs:470",
+                    message = "BUTTON 3: New Organization clicked - Signup page",
+                    data = new { isAuthenticated = User.Identity?.IsAuthenticated },
+                    timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+                }));
+            } catch {}
+            // #endregion
+
             return View(new CreateTenantDto());
         }
 
@@ -357,6 +512,7 @@ namespace GrcMvc.Controllers
         /// Creates the tenant in the database immediately.
         /// </summary>
         [HttpPost("Signup")]
+        [AllowAnonymous] // Must be public for new organization registration
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Signup(CreateTenantDto model)
         {

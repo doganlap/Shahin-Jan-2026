@@ -1,5 +1,5 @@
 using Xunit;
-using GrcMvc.Models.Dtos;
+using GrcMvc.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

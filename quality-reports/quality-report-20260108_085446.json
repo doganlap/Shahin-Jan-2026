@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-01-08T07:54:46Z",
+  "scores": {
+    "build": 25,
+    "test": 10,
+    "security": 10,
+    "codeQuality": 25,
+    "total": 70
+  },
+  "deploymentAllowed": true
+}

@@ -80,11 +80,19 @@ namespace GrcMvc.Controllers
                         b.CreatedDate
                     }).Cast<object>().ToList();
 
-                    // Get tenant name
+                    // Get tenant name and onboarding status
                     var tenant = await _unitOfWork.Tenants.GetByIdAsync(tenantId.Value);
                     if (tenant != null)
                     {
                         orgName = tenant.OrganizationName;
+                        
+                        // Check if onboarding is incomplete - show resume banner
+                        if (tenant.OnboardingStatus != "COMPLETED")
+                        {
+                            ViewBag.OnboardingIncomplete = true;
+                            ViewBag.OnboardingStatus = tenant.OnboardingStatus;
+                            ViewBag.OnboardingUrl = Url.Action("Index", "OnboardingWizard", new { tenantId = tenant.Id });
+                        }
                     }
                 }
 

@@ -60,6 +60,7 @@ namespace GrcMvc.Services.Interfaces
         public Guid? AssessmentTemplateId { get; set; }
         public Guid? GrcPlanId { get; set; }
         public int AssessmentsCreated { get; set; }
+        public int EvidenceRequirementsCreated { get; set; }
         public List<string> Errors { get; set; } = new();
         public List<string> Warnings { get; set; } = new();
     }

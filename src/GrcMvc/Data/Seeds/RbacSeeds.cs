@@ -178,11 +178,19 @@ public static class RbacSeeds
             new Permission { Code = "Grc.ComplianceCalendar.Manage", Name = "Manage Compliance Calendar", Category = "ComplianceCalendar", Description = "Create and manage compliance events" },
         });
 
-        // Workflow
+        // Workflow (comprehensive)
         permissions.AddRange(new[]
         {
             new Permission { Code = "Grc.Workflow.View", Name = "View Workflows", Category = "Workflow", Description = "View workflow instances" },
             new Permission { Code = "Grc.Workflow.Manage", Name = "Manage Workflows", Category = "Workflow", Description = "Create and manage workflows" },
+            new Permission { Code = "Grc.Workflow.Create", Name = "Create Workflows", Category = "Workflow", Description = "Create new workflows" },
+            new Permission { Code = "Grc.Workflow.Edit", Name = "Edit Workflows", Category = "Workflow", Description = "Edit workflow configurations" },
+            new Permission { Code = "Grc.Workflow.Delete", Name = "Delete Workflows", Category = "Workflow", Description = "Delete workflows" },
+            new Permission { Code = "Grc.Workflow.Approve", Name = "Approve Workflows", Category = "Workflow", Description = "Approve pending workflows" },
+            new Permission { Code = "Grc.Workflow.Reject", Name = "Reject Workflows", Category = "Workflow", Description = "Reject workflows" },
+            new Permission { Code = "Grc.Workflow.AssignTask", Name = "Assign Tasks", Category = "Workflow", Description = "Assign workflow tasks to users" },
+            new Permission { Code = "Grc.Workflow.Escalate", Name = "Escalate Tasks", Category = "Workflow", Description = "Escalate overdue tasks" },
+            new Permission { Code = "Grc.Workflow.Monitor", Name = "Monitor Workflows", Category = "Workflow", Description = "Monitor workflow status and metrics" },
         });
 
         // Notifications
@@ -212,6 +220,95 @@ public static class RbacSeeds
         {
             new Permission { Code = "Grc.Integrations.View", Name = "View Integrations", Category = "Integrations", Description = "View integration configurations" },
             new Permission { Code = "Grc.Integrations.Manage", Name = "Manage Integrations", Category = "Integrations", Description = "Configure and manage integrations" },
+        });
+
+        // Controls (comprehensive)
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Controls.View", Name = "View Controls", Category = "Controls", Description = "View control details" },
+            new Permission { Code = "Grc.Controls.Create", Name = "Create Controls", Category = "Controls", Description = "Create new controls" },
+            new Permission { Code = "Grc.Controls.Edit", Name = "Edit Controls", Category = "Controls", Description = "Edit control configurations" },
+            new Permission { Code = "Grc.Controls.Delete", Name = "Delete Controls", Category = "Controls", Description = "Delete controls" },
+            new Permission { Code = "Grc.Controls.Implement", Name = "Implement Controls", Category = "Controls", Description = "Implement controls" },
+            new Permission { Code = "Grc.Controls.Test", Name = "Test Controls", Category = "Controls", Description = "Test compliance of controls" },
+        });
+
+        // Additional Evidence permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Evidence.Submit", Name = "Submit Evidence", Category = "Evidence", Description = "Submit evidence for review" },
+            new Permission { Code = "Grc.Evidence.Review", Name = "Review Evidence", Category = "Evidence", Description = "Review submitted evidence" },
+            new Permission { Code = "Grc.Evidence.Archive", Name = "Archive Evidence", Category = "Evidence", Description = "Archive evidence" },
+        });
+
+        // Additional Risk permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Risks.Create", Name = "Create Risks", Category = "Risks", Description = "Create new risk entries" },
+            new Permission { Code = "Grc.Risks.Edit", Name = "Edit Risks", Category = "Risks", Description = "Edit risk assessments" },
+            new Permission { Code = "Grc.Risks.Delete", Name = "Delete Risks", Category = "Risks", Description = "Delete risk entries" },
+            new Permission { Code = "Grc.Risks.Approve", Name = "Approve Risks", Category = "Risks", Description = "Approve risk assessments" },
+            new Permission { Code = "Grc.Risks.Monitor", Name = "Monitor Risks", Category = "Risks", Description = "Monitor ongoing risks" },
+        });
+
+        // Additional Audit permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Audits.Create", Name = "Create Audits", Category = "Audits", Description = "Create new audits" },
+            new Permission { Code = "Grc.Audits.Edit", Name = "Edit Audits", Category = "Audits", Description = "Edit audit details" },
+            new Permission { Code = "Grc.Audits.Delete", Name = "Delete Audits", Category = "Audits", Description = "Delete audits" },
+            new Permission { Code = "Grc.Audits.Fieldwork", Name = "Conduct Fieldwork", Category = "Audits", Description = "Perform audit fieldwork" },
+            new Permission { Code = "Grc.Audits.Report", Name = "Issue Reports", Category = "Audits", Description = "Issue audit reports" },
+        });
+
+        // Additional Policy permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Policies.Create", Name = "Create Policies", Category = "Policies", Description = "Create new policies" },
+            new Permission { Code = "Grc.Policies.Edit", Name = "Edit Policies", Category = "Policies", Description = "Edit policy documents" },
+            new Permission { Code = "Grc.Policies.Delete", Name = "Delete Policies", Category = "Policies", Description = "Delete policies" },
+            new Permission { Code = "Grc.Policies.Review", Name = "Review Policies", Category = "Policies", Description = "Review policies for updates" },
+        });
+
+        // User Management permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Users.View", Name = "View Users", Category = "Users", Description = "View user accounts" },
+            new Permission { Code = "Grc.Users.Create", Name = "Create Users", Category = "Users", Description = "Create new users" },
+            new Permission { Code = "Grc.Users.Edit", Name = "Edit Users", Category = "Users", Description = "Edit user details" },
+            new Permission { Code = "Grc.Users.Delete", Name = "Delete Users", Category = "Users", Description = "Delete users" },
+            new Permission { Code = "Grc.Users.AssignRole", Name = "Assign Roles", Category = "Users", Description = "Assign roles to users" },
+        });
+
+        // Role Management permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Roles.View", Name = "View Roles", Category = "Roles", Description = "View role configurations" },
+            new Permission { Code = "Grc.Roles.Create", Name = "Create Roles", Category = "Roles", Description = "Create new roles" },
+            new Permission { Code = "Grc.Roles.Edit", Name = "Edit Roles", Category = "Roles", Description = "Edit role permissions" },
+            new Permission { Code = "Grc.Roles.Delete", Name = "Delete Roles", Category = "Roles", Description = "Delete roles" },
+        });
+
+        // System permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Permissions.Manage", Name = "Manage Permissions", Category = "System", Description = "Manage system permissions" },
+            new Permission { Code = "Grc.Features.Manage", Name = "Manage Features", Category = "System", Description = "Manage feature visibility" },
+            new Permission { Code = "Grc.Reports.Generate", Name = "Generate Reports", Category = "Reports", Description = "Generate custom reports" },
+        });
+
+        // Additional Assessment permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.Assessments.Delete", Name = "Delete Assessments", Category = "Assessments", Description = "Delete compliance assessments" },
+        });
+
+        // Additional ActionPlans permissions
+        permissions.AddRange(new[]
+        {
+            new Permission { Code = "Grc.ActionPlans.Create", Name = "Create Action Plans", Category = "ActionPlans", Description = "Create new action plans" },
+            new Permission { Code = "Grc.ActionPlans.Edit", Name = "Edit Action Plans", Category = "ActionPlans", Description = "Edit action plan details" },
+            new Permission { Code = "Grc.ActionPlans.Delete", Name = "Delete Action Plans", Category = "ActionPlans", Description = "Delete action plans" },
         });
 
         await context.Permissions.AddRangeAsync(permissions);

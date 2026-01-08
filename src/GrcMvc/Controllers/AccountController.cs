@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using GrcMvc.Models.Entities;
 using GrcMvc.Models.ViewModels;
 using GrcMvc.Services.Interfaces;
+using GrcMvc.Services;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,6 +25,7 @@ namespace GrcMvc.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
         private readonly IAppEmailSender _emailSender;
+        private readonly IGrcEmailService _grcEmailService;
         private readonly ILogger<AccountController> _logger;
         private readonly ITenantService _tenantService;
         private readonly GrcDbContext _context;
@@ -34,6 +36,7 @@ namespace GrcMvc.Controllers
             RoleManager<IdentityRole> roleManager,
             IConfiguration configuration,
             IAppEmailSender emailSender,
+            IGrcEmailService grcEmailService,
             ILogger<AccountController> logger,
             ITenantService tenantService,
             GrcDbContext context)
@@ -43,6 +46,7 @@ namespace GrcMvc.Controllers
             _roleManager = roleManager;
             _configuration = configuration;
             _emailSender = emailSender;
+            _grcEmailService = grcEmailService;
             _logger = logger;
             _tenantService = tenantService;
             _context = context;
@@ -109,37 +113,62 @@ namespace GrcMvc.Controllers
                                 {
                                     new Claim("TenantId", tenantUser.TenantId.ToString())
                                 };
-                                
+
                                 await _userManager.AddClaimsAsync(user, claims);
                                 _logger.LogDebug("Added TenantId claim for user {Email}", model.Email);
-                                
+
                                 // Re-sign in to include new claims
                                 await _signInManager.SignInAsync(user, model.RememberMe);
                             }
                         }
 
-                        if (tenantUser?.Tenant != null)
+                        // Check onboarding status for ALL users with a tenant
+                        if (tenantUser != null)
                         {
-                            var isAdmin = tenantUser.RoleCode == "TENANT_ADMIN" ||
-                                          tenantUser.RoleCode == "Admin" ||
-                                          await _userManager.IsInRoleAsync(user, "Admin");
-
-                            // Redirect to onboarding if tenant admin and onboarding not completed
-                            if (isAdmin && tenantUser.Tenant.OnboardingStatus != "COMPLETED")
+                            var tenant = tenantUser.Tenant ?? await _context.Tenants.FirstOrDefaultAsync(t => t.Id == tenantUser.TenantId);
+                            
+                            if (tenant != null)
                             {
-                                _logger.LogInformation("Redirecting tenant admin {Email} to onboarding wizard", model.Email);
-                                return RedirectToAction("Index", "OnboardingWizard", new { tenantId = tenantUser.TenantId });
+                                _logger.LogInformation("User {Email} - TenantId: {TenantId}, OnboardingStatus: {Status}", 
+                                    model.Email, tenant.Id, tenant.OnboardingStatus);
+
+                                // Redirect to onboarding if NOT completed
+                                // This applies to ALL users - they need to complete onboarding first
+                                if (tenant.OnboardingStatus != "COMPLETED")
+                                {
+                                    _logger.LogInformation("Redirecting user {Email} to onboarding wizard (status: {Status})", 
+                                        model.Email, tenant.OnboardingStatus);
+                                    return RedirectToAction("Index", "OnboardingWizard", new { tenantId = tenant.Id });
+                                }
                             }
                         }
                     }
 
                     // Redirect to role-based dashboard
-                    return Redirect("/login-redirect");
+                    return RedirectToAction(nameof(LoginRedirect));
                 }
 
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User {Email} account locked out.", model.Email);
+                    
+                    // Send account locked notification
+                    try
+                    {
+                        var lockedUser = await _userManager.FindByEmailAsync(model.Email);
+                        if (lockedUser != null)
+                        {
+                            var lockoutEnd = await _userManager.GetLockoutEndDateAsync(lockedUser);
+                            var unlockTime = lockoutEnd?.ToString("yyyy-MM-dd HH:mm") ?? "قريباً";
+                            var userName = lockedUser.FullName ?? lockedUser.UserName ?? model.Email.Split('@')[0];
+                            await _grcEmailService.SendAccountLockedNotificationAsync(model.Email, userName, unlockTime, isArabic: true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to send account locked notification to {Email}", model.Email);
+                    }
+                    
                     return View("Lockout");
                 }
 
@@ -152,6 +181,27 @@ namespace GrcMvc.Controllers
             }
 
             return View(model);
+        }
+
+        /// <summary>
+        /// Role-based redirect after successful login
+        /// </summary>
+        [Authorize]
+        public async Task<IActionResult> LoginRedirect([FromServices] IPostLoginRoutingService routingService)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Use centralized routing service for role-based redirection
+            var (controller, action, routeValues) = await routingService.GetRouteForUserAsync(user);
+
+            _logger.LogInformation("Redirecting user {Email} to {Controller}/{Action}",
+                user.Email, controller, action);
+
+            return RedirectToAction(action, controller, routeValues);
         }
 
         // GET: Account/DemoLogin - Auto-login with demo credentials
@@ -252,6 +302,26 @@ namespace GrcMvc.Controllers
                         await _roleManager.CreateAsync(new IdentityRole(defaultRole));
                     }
                     await _userManager.AddToRoleAsync(user, defaultRole);
+
+                    // Send welcome email
+                    try
+                    {
+                        var loginUrl = Url.Action("Login", "Account", null, Request.Scheme);
+                        var userName = $"{model.FirstName} {model.LastName}".Trim();
+                        if (string.IsNullOrEmpty(userName)) userName = model.Email.Split('@')[0];
+                        
+                        await _grcEmailService.SendWelcomeEmailAsync(
+                            model.Email,
+                            userName,
+                            loginUrl ?? "https://portal.shahin-ai.com",
+                            "Shahin AI GRC",
+                            isArabic: true);
+                        _logger.LogInformation("Welcome email sent to {Email}", model.Email);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to send welcome email to {Email}", model.Email);
+                    }
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
@@ -570,17 +640,28 @@ namespace GrcMvc.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+                if (user == null)
                 {
-                    // Don't reveal that the user does not exist or is not confirmed
+                    // Don't reveal that the user does not exist
+                    _logger.LogWarning("Password reset requested for non-existent email: {Email}", model.Email);
                     return RedirectToAction(nameof(ForgotPasswordConfirmation));
                 }
 
+                _logger.LogInformation("Generating password reset token for user: {Email}", model.Email);
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
                 var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { code }, protocol: HttpContext.Request.Scheme);
-                await _emailSender.SendEmailAsync(model.Email, "Reset Password",
-                    $"Please reset your password by clicking <a href='{callbackUrl}'>here</a>");
+                
+                _logger.LogInformation("Password reset link generated: {Url}", callbackUrl);
+                
+                // Use templated email with Arabic support
+                var userName = user.FullName ?? user.UserName ?? user.Email?.Split('@')[0] ?? "المستخدم";
+                await _grcEmailService.SendPasswordResetEmailAsync(
+                    model.Email, 
+                    userName, 
+                    callbackUrl ?? "#", 
+                    isArabic: true);
 
+                _logger.LogInformation("Password reset email sent to {Email}", model.Email);
                 return RedirectToAction(nameof(ForgotPasswordConfirmation));
             }
 
@@ -633,6 +714,18 @@ namespace GrcMvc.Controllers
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
+                // Send password changed notification
+                try
+                {
+                    var userName = user.FullName ?? user.UserName ?? user.Email?.Split('@')[0] ?? "المستخدم";
+                    await _grcEmailService.SendPasswordChangedNotificationAsync(user.Email!, userName, isArabic: true);
+                    _logger.LogInformation("Password changed notification sent to {Email}", user.Email);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send password changed notification to {Email}", user.Email);
+                }
+                
                 return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
 

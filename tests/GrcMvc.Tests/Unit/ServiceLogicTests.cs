@@ -1,5 +1,5 @@
 using Xunit;
-using GrcMvc.Models.Dtos;
+using GrcMvc.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -138,11 +138,10 @@ public class AuditServiceTests
         {
             Id = Guid.NewGuid(),
             FindingNumber = "FIND-001",
-            Category = "Security",
+            Title = "Security Gap",
             Severity = "High",
             Status = "Open",
-            Description = "Test finding",
-            DueDate = DateTime.Now.AddMonths(1)
+            Description = "Test finding"
         };
 
         // Act & Assert
@@ -316,8 +315,8 @@ public class PolicyServiceTests
         // Arrange
         var violations = new List<PolicyViolationDto>
         {
-            new() { Id = Guid.NewGuid(), ViolationType = "VIO-001", Status = "Open" },
-            new() { Id = Guid.NewGuid(), ViolationType = "VIO-002", Status = "In Resolution" }
+            new() { Id = Guid.NewGuid(), Title = "VIO-001", Status = "Open" },
+            new() { Id = Guid.NewGuid(), Title = "VIO-002", Status = "In Resolution" }
         };
 
         // Act

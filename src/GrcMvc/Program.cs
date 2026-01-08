@@ -50,6 +50,63 @@ using GrcMvc.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ══════════════════════════════════════════════════════════════
+// Load Environment Variables from .env file (Production Security)
+// ══════════════════════════════════════════════════════════════
+var envFile = Path.Combine(Directory.GetCurrentDirectory(), ".env");
+if (!File.Exists(envFile))
+{
+    envFile = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", ".env");
+}
+if (!File.Exists(envFile))
+{
+    envFile = "/home/dogan/grc-system/.env";
+}
+
+if (File.Exists(envFile))
+{
+    foreach (var line in File.ReadAllLines(envFile))
+    {
+        if (string.IsNullOrWhiteSpace(line) || line.TrimStart().StartsWith("#"))
+            continue;
+        
+        var parts = line.Split('=', 2);
+        if (parts.Length == 2)
+        {
+            var envKey = parts[0].Trim();
+            var envValue = parts[1].Trim();
+            Environment.SetEnvironmentVariable(envKey, envValue);
+        }
+    }
+    Console.WriteLine($"[ENV] Loaded environment variables from: {envFile}");
+}
+
+// Build connection string from environment variables
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? "5432";
+var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "GrcMvcDb";
+var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "postgres";
+var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "postgres";
+var connectionString = $"Host={dbHost};Database={dbName};Username={dbUser};Password={dbPassword};Port={dbPort}";
+
+// Override configuration with environment variables
+builder.Configuration["ConnectionStrings:DefaultConnection"] = connectionString;
+builder.Configuration["ConnectionStrings:GrcAuthDb"] = connectionString;
+builder.Configuration["JwtSettings:Secret"] = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "ShahinAI-Dev-SecretKey-2026-MustBeAtLeast32Chars!";
+builder.Configuration["ClaudeAgents:ApiKey"] = Environment.GetEnvironmentVariable("CLAUDE_API_KEY") ?? "";
+builder.Configuration["ClaudeAgents:Model"] = Environment.GetEnvironmentVariable("CLAUDE_MODEL") ?? "claude-sonnet-4-20250514";
+builder.Configuration["SmtpSettings:TenantId"] = Environment.GetEnvironmentVariable("SMTP_TENANT_ID") ?? "";
+builder.Configuration["SmtpSettings:ClientId"] = Environment.GetEnvironmentVariable("SMTP_CLIENT_ID") ?? "";
+builder.Configuration["SmtpSettings:ClientSecret"] = Environment.GetEnvironmentVariable("SMTP_CLIENT_SECRET") ?? "";
+builder.Configuration["SmtpSettings:FromEmail"] = Environment.GetEnvironmentVariable("SMTP_FROM_EMAIL") ?? "";
+builder.Configuration["EmailOperations:MicrosoftGraph:TenantId"] = Environment.GetEnvironmentVariable("GRAPH_TENANT_ID") ?? "";
+builder.Configuration["EmailOperations:MicrosoftGraph:ClientId"] = Environment.GetEnvironmentVariable("GRAPH_CLIENT_ID") ?? "";
+builder.Configuration["EmailOperations:MicrosoftGraph:ClientSecret"] = Environment.GetEnvironmentVariable("GRAPH_CLIENT_SECRET") ?? "";
+builder.Configuration["CopilotAgent:TenantId"] = Environment.GetEnvironmentVariable("COPILOT_TENANT_ID") ?? "";
+builder.Configuration["CopilotAgent:ClientId"] = Environment.GetEnvironmentVariable("COPILOT_CLIENT_ID") ?? "";
+builder.Configuration["CopilotAgent:ClientSecret"] = Environment.GetEnvironmentVariable("COPILOT_CLIENT_SECRET") ?? "";
+builder.Configuration["Camunda:Password"] = Environment.GetEnvironmentVariable("CAMUNDA_PASSWORD") ?? "demo";
+
 // Configure Serilog for structured logging
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
@@ -124,7 +181,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddHttpContextAccessor();
 
 // Add Localization services (Arabic default, English secondary)
-builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+// Note: ResourcesPath is NOT set because the SharedResource class namespace already includes "Resources"
+// The resources are embedded as GrcMvc.Resources.SharedResource which matches the class namespace
+builder.Services.AddLocalization();
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     var supportedCultures = new[]
@@ -185,12 +244,12 @@ builder.Services.AddSingleton<IValidateOptions<JwtSettings>, JwtSettingsValidato
 builder.Services.AddSingleton<IValidateOptions<ApplicationSettings>, ApplicationSettingsValidator>();
 
 // Configure Entity Framework with PostgreSQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Note: connectionString already set from environment variables above
 if (string.IsNullOrWhiteSpace(connectionString))
 {
     throw new InvalidOperationException(
         "Database connection string 'DefaultConnection' not found. " +
-        "Please set it via environment variable: ConnectionStrings__DefaultConnection");
+        "Please set it via environment variable: DB_HOST, DB_NAME, DB_USER, DB_PASSWORD");
 }
 
 // Register master DbContext for tenant metadata (uses default connection)
@@ -388,6 +447,10 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Register services
+
+// App Info Service (centralized branding & version info)
+builder.Services.AddSingleton<IAppInfoService, AppInfoService>();
+
 // RiskService migrated to IDbContextFactory for tenant database isolation
 builder.Services.AddScoped<IRiskService, RiskService>();
 builder.Services.AddScoped<IControlService, ControlService>();
@@ -415,8 +478,15 @@ builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<IOnboardingWizardService, OnboardingWizardService>();
 builder.Services.AddScoped<IAuditEventService, AuditEventService>();
+
+// Post-Login Routing Service for role-based redirection
+builder.Services.AddScoped<IPostLoginRoutingService, PostLoginRoutingService>();
 // Use real SMTP email service via adapter (replaces StubEmailService)
 builder.Services.AddScoped<IEmailService, EmailServiceAdapter>();
+// GRC-specific email service with templates
+builder.Services.AddScoped<IGrcEmailService, GrcEmailService>();
+// Email-based MFA service
+builder.Services.AddScoped<IEmailMfaService, EmailMfaService>();
 builder.Services.AddScoped<IPlanService, PlanService>();
 
 // Workflow Services
@@ -513,6 +583,12 @@ builder.Services.AddScoped<IWorkflowRoutingService, WorkflowRoutingService>();
 
 // Expert Framework Mapping Service (Sector-driven compliance blueprints)
 builder.Services.AddScoped<IExpertFrameworkMappingService, ExpertFrameworkMappingService>();
+
+// Sector-Framework Cache Service (Fast lookups for onboarding)
+builder.Services.AddSingleton<ISectorFrameworkCacheService, SectorFrameworkCacheService>();
+
+// Tenant Evidence Provisioning Service (Auto-generate evidence requirements on onboarding)
+builder.Services.AddScoped<ITenantEvidenceProvisioningService, TenantEvidenceProvisioningService>();
 
 // Suite Generation Service (Baseline + Overlays model)
 builder.Services.AddScoped<ISuiteGenerationService, SuiteGenerationService>();
@@ -937,9 +1013,19 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<ISmtpEmailService, SmtpEmailService>();
 builder.Services.AddScoped<IWebhookService, WebhookService>();
 
-// Diagnostic agent service
+// AI Agent services - Claude powered
 builder.Services.AddScoped<IDiagnosticAgentService, DiagnosticAgentService>();
+builder.Services.AddScoped<IClaudeAgentService, ClaudeAgentService>();
 builder.Services.Configure<ClaudeApiSettings>(builder.Configuration.GetSection(ClaudeApiSettings.SectionName));
+
+// Email Operations Services (Shahin + Dogan Consult)
+builder.Services.AddHttpClient<GrcMvc.Services.EmailOperations.IMicrosoftGraphEmailService, 
+    GrcMvc.Services.EmailOperations.MicrosoftGraphEmailService>();
+builder.Services.AddScoped<GrcMvc.Services.EmailOperations.IEmailAiService, 
+    GrcMvc.Services.EmailOperations.EmailAiService>();
+builder.Services.AddScoped<GrcMvc.Services.EmailOperations.IEmailOperationsService, 
+    GrcMvc.Services.EmailOperations.EmailOperationsService>();
+builder.Services.AddScoped<GrcMvc.Services.EmailOperations.EmailProcessingJob>();
 
 // Multi-channel notification services
 builder.Services.AddScoped<ISlackNotificationService, SlackNotificationService>();
@@ -952,10 +1038,25 @@ builder.Services.Configure<SlackSettings>(builder.Configuration.GetSection("Slac
 builder.Services.Configure<TeamsSettings>(builder.Configuration.GetSection("Teams"));
 builder.Services.Configure<TwilioSettings>(builder.Configuration.GetSection("Twilio"));
 
-// Workflow services (add your existing workflow services here)
-// builder.Services.AddScoped<IControlImplementationService, ControlImplementationService>();
-// builder.Services.AddScoped<IApprovalWorkflowService, ApprovalWorkflowService>();
-// ... etc.
+// =============================================================================
+// KAFKA & CAMUNDA WORKFLOW ORCHESTRATION
+// =============================================================================
+
+// Kafka Event-Driven Architecture
+builder.Services.Configure<GrcMvc.Services.Kafka.KafkaSettings>(
+    builder.Configuration.GetSection(GrcMvc.Services.Kafka.KafkaSettings.SectionName));
+builder.Services.AddSingleton<GrcMvc.Services.Kafka.IKafkaProducer, GrcMvc.Services.Kafka.KafkaProducer>();
+builder.Services.AddHostedService<GrcMvc.Services.Kafka.KafkaConsumerService>();
+
+// Camunda Workflow Orchestration
+builder.Services.Configure<GrcMvc.Services.Camunda.CamundaSettings>(
+    builder.Configuration.GetSection(GrcMvc.Services.Camunda.CamundaSettings.SectionName));
+builder.Services.AddHttpClient<GrcMvc.Services.Camunda.ICamundaService, GrcMvc.Services.Camunda.CamundaService>(client =>
+{
+    var camundaSettings = builder.Configuration.GetSection("Camunda");
+    client.BaseAddress = new Uri(camundaSettings["BaseUrl"] ?? "http://localhost:8080/camunda");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
 
 // =============================================================================
 // 8. MVC & API CONFIGURATION
@@ -1001,9 +1102,15 @@ else
     app.UseHsts();
 }
 
+// Global Exception Handling (must be early in pipeline)
+app.UseMiddleware<GrcMvc.Middleware.GlobalExceptionMiddleware>();
+
 // Configure Request Localization (must be before UseStaticFiles and UseRouting)
 var localizationOptions = app.Services.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
 app.UseRequestLocalization(localizationOptions);
+
+// Status code pages with re-execute for friendly error pages
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
 
 // Policy Violation Exception Middleware (early in pipeline for API error handling)
 // Owner Setup Middleware (must run early, before authentication)
@@ -1017,6 +1124,9 @@ app.UseMiddleware<GrcMvc.Middleware.PolicyViolationExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Host-based routing (login.shahin-ai.com → Admin, shahin-ai.com → Landing)
+app.UseHostRouting();
 
 app.UseRouting();
 
@@ -1092,6 +1202,15 @@ if (enableHangfire)
         "*/2 * * * *",
         new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
 
+    // Email Operations - SLA breach check every hour
+    RecurringJob.AddOrUpdate<GrcMvc.Services.EmailOperations.EmailProcessingJob>(
+        "email-sla-check",
+        job => job.CheckSlaBreachesAsync(),
+        "0 * * * *", // Every hour at minute 0
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
+
+    appLogger.LogInformation("✅ Email Operations SLA check job scheduled");
+
     // Analytics projection jobs (only if ClickHouse is enabled)
     var analyticsEnabled = builder.Configuration.GetValue<bool>("Analytics:Enabled", false);
     if (analyticsEnabled)
@@ -1134,6 +1253,12 @@ if (signalREnabledForHub)
     appLogger.LogInformation("✅ SignalR Dashboard Hub mapped to /hubs/dashboard");
 }
 
+// Platform Admin routes (login.shahin-ai.com) - MUST BE BEFORE OTHER ROUTES
+app.MapControllerRoute(
+    name: "admin-portal",
+    pattern: "admin/{action=Login}/{id?}",
+    defaults: new { controller = "AdminPortal" });
+
 // Owner routes (PlatformAdmin only)
 app.MapControllerRoute(
     name: "owner",
@@ -1171,6 +1296,21 @@ app.MapControllerRoute(
     name: "onboarding",
     pattern: "Onboarding/{action=Index}/{id?}",
     defaults: new { controller = "Onboarding" });
+
+// Login redirect route (maps /login-redirect to AccountController.LoginRedirect)
+app.MapControllerRoute(
+    name: "login-redirect",
+    pattern: "login-redirect",
+    defaults: new { controller = "Account", action = "LoginRedirect" });
+
+// Enable attribute routing for API and custom-routed controllers
+app.MapControllers();
+
+// Landing page route (shahin-ai.com homepage)
+app.MapControllerRoute(
+    name: "landing",
+    pattern: "",
+    defaults: new { controller = "Landing", action = "Index" });
 
 // Default route
 app.MapControllerRoute(
@@ -1222,11 +1362,17 @@ app.Run();
 
 public class SmtpSettings
 {
-    public string Host { get; set; } = "smtp.gmail.com";
+    public string Host { get; set; } = "smtp.office365.com";
     public int Port { get; set; } = 587;
     public bool EnableSsl { get; set; } = true;
     public string FromEmail { get; set; } = "noreply@grcsystem.com";
     public string FromName { get; set; } = "GRC System";
     public string? Username { get; set; }
     public string? Password { get; set; }
+    
+    // OAuth2 settings for Office 365 (recommended for production)
+    public bool UseOAuth2 { get; set; } = false;
+    public string? TenantId { get; set; }
+    public string? ClientId { get; set; }
+    public string? ClientSecret { get; set; }
 }

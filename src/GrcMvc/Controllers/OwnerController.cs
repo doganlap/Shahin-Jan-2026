@@ -41,21 +41,43 @@ namespace GrcMvc.Controllers
 
 
         /// <summary>
-        /// Owner dashboard
+        /// Owner dashboard with comprehensive KPIs
         /// </summary>
         [HttpGet]
         [HttpGet("Index")]
+        [HttpGet("Dashboard")]
         public async Task<IActionResult> Index()
         {
-            var totalTenants = await _context.Tenants.CountAsync();
-            var ownerCreatedTenants = await _context.Tenants.CountAsync(t => t.IsOwnerCreated);
-            var activeTenants = await _context.Tenants.CountAsync(t => t.IsActive);
-            var tenantsWithAdmin = await _context.Tenants.CountAsync(t => t.AdminAccountGenerated);
+            // Tenant Statistics
+            ViewBag.TotalTenants = await _context.Tenants.CountAsync();
+            ViewBag.OwnerCreatedTenants = await _context.Tenants.CountAsync(t => t.IsOwnerCreated);
+            ViewBag.ActiveTenants = await _context.Tenants.CountAsync(t => t.IsActive);
+            ViewBag.TenantsWithAdmin = await _context.Tenants.CountAsync(t => t.AdminAccountGenerated);
 
-            ViewBag.TotalTenants = totalTenants;
-            ViewBag.OwnerCreatedTenants = ownerCreatedTenants;
-            ViewBag.ActiveTenants = activeTenants;
-            ViewBag.TenantsWithAdmin = tenantsWithAdmin;
+            // Sector & Framework Statistics
+            ViewBag.TotalMainSectors = await _context.SectorFrameworkIndexes.Select(s => s.SectorCode).Distinct().CountAsync();
+            ViewBag.TotalGosiSubSectors = await _context.GrcSubSectorMappings.CountAsync();
+            ViewBag.TotalSectorMappings = await _context.SectorFrameworkIndexes.CountAsync();
+            
+            // Regulatory Content Statistics
+            ViewBag.TotalRegulators = await _context.Regulators.CountAsync();
+            ViewBag.TotalFrameworks = await _context.FrameworkCatalogs.CountAsync();
+            ViewBag.TotalControls = await _context.FrameworkControls.CountAsync();
+            ViewBag.TotalEvidenceTypes = await _context.EvidenceScoringCriteria.CountAsync();
+            
+            // Workflow Statistics
+            ViewBag.TotalWorkflowDefinitions = await _context.WorkflowDefinitions.CountAsync();
+            ViewBag.TotalWorkflowInstances = await _context.WorkflowInstances.CountAsync();
+            
+            // User Statistics - count via TenantUsers (cross-tenant user mapping)
+            ViewBag.TotalUsers = await _context.TenantUsers.Select(tu => tu.UserId).Distinct().CountAsync();
+            
+            // Recent activity
+            ViewBag.RecentTenants = await _context.Tenants
+                .OrderByDescending(t => t.CreatedDate)
+                .Take(5)
+                .Select(t => new { t.Id, Name = t.OrganizationName, Subdomain = t.TenantSlug, t.IsActive, t.CreatedDate })
+                .ToListAsync();
 
             return View();
         }

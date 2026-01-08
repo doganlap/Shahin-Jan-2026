@@ -32,18 +32,14 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        // Check if user is authenticated and should see welcome tour
-        if (User.Identity?.IsAuthenticated == true)
+        // Unauthenticated users see the landing page
+        if (User.Identity?.IsAuthenticated != true)
         {
-            // Check if tour has been completed (stored in session or user preference)
-            var tourCompleted = HttpContext.Session.GetString("TourCompleted");
-            if (string.IsNullOrEmpty(tourCompleted))
-            {
-                ViewBag.ShowWelcomeTour = true;
-            }
+            return RedirectToAction("Index", "Landing");
         }
 
-        return View();
+        // Authenticated users go to dashboard
+        return RedirectToAction("Index", "Dashboard");
     }
 
     public IActionResult Privacy()
@@ -68,9 +64,29 @@ public class HomeController : Controller
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error(int? statusCode = null, string? correlationId = null)
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var model = new ErrorViewModel 
+        { 
+            RequestId = correlationId ?? Activity.Current?.Id ?? HttpContext.TraceIdentifier 
+        };
+
+        // Get status code from route or response
+        var actualStatusCode = statusCode ?? Response.StatusCode;
+        if (actualStatusCode < 400) actualStatusCode = 500;
+
+        ViewData["StatusCode"] = actualStatusCode;
+        ViewData["CorrelationId"] = model.RequestId;
+
+        // Set appropriate status code on response
+        Response.StatusCode = actualStatusCode;
+
+        // Log the error access
+        _logger.LogInformation(
+            "Error page accessed. StatusCode: {StatusCode}, CorrelationId: {CorrelationId}, Path: {Path}",
+            actualStatusCode, model.RequestId, HttpContext.Request.Path);
+
+        return View(model);
     }
 
     /// <summary>

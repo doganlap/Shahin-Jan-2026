@@ -4,26 +4,25 @@ using GrcMvc.Models.Entities;
 using GrcMvc.Data;
 using Microsoft.EntityFrameworkCore;
 using GrcMvc.Application.Permissions;
+using System.Security.Claims;
 
 namespace GrcMvc.Data.Seed;
 
 /// <summary>
 /// Seeds default roles and permission grants for the GRC system.
 /// Implements the 8 baseline roles defined in the GRC Policy Enforcement Agent plan.
+/// Uses RoleManager API (proper ASP.NET Identity approach) instead of direct DbContext.
 /// </summary>
 public class GrcRoleDataSeedContributor
 {
     private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly GrcDbContext _context;
     private readonly ILogger<GrcRoleDataSeedContributor> _logger;
 
     public GrcRoleDataSeedContributor(
         RoleManager<IdentityRole> roleManager,
-        GrcDbContext context,
         ILogger<GrcRoleDataSeedContributor> logger)
     {
         _roleManager = roleManager;
-        _context = context;
         _logger = logger;
     }
 
@@ -59,7 +58,7 @@ public class GrcRoleDataSeedContributor
                 var role = await _roleManager.FindByNameAsync(roleName);
                 if (role != null)
                 {
-                    await GrantPermissionsToRoleAsync(role.Id, permissions);
+                    await GrantPermissionsToRoleAsync(role, permissions);
                 }
             }
 
@@ -72,29 +71,35 @@ public class GrcRoleDataSeedContributor
         }
     }
 
-    private async Task GrantPermissionsToRoleAsync(string roleId, List<string> permissions)
+    private async Task GrantPermissionsToRoleAsync(IdentityRole role, List<string> permissions)
     {
+        // Get existing claims for this role
+        var existingClaims = await _roleManager.GetClaimsAsync(role);
+        var existingPermissions = existingClaims
+            .Where(c => c.Type == "permission")
+            .Select(c => c.Value)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         foreach (var permission in permissions)
         {
-            // Check if permission grant already exists
-            var exists = await _context.Set<IdentityRoleClaim<string>>()
-                .AnyAsync(rc => rc.RoleId == roleId && rc.ClaimType == "Permission" && rc.ClaimValue == permission);
-
-            if (!exists)
+            // Check if permission already exists
+            if (!existingPermissions.Contains(permission))
             {
-                // Add permission claim to role
-                var claim = new IdentityRoleClaim<string>
+                // Use RoleManager API to add claim (proper ASP.NET Identity approach)
+                var claim = new Claim("permission", permission);
+                var result = await _roleManager.AddClaimAsync(role, claim);
+
+                if (result.Succeeded)
                 {
-                    RoleId = roleId,
-                    ClaimType = "Permission",
-                    ClaimValue = permission
-                };
-                _context.Set<IdentityRoleClaim<string>>().Add(claim);
-                _logger.LogDebug("Granted permission {Permission} to role {RoleId}", permission, roleId);
+                    _logger.LogDebug("Granted permission {Permission} to role {RoleName}", permission, role.Name);
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to grant permission {Permission} to role {RoleName}: {Errors}",
+                        permission, role.Name, string.Join(", ", result.Errors.Select(e => e.Description)));
+                }
             }
         }
-
-        await _context.SaveChangesAsync();
     }
 
     private Dictionary<string, List<string>> GetRoleDefinitions()

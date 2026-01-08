@@ -182,4 +182,19 @@ namespace GrcMvc.Models.ViewModels
         [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; } = string.Empty;
     }
+
+    /// <summary>
+    /// ViewModel for Email MFA verification
+    /// </summary>
+    public class VerifyMfaViewModel
+    {
+        [Required(ErrorMessage = "رمز التحقق مطلوب")]
+        [StringLength(6, MinimumLength = 6, ErrorMessage = "رمز التحقق يجب أن يكون 6 أرقام")]
+        [Display(Name = "رمز التحقق")]
+        public string Code { get; set; } = string.Empty;
+
+        public string? ReturnUrl { get; set; }
+        public bool RememberMe { get; set; }
+        public string? MaskedEmail { get; set; }
+    }
 }

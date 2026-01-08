@@ -1,0 +1,404 @@
+@using GrcMvc.Services
+@inject IAppInfoService AppInfo
+@{
+    ViewData["Title"] = "تواصل معنا - " + AppInfo.Name;
+    Layout = "_LandingLayout";
+}
+
+<section class="contact-hero">
+    <div class="container">
+        <div class="section-header fade-up">
+            <div class="section-badge">
+                <i class="bi bi-chat-dots"></i>
+                <span>تواصل معنا</span>
+            </div>
+            <h1 class="section-title">نحب أن نسمع منك</h1>
+            <p class="section-subtitle">
+                سواء كان لديك سؤال، اقتراح، أو ترغب في معرفة المزيد عن خدماتنا، فريقنا جاهز لمساعدتك.
+            </p>
+        </div>
+
+        <div class="contact-content fade-up">
+            <div class="contact-info">
+                <h3>طرق التواصل</h3>
+                
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="bi bi-envelope"></i></div>
+                    <div class="contact-details">
+                        <h4>البريد الإلكتروني</h4>
+                        <p>info@shahin-ai.com</p>
+                        <p>support@shahin-ai.com</p>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="bi bi-telephone"></i></div>
+                    <div class="contact-details">
+                        <h4>الهاتف</h4>
+                        <p dir="ltr">+966 XX XXX XXXX</p>
+                        <p class="note">متاح من الأحد إلى الخميس، 9 ص - 5 م</p>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="bi bi-geo-alt"></i></div>
+                    <div class="contact-details">
+                        <h4>العنوان</h4>
+                        <p>الرياض، المملكة العربية السعودية</p>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-icon"><i class="bi bi-clock"></i></div>
+                    <div class="contact-details">
+                        <h4>ساعات العمل</h4>
+                        <p>الأحد - الخميس: 9:00 ص - 5:00 م</p>
+                        <p>الجمعة - السبت: مغلق</p>
+                    </div>
+                </div>
+
+                <div class="social-links">
+                    <h4>تابعنا</h4>
+                    <div class="social-icons">
+                        <a href="#" class="social-icon"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-twitter-x"></i></a>
+                        <a href="#" class="social-icon"><i class="bi bi-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-form-wrapper">
+                <h3>أرسل رسالة</h3>
+                <form id="contactForm" class="contact-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">الاسم الكامل</label>
+                            <input type="text" id="name" name="name" required placeholder="أدخل اسمك">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">البريد الإلكتروني</label>
+                            <input type="email" id="email" name="email" required placeholder="example@domain.com">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="company">اسم المنظمة</label>
+                            <input type="text" id="company" name="company" placeholder="اسم شركتك (اختياري)">
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">رقم الهاتف</label>
+                            <input type="tel" id="phone" name="phone" placeholder="+966 XX XXX XXXX">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">الموضوع</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">اختر موضوع الرسالة</option>
+                            <option value="sales">استفسار عن المبيعات</option>
+                            <option value="demo">طلب عرض توضيحي</option>
+                            <option value="support">الدعم الفني</option>
+                            <option value="partnership">الشراكات</option>
+                            <option value="other">أخرى</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">الرسالة</label>
+                        <textarea id="message" name="message" rows="5" required placeholder="اكتب رسالتك هنا..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-send"></i>
+                        إرسال الرسالة
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="quick-links fade-up">
+            <h3>روابط سريعة</h3>
+            <div class="links-grid">
+                <a href="/Help" class="quick-link">
+                    <i class="bi bi-question-circle"></i>
+                    <span>مركز المساعدة</span>
+                </a>
+                <a href="/Help/FAQ" class="quick-link">
+                    <i class="bi bi-chat-left-text"></i>
+                    <span>الأسئلة الشائعة</span>
+                </a>
+                <a href="/Landing/Pricing" class="quick-link">
+                    <i class="bi bi-tag"></i>
+                    <span>الأسعار</span>
+                </a>
+                <a href="/trial" class="quick-link">
+                    <i class="bi bi-rocket-takeoff"></i>
+                    <span>التجربة المجانية</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+<style>
+    .contact-hero {
+        padding: 8rem 0 4rem;
+    }
+
+    .contact-content {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 3rem;
+        margin-bottom: 4rem;
+    }
+
+    .contact-info {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 2.5rem;
+    }
+
+    .contact-info h3 {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .contact-item {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .contact-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(16, 185, 129, 0.15);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: var(--primary);
+        flex-shrink: 0;
+    }
+
+    .contact-details h4 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .contact-details p {
+        color: rgba(248, 250, 252, 0.7);
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .contact-details .note {
+        font-size: 0.85rem;
+        color: rgba(248, 250, 252, 0.5);
+    }
+
+    .social-links {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .social-links h4 {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .social-icons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .social-icon {
+        width: 44px;
+        height: 44px;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--light);
+        font-size: 1.25rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .social-icon:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .contact-form-wrapper {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 2.5rem;
+    }
+
+    .contact-form-wrapper h3 {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        color: var(--light);
+        font-family: inherit;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+        color: rgba(248, 250, 252, 0.4);
+    }
+
+    .form-group select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23f8fafc' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: left 1rem center;
+        padding-left: 2.5rem;
+    }
+
+    .form-group select option {
+        background: var(--dark);
+        color: var(--light);
+    }
+
+    .contact-form button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .quick-links {
+        text-align: center;
+    }
+
+    .quick-links h3 {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .links-grid {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .quick-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        color: var(--light);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    .quick-link:hover {
+        border-color: var(--primary);
+        background: rgba(16, 185, 129, 0.1);
+    }
+
+    .quick-link i {
+        font-size: 1.25rem;
+        color: var(--primary);
+    }
+
+    @@media (max-width: 1024px) {
+        .contact-content {
+            grid-template-columns: 1fr;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .links-grid {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .quick-link {
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+        }
+    }
+</style>
+}
+
+@section Scripts {
+<script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Here you would typically send to an API
+        // For now, show a success message
+        fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(() => {
+            alert('شكراً لتواصلك معنا! سنرد عليك في أقرب وقت.');
+            this.reset();
+        }).catch(() => {
+            alert('شكراً لتواصلك! سنتواصل معك قريباً.');
+            this.reset();
+        });
+    });
+</script>
+}

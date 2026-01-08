@@ -13,6 +13,7 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
       - ConnectionStrings__HangfireConnection=${CONNECTION_STRING}
+      - ConnectionStrings__GrcAuthDb=${CONNECTION_STRING_GrcAuthDb:-Host=db;Database=GrcAuthDb;Username=postgres;Password=postgres;Port=5432}
       - JwtSettings__Secret=${JWT_SECRET}
       - JwtSettings__Issuer=${JWT_ISSUER:-https://portal.shahin-ai.com}
       - JwtSettings__Audience=${JWT_AUDIENCE:-https://portal.shahin-ai.com}
@@ -100,26 +101,36 @@ services:
 
   # Kafka Message Broker
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.5.0
     container_name: grc-kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     environment:
-      - KAFKA_BROKER_ID=1
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:${KAFKA_PORT:-9092}
-      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     ports:
-      - "${KAFKA_PORT:-9092}:9092"
+      - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
     networks:
       - grc-network
     healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 40s
+      start_period: 60s
 
   # Kafka Connect (for Debezium CDC)
   kafka-connect:
@@ -148,6 +159,40 @@ services:
       retries: 5
       start_period: 60s
 
+  # Camunda Workflow Engine (BPM) - Uses H2 embedded database
+  camunda:
+    image: camunda/camunda-bpm-platform:run-7.20.0
+    container_name: grc-camunda
+    environment:
+      CAMUNDA_BPM_RUN_AUTH_ENABLED: "true"
+    ports:
+      - "8085:8080"
+    networks:
+      - grc-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/camunda/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    volumes:
+      - camunda_data:/camunda/configuration
+
+  # Kafka UI for monitoring
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: grc-kafka-ui
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=grc-cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    ports:
+      - "${KAFKA_UI_PORT:-9080}:8080"
+    depends_on:
+      - kafka
+    networks:
+      - grc-network
+
   # Redis Cache (optional)
   redis:
     image: redis:7-alpine
@@ -169,6 +214,8 @@ volumes:
   grc_db_data:
   clickhouse_data:
   redis_data:
+  camunda_data:
+  kafka_data:
 
 networks:
   grc-network:

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  id="Definitions_Risk"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+  
+  <bpmn:process id="grc-risk-assessment" name="GRC Risk Assessment" isExecutable="true">
+    
+    <!-- Start Event -->
+    <bpmn:startEvent id="StartEvent" name="Risk Identified">
+      <bpmn:outgoing>Flow_Start</bpmn:outgoing>
+    </bpmn:startEvent>
+    
+    <!-- AI Risk Analysis -->
+    <bpmn:serviceTask id="Task_AIAnalysis" name="AI Risk Analysis"
+                      camunda:type="external" camunda:topic="grc-ai-risk-analysis">
+      <bpmn:incoming>Flow_Start</bpmn:incoming>
+      <bpmn:outgoing>Flow_Analysis</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <!-- Risk Assessment Task -->
+    <bpmn:userTask id="Task_Assess" name="Assess Risk" camunda:candidateGroups="risk-managers">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="likelihood" label="Likelihood (1-5)" type="long" />
+          <camunda:formField id="impact" label="Impact (1-5)" type="long" />
+          <camunda:formField id="mitigationRequired" label="Mitigation Required?" type="boolean" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Analysis</bpmn:incoming>
+      <bpmn:outgoing>Flow_Decision</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <!-- Risk Level Gateway -->
+    <bpmn:exclusiveGateway id="Gateway_RiskLevel" name="Risk Level?">
+      <bpmn:incoming>Flow_Decision</bpmn:incoming>
+      <bpmn:outgoing>Flow_Critical</bpmn:outgoing>
+      <bpmn:outgoing>Flow_High</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Medium</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Low</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    
+    <!-- Critical Risk - Escalate -->
+    <bpmn:userTask id="Task_Escalate" name="Executive Escalation" camunda:candidateGroups="executives">
+      <bpmn:incoming>Flow_Critical</bpmn:incoming>
+      <bpmn:outgoing>Flow_Escalate_End</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <!-- High Risk - Mitigation Plan -->
+    <bpmn:userTask id="Task_MitigationPlan" name="Create Mitigation Plan" camunda:assignee="${riskOwnerId}">
+      <bpmn:incoming>Flow_High</bpmn:incoming>
+      <bpmn:outgoing>Flow_Mitigation</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <!-- Implement Mitigation -->
+    <bpmn:userTask id="Task_Implement" name="Implement Mitigation" camunda:assignee="${riskOwnerId}">
+      <bpmn:incoming>Flow_Mitigation</bpmn:incoming>
+      <bpmn:outgoing>Flow_Implement_End</bpmn:outgoing>
+    </bpmn:userTask>
+    
+    <!-- Medium Risk - Monitor -->
+    <bpmn:serviceTask id="Task_ScheduleMonitoring" name="Schedule Monitoring"
+                      camunda:type="external" camunda:topic="grc-schedule-monitoring">
+      <bpmn:incoming>Flow_Medium</bpmn:incoming>
+      <bpmn:outgoing>Flow_Monitor_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <!-- Low Risk - Accept -->
+    <bpmn:serviceTask id="Task_AcceptRisk" name="Accept Risk"
+                      camunda:type="external" camunda:topic="grc-accept-risk">
+      <bpmn:incoming>Flow_Low</bpmn:incoming>
+      <bpmn:outgoing>Flow_Accept_End</bpmn:outgoing>
+    </bpmn:serviceTask>
+    
+    <!-- End Events -->
+    <bpmn:endEvent id="EndEvent_Escalated" name="Escalated">
+      <bpmn:incoming>Flow_Escalate_End</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <bpmn:endEvent id="EndEvent_Mitigated" name="Mitigated">
+      <bpmn:incoming>Flow_Implement_End</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <bpmn:endEvent id="EndEvent_Monitored" name="Monitored">
+      <bpmn:incoming>Flow_Monitor_End</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <bpmn:endEvent id="EndEvent_Accepted" name="Accepted">
+      <bpmn:incoming>Flow_Accept_End</bpmn:incoming>
+    </bpmn:endEvent>
+    
+    <!-- Sequence Flows -->
+    <bpmn:sequenceFlow id="Flow_Start" sourceRef="StartEvent" targetRef="Task_AIAnalysis" />
+    <bpmn:sequenceFlow id="Flow_Analysis" sourceRef="Task_AIAnalysis" targetRef="Task_Assess" />
+    <bpmn:sequenceFlow id="Flow_Decision" sourceRef="Task_Assess" targetRef="Gateway_RiskLevel" />
+    
+    <bpmn:sequenceFlow id="Flow_Critical" sourceRef="Gateway_RiskLevel" targetRef="Task_Escalate">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${likelihood * impact >= 20}
+      </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    
+    <bpmn:sequenceFlow id="Flow_High" sourceRef="Gateway_RiskLevel" targetRef="Task_MitigationPlan">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${likelihood * impact >= 12 &amp;&amp; likelihood * impact &lt; 20}
+      </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    
+    <bpmn:sequenceFlow id="Flow_Medium" sourceRef="Gateway_RiskLevel" targetRef="Task_ScheduleMonitoring">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${likelihood * impact >= 6 &amp;&amp; likelihood * impact &lt; 12}
+      </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    
+    <bpmn:sequenceFlow id="Flow_Low" sourceRef="Gateway_RiskLevel" targetRef="Task_AcceptRisk">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${likelihood * impact &lt; 6}
+      </bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    
+    <bpmn:sequenceFlow id="Flow_Mitigation" sourceRef="Task_MitigationPlan" targetRef="Task_Implement" />
+    <bpmn:sequenceFlow id="Flow_Escalate_End" sourceRef="Task_Escalate" targetRef="EndEvent_Escalated" />
+    <bpmn:sequenceFlow id="Flow_Implement_End" sourceRef="Task_Implement" targetRef="EndEvent_Mitigated" />
+    <bpmn:sequenceFlow id="Flow_Monitor_End" sourceRef="Task_ScheduleMonitoring" targetRef="EndEvent_Monitored" />
+    <bpmn:sequenceFlow id="Flow_Accept_End" sourceRef="Task_AcceptRisk" targetRef="EndEvent_Accepted" />
+    
+  </bpmn:process>
+</bpmn:definitions>

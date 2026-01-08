@@ -373,12 +373,16 @@ namespace GrcMvc.Services.Implementations
                 // 6. Setup workspace features
                 await SetupWorkspaceFeaturesAsync(tenantId, result.WorkspaceId.Value, createdBy);
 
+                // 7. Auto-provision evidence requirements based on sector
+                result.EvidenceRequirementsCreated = await ProvisionEvidenceRequirementsAsync(tenantId, createdBy);
+
                 // Update tenant status
                 tenant.OnboardingStatus = "COMPLETED";
                 tenant.OnboardingCompletedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                _logger.LogInformation("Onboarding provisioning completed for tenant {TenantId}", tenantId);
+                _logger.LogInformation("Onboarding provisioning completed for tenant {TenantId} with {EvidenceCount} evidence requirements", 
+                    tenantId, result.EvidenceRequirementsCreated);
             }
             catch (Exception ex)
             {
@@ -388,6 +392,114 @@ namespace GrcMvc.Services.Implementations
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Auto-provision evidence requirements based on tenant's organization profile sector
+        /// </summary>
+        private async Task<int> ProvisionEvidenceRequirementsAsync(Guid tenantId, string createdBy)
+        {
+            try
+            {
+                // Get organization profile to determine sector
+                var profile = await _context.OrganizationProfiles.FirstOrDefaultAsync(p => p.TenantId == tenantId);
+                if (profile == null || string.IsNullOrEmpty(profile.Sector))
+                {
+                    _logger.LogWarning("No organization profile or sector found for tenant {TenantId}, skipping evidence provisioning", tenantId);
+                    return 0;
+                }
+
+                // Get default workspace
+                var workspace = await _context.Workspaces
+                    .FirstOrDefaultAsync(w => w.TenantId == tenantId && w.IsDefault && !w.IsDeleted);
+
+                // Get sector-framework mappings
+                var sectorMappings = await _context.SectorFrameworkIndexes
+                    .Where(s => s.SectorCode.ToUpper() == profile.Sector.ToUpper() && s.IsActive && s.IsMandatory)
+                    .OrderBy(s => s.Priority)
+                    .ToListAsync();
+
+                if (sectorMappings.Count == 0)
+                {
+                    _logger.LogInformation("No sector framework mappings found for sector {Sector}", profile.Sector);
+                    return 0;
+                }
+
+                // Get existing requirements to avoid duplicates
+                var existingKeys = await _context.TenantEvidenceRequirements
+                    .Where(r => r.TenantId == tenantId)
+                    .Select(r => $"{r.FrameworkCode}|{r.ControlNumber}|{r.EvidenceTypeCode}")
+                    .ToListAsync();
+                var existingSet = existingKeys.ToHashSet();
+
+                var newRequirements = new List<TenantEvidenceRequirement>();
+
+                foreach (var mapping in sectorMappings)
+                {
+                    // Get controls for this framework
+                    var controls = await _context.FrameworkControls
+                        .Where(c => c.FrameworkCode == mapping.FrameworkCode && !string.IsNullOrEmpty(c.EvidenceRequirements))
+                        .Select(c => new { c.ControlNumber, c.EvidenceRequirements })
+                        .Take(50) // Limit to top 50 controls per framework for initial provisioning
+                        .ToListAsync();
+
+                    foreach (var control in controls)
+                    {
+                        var evidenceTypes = control.EvidenceRequirements.Split('|')
+                            .Where(e => !string.IsNullOrWhiteSpace(e))
+                            .Select(e => e.Trim())
+                            .Distinct();
+
+                        foreach (var evidenceType in evidenceTypes)
+                        {
+                            var key = $"{mapping.FrameworkCode}|{control.ControlNumber}|{evidenceType}";
+                            if (existingSet.Contains(key))
+                                continue;
+
+                            // Get scoring criteria
+                            var criteria = await _context.EvidenceScoringCriteria
+                                .FirstOrDefaultAsync(c => c.EvidenceTypeName.Contains(evidenceType) && c.IsActive);
+
+                            var requirement = new TenantEvidenceRequirement
+                            {
+                                Id = Guid.NewGuid(),
+                                TenantId = tenantId,
+                                EvidenceTypeCode = evidenceType.Replace(" ", "_").ToUpper(),
+                                EvidenceTypeName = evidenceType,
+                                FrameworkCode = mapping.FrameworkCode,
+                                ControlNumber = control.ControlNumber,
+                                MinimumScore = criteria?.MinimumScore ?? 70,
+                                CollectionFrequency = criteria?.CollectionFrequency ?? "Annual",
+                                DefaultValidityDays = criteria?.DefaultValidityDays ?? 365,
+                                Status = "NotStarted",
+                                DueDate = DateTime.UtcNow.AddDays(90), // Default 90 days
+                                WorkspaceId = workspace?.Id,
+                                CreatedDate = DateTime.UtcNow,
+                                CreatedBy = createdBy
+                            };
+
+                            newRequirements.Add(requirement);
+                            existingSet.Add(key);
+                        }
+                    }
+                }
+
+                if (newRequirements.Count > 0)
+                {
+                    await _context.TenantEvidenceRequirements.AddRangeAsync(newRequirements);
+                    await _context.SaveChangesAsync();
+                }
+
+                _logger.LogInformation("Provisioned {Count} evidence requirements for tenant {TenantId} in sector {Sector}",
+                    newRequirements.Count, tenantId, profile.Sector);
+
+                return newRequirements.Count;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error provisioning evidence requirements for tenant {TenantId}", tenantId);
+                return 0;
+            }
         }
 
         /// <summary>

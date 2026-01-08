@@ -55,6 +55,9 @@ public class ApplicationInitializer
             // Seed Workflow Definitions (STAGE 2)
             await WorkflowDefinitionSeeds.SeedWorkflowDefinitionsAsync(_context, _logger);
 
+            // Seed Comprehensive Derivation Rules (50+ rules for KSA GRC)
+            await DerivationRulesSeeds.SeedAsync(_context, _logger);
+
             // Seed RBAC System (Permissions, Features, Roles, Mappings) - MUST be before user seeding
             var defaultTenant = await _context.Tenants.FirstOrDefaultAsync(t => t.TenantSlug == "default" && !t.IsDeleted);
             if (defaultTenant != null)
@@ -62,11 +65,12 @@ public class ApplicationInitializer
                 using var scope = _serviceProvider.CreateScope();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 await RbacSeeds.SeedRbacSystemAsync(_context, roleManager, defaultTenant.Id, _logger);
-                
+
                 // Seed GRC Policy Enforcement Roles (8 baseline roles)
+                // Uses RoleManager API to add permission claims to AspNetRoleClaims
                 using var grcScope = _serviceProvider.CreateScope();
                 var grcLogger = grcScope.ServiceProvider.GetRequiredService<ILogger<GrcRoleDataSeedContributor>>();
-                var grcRoleSeeder = new GrcRoleDataSeedContributor(roleManager, _context, grcLogger);
+                var grcRoleSeeder = new GrcRoleDataSeedContributor(roleManager, grcLogger);
                 await grcRoleSeeder.SeedAsync();
             }
 
@@ -75,6 +79,13 @@ public class ApplicationInitializer
 
             // Seed Platform Admin (Dooganlap@gmail.com as Owner)
             await PlatformAdminSeeds.SeedPlatformAdminAsync(_context, _userManager, _logger);
+
+            // Create Ahmet Dogan user (Platform Admin)
+            await CreateAhmetDoganUser.CreateUserAsync(_userManager, _context, _logger);
+
+            // Seed AI Agent Team (Dr. Dogan's AI Team) - 12 registered agents with roles and permissions
+            _logger.LogInformation("🤖 Seeding AI Agent Team (Dr. Dogan's Team)...");
+            await AiAgentTeamSeeds.SeedAsync(_context);
 
             _logger.LogInformation("✅ Application initialization completed successfully");
         }
