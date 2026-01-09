@@ -1,5 +1,7 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> L
 @{
-    ViewData["Title"] = "سياسة الخصوصية - شاهين";
+    ViewData["Title"] = L["Landing_Privacy"].Value;
     Layout = "~/Views/Landing/_LandingLayout.cshtml";
 }
 
@@ -9,13 +11,13 @@
         <div class="container text-center">
             <div class="section-badge fade-up">
                 <i class="bi bi-shield-lock"></i>
-                <span>الخصوصية والأمان</span>
+                <span>@L["Landing_PrivacyAndSecurity"]</span>
             </div>
-            <h1 class="display-4 mb-3 fade-up" style="font-weight: 800;">خصوصيتك أولويتنا</h1>
+            <h1 class="display-4 mb-3 fade-up" style="font-weight: 800;">@L["Landing_PrivacyTitle"]</h1>
             <p class="lead text-muted mb-4 fade-up" style="max-width: 700px; margin: 0 auto;">
-                نلتزم بأعلى معايير حماية البيانات وفقاً للأنظمة السعودية والدولية
+                @L["Landing_PrivacySubtitle"]
             </p>
-            <p class="fade-up" style="color: var(--text-secondary);">آخر تحديث: يناير 2026</p>
+            <p class="fade-up" style="color: var(--text-secondary);">@L["Landing_LastUpdated"] @DateTime.Now.ToString("MMMM yyyy", new System.Globalization.CultureInfo("en-US"))</p>
         </div>
     </section>
 

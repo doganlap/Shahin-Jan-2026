@@ -1,6 +1,8 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> L
 @model GrcMvc.Models.DTOs.UpdateRiskDto
 @{
-    ViewData["Title"] = "Edit Risk";
+    ViewData["Title"] = L["Risk_Edit"].Value;
     Layout = "_Layout";
 }
 

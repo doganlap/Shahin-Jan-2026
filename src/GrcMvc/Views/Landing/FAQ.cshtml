@@ -1,6 +1,8 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> L
 @model GrcMvc.Controllers.FaqViewModel
 @{
-    ViewData["Title"] = "الأسئلة المتكررة - FAQ";
+    ViewData["Title"] = L["Landing_FAQ"].Value;
     Layout = "_LandingLayout";
 }
 
@@ -9,11 +11,11 @@
         <div class="section-header fade-up">
             <div class="section-badge">
                 <i class="bi bi-question-circle"></i>
-                <span>الأسئلة المتكررة</span>
+                <span>@L["Landing_FAQ"]</span>
             </div>
-            <h1 class="section-title">كيف يمكننا مساعدتك؟</h1>
+            <h1 class="section-title">@L["Landing_FAQTitle"]</h1>
             <p class="section-subtitle">
-                إجابات على أكثر الأسئلة شيوعاً حول منصة شاهين
+                @L["Landing_FAQSubtitle"]
             </p>
         </div>
 
@@ -21,7 +23,7 @@
         {
             <!-- FAQ Categories -->
             <div class="faq-categories fade-up" style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-bottom: 3rem;">
-                <button class="faq-filter active" data-category="all">الكل</button>
+                <button class="faq-filter active" data-category="all">@L["Landing_All"]</button>
                 @foreach (var category in Model.Faqs.Select(f => f.Category).Distinct())
                 {
                     <button class="faq-filter" data-category="@category">

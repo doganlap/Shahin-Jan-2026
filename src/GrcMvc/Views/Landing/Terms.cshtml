@@ -1,5 +1,7 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> L
 @{
-    ViewData["Title"] = "الشروط والأحكام - شاهين";
+    ViewData["Title"] = L["Landing_Terms"].Value;
     Layout = "~/Views/Landing/_LandingLayout.cshtml";
 }
 
@@ -9,13 +11,13 @@
         <div class="container text-center">
             <div class="section-badge fade-up">
                 <i class="bi bi-file-earmark-text"></i>
-                <span>الاتفاقية القانونية</span>
+                <span>@L["Landing_LegalAgreement"]</span>
             </div>
-            <h1 class="display-4 mb-3 fade-up" style="font-weight: 800;">الشروط والأحكام</h1>
+            <h1 class="display-4 mb-3 fade-up" style="font-weight: 800;">@L["Landing_TermsTitle"]</h1>
             <p class="lead text-muted mb-4 fade-up" style="max-width: 700px; margin: 0 auto;">
-                اتفاقية استخدام منصة شاهين لإدارة الحوكمة والمخاطر والامتثال
+                @L["Landing_TermsSubtitle"]
             </p>
-            <p class="fade-up" style="color: var(--text-secondary);">آخر تحديث: يناير 2026</p>
+            <p class="fade-up" style="color: var(--text-secondary);">@L["Landing_LastUpdated"] @DateTime.Now.ToString("MMMM yyyy", new System.Globalization.CultureInfo("en-US"))</p>
         </div>
     </section>
 

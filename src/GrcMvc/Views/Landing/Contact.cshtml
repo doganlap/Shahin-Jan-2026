@@ -1,9 +1,11 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> L
 @using GrcMvc.Services
 @using GrcMvc.Services.Interfaces
 @inject IAppInfoService AppInfo
 @inject ISiteSettingsService SiteSettings
 @{
-    ViewData["Title"] = "تواصل معنا - " + AppInfo.Name;
+    ViewData["Title"] = L["Landing_Contact"].Value + " - " + AppInfo.Name;
     Layout = "_LandingLayout";
 }
 
@@ -12,22 +14,22 @@
         <div class="section-header fade-up">
             <div class="section-badge">
                 <i class="bi bi-chat-dots"></i>
-                <span>تواصل معنا</span>
+                <span>@L["Landing_Contact"]</span>
             </div>
-            <h1 class="section-title">نحب أن نسمع منك</h1>
+            <h1 class="section-title">@L["Landing_ContactTitle"]</h1>
             <p class="section-subtitle">
-                سواء كان لديك سؤال، اقتراح، أو ترغب في معرفة المزيد عن خدماتنا، فريقنا جاهز لمساعدتك.
+                @L["Landing_ContactSubtitle"]
             </p>
         </div>
 
         <div class="contact-content fade-up">
             <div class="contact-info">
-                <h3>طرق التواصل</h3>
+                <h3>@L["Landing_ContactMethods"]</h3>
 
                 <div class="contact-item">
                     <div class="contact-icon"><i class="bi bi-envelope"></i></div>
                     <div class="contact-details">
-                        <h4>البريد الإلكتروني</h4>
+                        <h4>@L["Landing_Email"]</h4>
                         <p>info@shahin-ai.com</p>
                         <p>support@shahin-ai.com</p>
                     </div>

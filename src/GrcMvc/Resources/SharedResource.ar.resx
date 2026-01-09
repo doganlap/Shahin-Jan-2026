@@ -2198,4 +2198,202 @@
   <data name="Landing_ShahinDesignedForSaudi" xml:space="preserve">
     <value>منصة شاهين مصممة خصيصاً للسوق السعودي مع تقنيات متقدمة لا تجدها في أي منصة أخرى</value>
   </data>
+  <data name="Landing_Contact" xml:space="preserve">
+    <value>تواصل معنا</value>
+  </data>
+  <data name="Landing_ContactTitle" xml:space="preserve">
+    <value>نحب أن نسمع منك</value>
+  </data>
+  <data name="Landing_ContactSubtitle" xml:space="preserve">
+    <value>سواء كان لديك سؤال، اقتراح، أو ترغب في معرفة المزيد عن خدماتنا، فريقنا جاهز لمساعدتك.</value>
+  </data>
+  <data name="Landing_ContactMethods" xml:space="preserve">
+    <value>طرق التواصل</value>
+  </data>
+  <data name="Landing_Email" xml:space="preserve">
+    <value>البريد الإلكتروني</value>
+  </data>
+  <data name="Landing_FAQ" xml:space="preserve">
+    <value>الأسئلة المتكررة</value>
+  </data>
+  <data name="Landing_FAQTitle" xml:space="preserve">
+    <value>كيف يمكننا مساعدتك؟</value>
+  </data>
+  <data name="Landing_FAQSubtitle" xml:space="preserve">
+    <value>إجابات على أكثر الأسئلة شيوعاً حول منصة شاهين</value>
+  </data>
+  <data name="Landing_All" xml:space="preserve">
+    <value>الكل</value>
+  </data>
+  <data name="Landing_Terms" xml:space="preserve">
+    <value>الشروط والأحكام</value>
+  </data>
+  <data name="Landing_TermsTitle" xml:space="preserve">
+    <value>الشروط والأحكام</value>
+  </data>
+  <data name="Landing_TermsSubtitle" xml:space="preserve">
+    <value>اتفاقية استخدام منصة شاهين لإدارة الحوكمة والمخاطر والامتثال</value>
+  </data>
+  <data name="Landing_LastUpdated" xml:space="preserve">
+    <value>آخر تحديث:</value>
+  </data>
+  <data name="Landing_Privacy" xml:space="preserve">
+    <value>سياسة الخصوصية</value>
+  </data>
+  <data name="Landing_PrivacyTitle" xml:space="preserve">
+    <value>خصوصيتك أولويتنا</value>
+  </data>
+  <data name="Landing_PrivacySubtitle" xml:space="preserve">
+    <value>نلتزم بأعلى معايير حماية البيانات وفقاً للأنظمة السعودية والدولية</value>
+  </data>
+  <data name="Landing_PrivacyAndSecurity" xml:space="preserve">
+    <value>الخصوصية والأمان</value>
+  </data>
+  <data name="Landing_LegalAgreement" xml:space="preserve">
+    <value>الاتفاقية القانونية</value>
+  </data>
+  <data name="Risk_Create" xml:space="preserve">
+    <value>إنشاء مخاطرة</value>
+  </data>
+  <data name="Risk_CreateNew" xml:space="preserve">
+    <value>إنشاء مخاطرة جديدة</value>
+  </data>
+  <data name="Risk_Edit" xml:space="preserve">
+    <value>تعديل المخاطرة</value>
+  </data>
+  <data name="Risk_Details" xml:space="preserve">
+    <value>تفاصيل المخاطرة</value>
+  </data>
+  <data name="Risk_Delete" xml:space="preserve">
+    <value>حذف المخاطرة</value>
+  </data>
+  <data name="Risk_DeleteWarning" xml:space="preserve">
+    <value>تحذير! هل أنت متأكد من حذف هذه المخاطرة؟ لا يمكن التراجع عن هذا الإجراء.</value>
+  </data>
+  <data name="Risk_SelectCategory" xml:space="preserve">
+    <value>اختر الفئة</value>
+  </data>
+  <data name="Risk_Category_Financial" xml:space="preserve">
+    <value>مالي</value>
+  </data>
+  <data name="Risk_Category_Operational" xml:space="preserve">
+    <value>تشغيلي</value>
+  </data>
+  <data name="Risk_Category_Strategic" xml:space="preserve">
+    <value>استراتيجي</value>
+  </data>
+  <data name="Risk_Category_Compliance" xml:space="preserve">
+    <value>امتثال</value>
+  </data>
+  <data name="Risk_Category_Reputational" xml:space="preserve">
+    <value>سمعة</value>
+  </data>
+  <data name="Risk_Category_Technology" xml:space="preserve">
+    <value>تقنية</value>
+  </data>
+  <data name="Risk_Category_Security" xml:space="preserve">
+    <value>أمن</value>
+  </data>
+  <data name="Risk_Probability_VeryLow" xml:space="preserve">
+    <value>منخفض جداً (1)</value>
+  </data>
+  <data name="Risk_Probability_Low" xml:space="preserve">
+    <value>منخفض (2)</value>
+  </data>
+  <data name="Risk_Probability_Medium" xml:space="preserve">
+    <value>متوسط (3)</value>
+  </data>
+  <data name="Risk_Probability_High" xml:space="preserve">
+    <value>عالي (4)</value>
+  </data>
+  <data name="Risk_Probability_VeryHigh" xml:space="preserve">
+    <value>عالي جداً (5)</value>
+  </data>
+  <data name="Risk_Impact_Negligible" xml:space="preserve">
+    <value>ضئيل (1)</value>
+  </data>
+  <data name="Risk_Impact_Minor" xml:space="preserve">
+    <value>بسيط (2)</value>
+  </data>
+  <data name="Risk_Impact_Moderate" xml:space="preserve">
+    <value>متوسط (3)</value>
+  </data>
+  <data name="Risk_Impact_Major" xml:space="preserve">
+    <value>كبير (4)</value>
+  </data>
+  <data name="Risk_Impact_Catastrophic" xml:space="preserve">
+    <value>كارثي (5)</value>
+  </data>
+  <data name="Risk_MitigationStrategy" xml:space="preserve">
+    <value>استراتيجية التخفيف</value>
+  </data>
+  <data name="Risk_Owner" xml:space="preserve">
+    <value>المالك</value>
+  </data>
+  <data name="Risk_DueDate" xml:space="preserve">
+    <value>تاريخ الاستحقاق</value>
+  </data>
+  <data name="Risk_BackToList" xml:space="preserve">
+    <value>العودة إلى القائمة</value>
+  </data>
+  <data name="Risk_YesDelete" xml:space="preserve">
+    <value>نعم، احذف</value>
+  </data>
+  <data name="Risk_Overdue" xml:space="preserve">
+    <value>متأخر</value>
+  </data>
+  <data name="Risk_NotSet" xml:space="preserve">
+    <value>غير محدد</value>
+  </data>
+  <data name="Risk_CreatedDate" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="Risk_LastModified" xml:space="preserve">
+    <value>آخر تعديل</value>
+  </data>
+  <data name="Risk_RiskPosition" xml:space="preserve">
+    <value>موقع المخاطرة</value>
+  </data>
+  <data name="Risk_AddControl" xml:space="preserve">
+    <value>إضافة ضابط</value>
+  </data>
+  <data name="Risk_ScheduleAssessment" xml:space="preserve">
+    <value>جدولة تقييم</value>
+  </data>
+  <data name="Risk_GenerateReport" xml:space="preserve">
+    <value>إنشاء تقرير</value>
+  </data>
+  <data name="Risk_RiskId" xml:space="preserve">
+    <value>معرف المخاطرة:</value>
+  </data>
+  <data name="Risk_RiskName" xml:space="preserve">
+    <value>اسم المخاطرة:</value>
+  </data>
+  <data name="Risk_RiskOwner" xml:space="preserve">
+    <value>مالك المخاطرة:</value>
+  </data>
+  <data name="Risk_InherentRiskScore" xml:space="preserve">
+    <value>نقاط المخاطرة الفطرية:</value>
+  </data>
+  <data name="Risk_ResidualRiskScore" xml:space="preserve">
+    <value>نقاط المخاطرة المتبقية:</value>
+  </data>
+  <data name="Risk_Unknown" xml:space="preserve">
+    <value>غير معروف</value>
+  </data>
+  <data name="Risk_VeryLowRisk" xml:space="preserve">
+    <value>مخاطرة منخفضة جداً</value>
+  </data>
+  <data name="Risk_LowRisk" xml:space="preserve">
+    <value>مخاطرة منخفضة</value>
+  </data>
+  <data name="Risk_MediumRisk" xml:space="preserve">
+    <value>مخاطرة متوسطة</value>
+  </data>
+  <data name="Risk_HighRisk" xml:space="preserve">
+    <value>مخاطرة عالية</value>
+  </data>
+  <data name="Risk_CriticalRisk" xml:space="preserve">
+    <value>مخاطرة حرجة</value>
+  </data>
 </root>
