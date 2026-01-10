@@ -4,20 +4,24 @@ import { motion } from "framer-motion"
 import { ArrowLeft, Shield, CheckCircle, Zap, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useTranslations } from 'next-intl'
 
-const stats = [
-  { label: "عميل نشط", value: "500+", icon: Globe },
-  { label: "نسبة الامتثال", value: "99.2%", icon: CheckCircle },
-  { label: "إطار تنظيمي", value: "50+", icon: Shield },
-  { label: "توفير الوقت", value: "80%", icon: Zap },
+const statsConfig = [
+  { key: "clients", value: "500+", icon: Globe },
+  { key: "compliance_rate", value: "99.2%", icon: CheckCircle },
+  { key: "frameworks", value: "50+", icon: Shield },
+  { key: "time_saved", value: "80%", icon: Zap },
 ]
 
 export function Hero() {
+  const t = useTranslations('landing.hero')
+  const tStats = useTranslations('landing.stats')
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 hero-gradient" />
-      
+
       {/* Animated Circles */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
@@ -46,7 +50,7 @@ export function Hero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
               </span>
-              منصة الحوكمة والمخاطر والامتثال الأولى في المملكة
+              {t('badge')}
             </span>
           </motion.div>
 
@@ -57,10 +61,10 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            إدارة الامتثال{" "}
-            <span className="text-gradient">بذكاء اصطناعي</span>
+            {t('title')}{" "}
+            <span className="text-gradient">{t('ai_powered')}</span>
             <br />
-            للمؤسسات السعودية
+            {t('subtitle')}
           </motion.h1>
 
           {/* Description */}
@@ -70,8 +74,7 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            منصة متكاملة لإدارة الحوكمة والمخاطر والامتثال مع دعم كامل للأطر التنظيمية السعودية
-            ومعايير الأمن السيبراني الوطنية
+            {t('description')}
           </motion.p>
 
           {/* CTA Buttons */}
@@ -83,13 +86,13 @@ export function Hero() {
           >
             <Link href="/trial">
               <Button variant="gradient" size="xl" className="group">
-                ابدأ تجربتك المجانية
+                {t('cta_primary')}
                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
               </Button>
             </Link>
             <Link href="/demo">
               <Button variant="outline" size="xl">
-                احجز عرض توضيحي
+                {t('cta_secondary')}
               </Button>
             </Link>
           </motion.div>
@@ -101,9 +104,9 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
           >
-            {stats.map((stat, index) => (
+            {statsConfig.map((stat, index) => (
               <motion.div
-                key={stat.label}
+                key={stat.key}
                 className="stat-card text-center"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -114,7 +117,7 @@ export function Hero() {
                   {stat.value}
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {stat.label}
+                  {tStats(stat.key)}
                 </div>
               </motion.div>
             ))}

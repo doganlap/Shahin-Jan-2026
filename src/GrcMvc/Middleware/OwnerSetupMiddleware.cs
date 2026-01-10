@@ -22,17 +22,26 @@ namespace GrcMvc.Middleware
             RequestDelegate next,
             ILogger<OwnerSetupMiddleware> logger)
         {
+            // #region agent log
+            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "K", location = "OwnerSetupMiddleware.cs:21", message = "OwnerSetupMiddleware constructor", data = new { nextExists = next != null, loggerExists = logger != null, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
             _next = next;
             _logger = logger;
+            _logger.LogDebug("OwnerSetupMiddleware initialized");
         }
 
         public async Task InvokeAsync(HttpContext context, IOwnerSetupService ownerSetupService)
         {
+            // #region agent log
+            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "K", location = "OwnerSetupMiddleware.cs:32", message = "InvokeAsync entry", data = new { path = context.Request.Path.Value, method = context.Request.Method, ownerSetupServiceExists = ownerSetupService != null, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch (Exception logEx) { _logger.LogError(logEx, "Failed to write debug log at InvokeAsync entry"); }
+            // #endregion
             var path = context.Request.Path.Value?.ToLower() ?? "";
 
             // #region agent log
-            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "A", location = "OwnerSetupMiddleware.cs:31", message = "OwnerSetupMiddleware entry", data = new { path = path, method = context.Request.Method, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "K", location = "OwnerSetupMiddleware.cs:37", message = "After path lowercasing", data = new { path = path, originalPath = context.Request.Path.Value, pathLength = path.Length, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch (Exception logEx) { _logger.LogError(logEx, "Failed to write debug log after path lowercasing"); }
             // #endregion
+
+            _logger.LogDebug("OwnerSetupMiddleware processing path: {Path}", path);
 
             // Skip middleware for:
             // - OwnerSetup controller (to avoid redirect loop) - case insensitive
@@ -41,7 +50,7 @@ namespace GrcMvc.Middleware
             // - API endpoints
             // - Health checks
             // Path is already lowercased above, so simple string comparison works
-            if (path.StartsWith("/ownersetup") ||
+            bool shouldSkip = path.StartsWith("/ownersetup") ||
                 path == "/" ||
                 path == "/home" ||
                 path.StartsWith("/landing/") ||
@@ -61,11 +70,15 @@ namespace GrcMvc.Middleware
                 path.StartsWith("/lib/") ||
                 path.StartsWith("/images/") ||
                 path.StartsWith("/health") ||
-                path == "/favicon.ico")
+                path == "/favicon.ico";
+
+            // #region agent log
+            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "K", location = "OwnerSetupMiddleware.cs:65", message = "Path skip check result", data = new { path = path, shouldSkip = shouldSkip, pathEqualsSlash = path == "/", pathStartsWithOwnersetup = path.StartsWith("/ownersetup"), timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch (Exception logEx) { _logger.LogError(logEx, "Failed to write debug log for skip check"); }
+            // #endregion
+
+            if (shouldSkip)
             {
-                // #region agent log
-                try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "A", location = "OwnerSetupMiddleware.cs:64", message = "OwnerSetupMiddleware skipping", data = new { path = path, skipped = true, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-                // #endregion
+                _logger.LogDebug("OwnerSetupMiddleware skipping path: {Path}", path);
                 await _next(context);
                 return;
             }
@@ -77,30 +90,21 @@ namespace GrcMvc.Middleware
                 if (_ownerExistsCache.HasValue && DateTime.UtcNow < _cacheExpiry)
                 {
                     ownerExists = _ownerExistsCache.Value;
+                    _logger.LogDebug("Owner existence from cache: {OwnerExists}", ownerExists);
                 }
                 else
                 {
-                    // #region agent log
-                    try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "A", location = "OwnerSetupMiddleware.cs:82", message = "Before OwnerExistsAsync check", data = new { path = path, cacheExpired = true, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-                    // #endregion
-                    _logger.LogDebug("Checking owner existence in middleware for path: {Path}", path);
-
+                    _logger.LogDebug("Checking owner existence in database for path: {Path}", path);
                     ownerExists = await ownerSetupService.OwnerExistsAsync();
-                    // #region agent log
-                    try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "A", location = "OwnerSetupMiddleware.cs:87", message = "OwnerExistsAsync result", data = new { path = path, ownerExists = ownerExists, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-                    // #endregion
                     _ownerExistsCache = ownerExists;
                     _cacheExpiry = DateTime.UtcNow.Add(CacheDuration);
+                    _logger.LogDebug("Owner existence check result: {OwnerExists}", ownerExists);
                 }
 
                 // If no owner exists and user is not already on setup page, redirect
                 if (!ownerExists && !path.StartsWith("/account/login"))
                 {
-                    // #region agent log
-                    try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "A", location = "OwnerSetupMiddleware.cs:92", message = "Redirecting to OwnerSetup", data = new { path = path, ownerExists = ownerExists, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-                    // #endregion
                     _logger.LogInformation("Redirecting to owner setup page. Path: {Path}, OwnerExists: {OwnerExists}", path, ownerExists);
-
                     context.Response.Redirect("/OwnerSetup");
                     return;
                 }
@@ -113,7 +117,7 @@ namespace GrcMvc.Middleware
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in OwnerSetupMiddleware");
+                _logger.LogError(ex, "Error in OwnerSetupMiddleware for path: {Path}", path);
                 // On error, continue to next middleware (don't block the app)
             }
 

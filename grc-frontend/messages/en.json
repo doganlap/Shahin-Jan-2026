@@ -61,7 +61,9 @@
   },
   "landing": {
     "hero": {
-      "title": "AI-Powered Compliance Management",
+      "badge": "Saudi Arabia's Leading GRC Platform",
+      "title": "Compliance Management",
+      "ai_powered": "AI-Powered",
       "subtitle": "For Saudi Enterprises",
       "description": "Comprehensive platform for Governance, Risk, and Compliance management with full support for Saudi regulatory frameworks and national cybersecurity standards",
       "cta_primary": "Start Free Trial",
@@ -74,8 +76,10 @@
       "time_saved": "Time Saved"
     },
     "features": {
+      "sectionLabel": "Features",
       "title": "Everything You Need in One Platform",
       "subtitle": "Comprehensive GRC platform with integrated tools for all your organization's requirements",
+      "learnMore": "Learn More",
       "compliance": {
         "title": "Compliance Management",
         "description": "Complete compliance tracking with all Saudi and international regulatory frameworks"
@@ -99,23 +103,70 @@
       "vendors": {
         "title": "Vendor Management",
         "description": "Assess and monitor third-party and vendor risks"
+      },
+      "notifications": {
+        "title": "Smart Alerts",
+        "description": "Automated notifications and alerts for deadlines and pending tasks"
+      },
+      "actionPlans": {
+        "title": "Action Plans",
+        "description": "Manage and track remediation and continuous improvement plans"
+      },
+      "frameworks": {
+        "title": "Regulatory Frameworks",
+        "description": "Comprehensive library of Saudi and international regulatory frameworks"
+      },
+      "security": {
+        "title": "Advanced Security",
+        "description": "Advanced encryption and multi-level access control"
+      },
+      "integration": {
+        "title": "Integration",
+        "description": "Easy integration with existing systems and cybersecurity tools"
+      },
+      "dashboards": {
+        "title": "Dashboards",
+        "description": "Interactive dashboards with advanced reports and charts"
       }
     },
-    "regulators": {
-      "title": "Full Support for Saudi Regulatory Requirements",
-      "subtitle": "Compliant with all regulatory frameworks and standards issued by Saudi government entities"
-    },
     "testimonials": {
+      "sectionLabel": "Client Reviews",
       "title": "What Our Clients Say",
       "subtitle": "Proud to be trusted by over 500 Saudi organizations"
     },
     "cta": {
+      "badge": "Limited Time Offer",
       "title": "Start Your Compliance Journey Today",
       "subtitle": "Join over 500 Saudi organizations that trust Shahin for compliance and risk management",
       "benefit_1": "14-day free trial",
       "benefit_2": "No credit card required",
       "benefit_3": "Arabic language support",
-      "benefit_4": "Quick setup in minutes"
+      "benefit_4": "Quick setup in minutes",
+      "cta_primary": "Start Free Trial",
+      "cta_secondary": "Talk to Sales Team"
+    },
+    "statsSec": {
+      "regulators": {
+        "label": "Regulatory Bodies",
+        "description": "Local and International"
+      },
+      "frameworks_count": {
+        "label": "Regulatory Frameworks",
+        "description": "Certified and Updated"
+      },
+      "controls": {
+        "label": "Control Measures",
+        "description": "Ready to Apply"
+      },
+      "ai_agents": {
+        "label": "AI Agents",
+        "description": "Specialized"
+      }
+    },
+    "regulators": {
+      "sectionLabel": "Regulatory Frameworks",
+      "title": "Full Support for Saudi Regulatory Requirements",
+      "subtitle": "Compliant with all regulatory frameworks and standards issued by Saudi government entities"
     }
   },
   "dashboard": {

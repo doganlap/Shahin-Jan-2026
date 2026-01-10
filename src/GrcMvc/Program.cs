@@ -285,6 +285,9 @@ builder.Services.AddFluentValidationClientsideAdapters();
 // Register validators
 builder.Services.AddValidatorsFromAssemblyContaining<CreateRiskDtoValidator>();
 
+// Register API Exception Filter (ASP.NET/ABP best practice for consistent error responses)
+builder.Services.AddScoped<GrcMvc.Filters.ApiExceptionFilterAttribute>();
+
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -802,6 +805,18 @@ builder.Services.AddScoped<IMenuService, MenuService>();
 // builder.Services.AddScoped<IAuthenticationService, AuthenticationService>(); // OLD: Mock implementation
 builder.Services.AddScoped<IAuthenticationService, IdentityAuthenticationService>(); // NEW: Identity-based
 builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+
+// Authentication Audit Service (comprehensive security audit logging)
+builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditService>();
+
+// Password History Service (prevents password reuse - GRC compliance)
+builder.Services.AddScoped<IPasswordHistoryService, PasswordHistoryService>();
+
+// Session Management Service (concurrent session limiting - GRC compliance)
+builder.Services.AddScoped<ISessionManagementService, SessionManagementService>();
+
+// CAPTCHA Service (bot protection - GRC compliance)
+builder.Services.AddHttpClient<ICaptchaService, GoogleRecaptchaService>();
 
 // Policy Enforcement System
 builder.Services.AddScoped<GrcMvc.Application.Policy.IPolicyEnforcer, GrcMvc.Application.Policy.PolicyEnforcer>();

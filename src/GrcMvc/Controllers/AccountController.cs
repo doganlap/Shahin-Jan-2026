@@ -15,6 +15,7 @@ using System.Text;
 using System.Security.Claims;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using GrcMvc.Data;
 using GrcMvc.Constants;
 
@@ -32,6 +33,11 @@ namespace GrcMvc.Controllers
         private readonly ITenantService _tenantService;
         private readonly GrcDbContext _context;
         private readonly IAuditEventService? _auditEventService; // MEDIUM FIX: Audit logging for authentication events
+        private readonly IAuthenticationAuditService? _authAuditService; // CRITICAL: Comprehensive authentication audit logging
+        private readonly Data.GrcAuthDbContext? _authContext; // CRITICAL: Auth database context for PasswordHistory
+        private readonly IPasswordHistoryService? _passwordHistoryService; // SECURITY: Password reuse prevention
+        private readonly ISessionManagementService? _sessionManagementService; // SECURITY: Concurrent session limiting
+        private readonly ICaptchaService? _captchaService; // SECURITY: Bot protection
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -43,7 +49,12 @@ namespace GrcMvc.Controllers
             ILogger<AccountController> logger,
             ITenantService tenantService,
             GrcDbContext context,
-            IAuditEventService? auditEventService = null) // Optional for backward compatibility
+            IAuditEventService? auditEventService = null, // Optional for backward compatibility
+            IAuthenticationAuditService? authAuditService = null, // CRITICAL: Authentication audit service
+            Data.GrcAuthDbContext? authContext = null, // CRITICAL: Auth database context
+            IPasswordHistoryService? passwordHistoryService = null, // SECURITY: Password reuse prevention
+            ISessionManagementService? sessionManagementService = null, // SECURITY: Concurrent session limiting
+            ICaptchaService? captchaService = null) // SECURITY: Bot protection
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -55,6 +66,11 @@ namespace GrcMvc.Controllers
             _tenantService = tenantService;
             _context = context;
             _auditEventService = auditEventService;
+            _authAuditService = authAuditService;
+            _authContext = authContext;
+            _passwordHistoryService = passwordHistoryService;
+            _sessionManagementService = sessionManagementService;
+            _captchaService = captchaService;
         }
 
         // GET: Account/Login
@@ -87,14 +103,56 @@ namespace GrcMvc.Controllers
                     var user = await _userManager.FindByEmailAsync(model.Email);
                     if (user != null)
                     {
-                        // MEDIUM PRIORITY FIX: Enhanced logging with IP, user agent, timestamp
+                        // CRITICAL FIX: Enhanced logging with IP, user agent, timestamp
                         var loginIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
                         var loginUserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
                         _logger.LogInformation(
                             "User {Email} (ID: {UserId}) logged in successfully from IP {IpAddress}, UserAgent: {UserAgent}",
                             model.Email, user.Id, loginIpAddress, loginUserAgent);
 
-                        // MEDIUM PRIORITY FIX: Formal audit log entry for successful login
+                        // CRITICAL FIX: Comprehensive authentication audit logging
+                        if (_authAuditService != null)
+                        {
+                            try
+                            {
+                                // Log login attempt (success)
+                                await _authAuditService.LogLoginAttemptAsync(
+                                    userId: user.Id,
+                                    email: model.Email,
+                                    success: true,
+                                    ipAddress: loginIpAddress,
+                                    userAgent: loginUserAgent);
+
+                                // Log authentication event
+                                await _authAuditService.LogAuthenticationEventAsync(new AuthenticationAuditEvent
+                                {
+                                    UserId = user.Id,
+                                    Email = model.Email,
+                                    EventType = "Login",
+                                    Success = true,
+                                    IpAddress = loginIpAddress,
+                                    UserAgent = loginUserAgent,
+                                    Message = $"User {model.Email} logged in successfully",
+                                    Severity = "Info",
+                                    Details = new Dictionary<string, object>
+                                    {
+                                        ["RememberMe"] = model.RememberMe,
+                                        ["TenantId"] = (await _context.TenantUsers
+                                            .FirstOrDefaultAsync(tu => tu.UserId == user.Id && !tu.IsDeleted))?.TenantId.ToString() ?? "N/A"
+                                    }
+                                });
+
+                                // Update LastLoginDate
+                                user.LastLoginDate = DateTime.UtcNow;
+                                await _userManager.UpdateAsync(user);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogWarning(ex, "Failed to log authentication audit event for login");
+                            }
+                        }
+
+                        // MEDIUM PRIORITY FIX: Formal audit log entry for successful login (legacy - keep for backward compatibility)
                         if (_auditEventService != null)
                         {
                             try
@@ -163,7 +221,39 @@ namespace GrcMvc.Controllers
 
                 if (result.IsLockedOut)
                 {
+                    var loginIpAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    var loginUserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                    
                     _logger.LogWarning("User {Email} account locked out.", model.Email);
+                    
+                    // CRITICAL FIX: Log account lockout event
+                    if (_authAuditService != null)
+                    {
+                        try
+                        {
+                            var user = await _userManager.FindByEmailAsync(model.Email);
+                            if (user != null)
+                            {
+                                await _authAuditService.LogAccountLockoutAsync(
+                                    userId: user.Id,
+                                    reason: "Too many failed login attempts",
+                                    ipAddress: loginIpAddress);
+
+                                await _authAuditService.LogLoginAttemptAsync(
+                                    userId: user.Id,
+                                    email: model.Email,
+                                    success: false,
+                                    ipAddress: loginIpAddress,
+                                    userAgent: loginUserAgent,
+                                    failureReason: "Account locked out",
+                                    triggeredLockout: true);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to log account lockout event");
+                        }
+                    }
                     
                     // Send account locked notification
                     try
@@ -190,14 +280,59 @@ namespace GrcMvc.Controllers
                     return RedirectToAction(nameof(LoginWith2fa), new { returnUrl, model.RememberMe });
                 }
 
-                // MEDIUM PRIORITY FIX: Enhanced failed login logging (username, IP, timestamp, user agent)
+                // CRITICAL FIX: Enhanced failed login logging with comprehensive audit trail
                 var failedLoginIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
                 var failedLoginUserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
                 _logger.LogWarning(
                     "Failed login attempt for email {Email} from IP {IpAddress} at {Timestamp}, UserAgent: {UserAgent}",
                     model.Email, failedLoginIp, DateTime.UtcNow, failedLoginUserAgent);
 
-                // MEDIUM PRIORITY FIX: Log failed login to audit trail
+                // CRITICAL FIX: Log failed login attempt to authentication audit system
+                if (_authAuditService != null)
+                {
+                    try
+                    {
+                        var failedUser = await _userManager.FindByEmailAsync(model.Email);
+                        var failureReason = result.IsLockedOut ? "Account locked out" 
+                                    : result.IsNotAllowed ? "Account not allowed" 
+                                    : result.RequiresTwoFactor ? "Two-factor authentication required"
+                                    : "Invalid credentials";
+                        
+                        await _authAuditService.LogLoginAttemptAsync(
+                            userId: failedUser?.Id,
+                            email: model.Email,
+                            success: false,
+                            ipAddress: failedLoginIp,
+                            userAgent: failedLoginUserAgent,
+                            failureReason: failureReason,
+                            triggeredLockout: result.IsLockedOut);
+
+                        await _authAuditService.LogAuthenticationEventAsync(new AuthenticationAuditEvent
+                        {
+                            UserId = failedUser?.Id,
+                            Email = model.Email,
+                            EventType = "FailedLogin",
+                            Success = false,
+                            IpAddress = failedLoginIp,
+                            UserAgent = failedLoginUserAgent,
+                            Message = $"Failed login attempt for {model.Email}: {failureReason}",
+                            Severity = result.IsLockedOut ? "Warning" : "Info",
+                            Details = new Dictionary<string, object>
+                            {
+                                ["FailureReason"] = failureReason,
+                                ["IsLockedOut"] = result.IsLockedOut,
+                                ["IsNotAllowed"] = result.IsNotAllowed,
+                                ["RequiresTwoFactor"] = result.RequiresTwoFactor
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to log authentication audit event for failed login");
+                    }
+                }
+
+                // MEDIUM PRIORITY FIX: Log failed login to audit trail (legacy - keep for backward compatibility)
                 if (_auditEventService != null)
                 {
                     try
@@ -520,20 +655,78 @@ namespace GrcMvc.Controllers
                 return View(model);
             }
 
+            // SECURITY: Check password history to prevent reuse
+            if (_passwordHistoryService != null)
+            {
+                var isInHistory = await _passwordHistoryService.IsPasswordInHistoryAsync(user.Id, model.NewPassword);
+                if (isInHistory)
+                {
+                    ModelState.AddModelError(nameof(model.NewPassword), 
+                        "This password has been used recently. Please choose a different password.");
+                    return View(model);
+                }
+            }
+
+            // CRITICAL FIX: Capture old password hash BEFORE changing password
+            string? oldPasswordHash = user.PasswordHash;
+
             // Change password
             var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
             if (result.Succeeded)
             {
-                // Clear the must change password flag
-                user.MustChangePassword = false;
-                user.LastPasswordChangedAt = DateTime.UtcNow;
-                await _userManager.UpdateAsync(user);
+                // CRITICAL FIX: Store password history and log audit event
+                try
+                {
+                    // Store old password hash in history (captured before change)
+                    if (_authContext != null && !string.IsNullOrEmpty(oldPasswordHash))
+                    {
+                        var passwordHistory = new PasswordHistory
+                        {
+                            UserId = user.Id,
+                            PasswordHash = oldPasswordHash, // Store old hash (captured before change)
+                            ChangedAt = DateTime.UtcNow,
+                            ChangedByUserId = user.Id,
+                            Reason = "First login password change",
+                            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                            UserAgent = HttpContext.Request.Headers["User-Agent"].ToString()
+                        };
+                        _authContext.PasswordHistory.Add(passwordHistory);
+                        await _authContext.SaveChangesAsync();
+                    }
 
-                _logger.LogInformation("User {Email} changed password on first login", user.Email);
-                TempData["SuccessMessage"] = "Password changed successfully. Welcome!";
+                    // Clear the must change password flag and update timestamp
+                    user.MustChangePassword = false;
+                    user.LastPasswordChangedAt = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
 
-                // Process post-login logic (add tenant claim, check onboarding)
-                return await ProcessPostLoginAsync(user, rememberMe: false);
+                    // Log audit event
+                    if (_authAuditService != null)
+                    {
+                        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                        var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                        await _authAuditService.LogPasswordChangeAsync(
+                            userId: user.Id,
+                            changedByUserId: user.Id,
+                            reason: "First login password change",
+                            ipAddress: ipAddress,
+                            userAgent: userAgent);
+                    }
+
+                    _logger.LogInformation("User {Email} changed password on first login", user.Email);
+                    TempData["SuccessMessage"] = "Password changed successfully. Welcome!";
+
+                    // Process post-login logic (add tenant claim, check onboarding)
+                    return await ProcessPostLoginAsync(user, rememberMe: false);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to store password history for user {UserId}", user.Id);
+                    // Continue even if audit logging fails
+                    user.MustChangePassword = false;
+                    user.LastPasswordChangedAt = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+                    return await ProcessPostLoginAsync(user, rememberMe: false);
+                }
             }
 
             foreach (var error in result.Errors)
@@ -626,6 +819,21 @@ namespace GrcMvc.Controllers
                 return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            // SECURITY: Check password history to prevent reuse
+            if (_passwordHistoryService != null)
+            {
+                var isInHistory = await _passwordHistoryService.IsPasswordInHistoryAsync(user.Id, model.NewPassword);
+                if (isInHistory)
+                {
+                    ModelState.AddModelError(nameof(model.NewPassword), 
+                        "This password has been used recently. Please choose a different password.");
+                    return View(model);
+                }
+            }
+
+            // CRITICAL FIX: Capture old password hash BEFORE changing password
+            string? oldPasswordHash = user.PasswordHash;
+
             var changePasswordResult = await _userManager.ChangePasswordAsync(
                 user, model.CurrentPassword, model.NewPassword);
 
@@ -638,16 +846,70 @@ namespace GrcMvc.Controllers
                 return View(model);
             }
 
-            // MEDIUM PRIORITY FIX: Update password change timestamp for expiry tracking
-            user.LastPasswordChangedAt = DateTime.UtcNow;
-            user.MustChangePassword = false;
-            await _userManager.UpdateAsync(user);
+            // CRITICAL FIX: Store password history and log audit event
+            try
+            {
+                // Store old password hash in history (captured before change)
+                if (_authContext != null && !string.IsNullOrEmpty(oldPasswordHash))
+                {
+                    var passwordHistory = new PasswordHistory
+                    {
+                        UserId = user.Id,
+                        PasswordHash = oldPasswordHash, // Store old hash (captured before change)
+                        ChangedAt = DateTime.UtcNow,
+                        ChangedByUserId = user.Id,
+                        Reason = "User initiated",
+                        IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                        UserAgent = HttpContext.Request.Headers["User-Agent"].ToString()
+                    };
+                    _authContext.PasswordHistory.Add(passwordHistory);
+                    await _authContext.SaveChangesAsync();
+                }
 
-            await _signInManager.RefreshSignInAsync(user);
-            _logger.LogInformation("User changed their password successfully.");
+                // Update password change timestamp
+                user.LastPasswordChangedAt = DateTime.UtcNow;
+                user.MustChangePassword = false;
+                await _userManager.UpdateAsync(user);
 
-            TempData["SuccessMessage"] = "Your password has been changed.";
-            return RedirectToAction(nameof(Manage));
+                // Log audit event
+                if (_authAuditService != null)
+                {
+                    var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                    var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                    await _authAuditService.LogPasswordChangeAsync(
+                        userId: user.Id,
+                        changedByUserId: user.Id,
+                        reason: "User initiated",
+                        ipAddress: ipAddress,
+                        userAgent: userAgent);
+                }
+
+                // SECURITY: Revoke all other sessions on password change
+                if (_sessionManagementService != null)
+                {
+                    await _sessionManagementService.RevokeAllSessionsAsync(
+                        user.Id, 
+                        "Password changed - all sessions revoked for security");
+                    _logger.LogInformation("Revoked all sessions for user {UserId} due to password change", user.Id);
+                }
+
+                await _signInManager.RefreshSignInAsync(user);
+                _logger.LogInformation("User {Email} changed their password successfully.", user.Email);
+
+                TempData["SuccessMessage"] = "Your password has been changed.";
+                return RedirectToAction(nameof(Manage));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to store password history for user {UserId}", user.Id);
+                // Continue even if audit logging fails
+                user.LastPasswordChangedAt = DateTime.UtcNow;
+                user.MustChangePassword = false;
+                await _userManager.UpdateAsync(user);
+                await _signInManager.RefreshSignInAsync(user);
+                TempData["SuccessMessage"] = "Your password has been changed.";
+                return RedirectToAction(nameof(Manage));
+            }
         }
 
         // GET: Account/LoginWith2fa
@@ -858,27 +1120,94 @@ namespace GrcMvc.Controllers
                 return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
 
+            // SECURITY: Check password history to prevent reuse
+            if (_passwordHistoryService != null)
+            {
+                var isInHistory = await _passwordHistoryService.IsPasswordInHistoryAsync(user.Id, model.Password);
+                if (isInHistory)
+                {
+                    ModelState.AddModelError(nameof(model.Password), 
+                        "This password has been used recently. Please choose a different password.");
+                    return View(model);
+                }
+            }
+
+            // CRITICAL FIX: Capture old password hash BEFORE resetting password
+            string? oldPasswordHash = user.PasswordHash;
+
             var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
             if (result.Succeeded)
             {
-                // MEDIUM PRIORITY FIX: Update password change timestamp for expiry tracking
-                user.LastPasswordChangedAt = DateTime.UtcNow;
-                user.MustChangePassword = false;
-                await _userManager.UpdateAsync(user);
-
-                // MEDIUM PRIORITY FIX: Send confirmation email after successful password reset
+                // CRITICAL FIX: Store password history and log audit event
                 try
                 {
-                    var userName = user.FullName ?? user.UserName ?? user.Email?.Split('@')[0] ?? "المستخدم";
-                    await _grcEmailService.SendPasswordChangedNotificationAsync(user.Email!, userName, isArabic: true);
-                    _logger.LogInformation("Password changed notification sent to {Email}", user.Email);
+                    // Store old password hash in history (captured before change)
+                    if (_authContext != null && !string.IsNullOrEmpty(oldPasswordHash))
+                    {
+                        var passwordHistory = new PasswordHistory
+                        {
+                            UserId = user.Id,
+                            PasswordHash = oldPasswordHash, // Store old hash (captured before change)
+                            ChangedAt = DateTime.UtcNow,
+                            ChangedByUserId = user.Id,
+                            Reason = "Password reset via email",
+                            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                            UserAgent = HttpContext.Request.Headers["User-Agent"].ToString()
+                        };
+                        _authContext.PasswordHistory.Add(passwordHistory);
+                        await _authContext.SaveChangesAsync();
+                    }
+
+                    // Update password change timestamp
+                    user.LastPasswordChangedAt = DateTime.UtcNow;
+                    user.MustChangePassword = false;
+                    await _userManager.UpdateAsync(user);
+
+                    // Log audit event
+                    if (_authAuditService != null)
+                    {
+                        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+                        var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                        await _authAuditService.LogPasswordChangeAsync(
+                            userId: user.Id,
+                            changedByUserId: user.Id,
+                            reason: "Password reset via email",
+                            ipAddress: ipAddress,
+                            userAgent: userAgent);
+                    }
+
+                    // SECURITY: Revoke all sessions on password reset
+                    if (_sessionManagementService != null)
+                    {
+                        await _sessionManagementService.RevokeAllSessionsAsync(
+                            user.Id, 
+                            "Password reset - all sessions revoked for security");
+                        _logger.LogInformation("Revoked all sessions for user {UserId} due to password reset", user.Id);
+                    }
+
+                    // MEDIUM PRIORITY FIX: Send confirmation email after successful password reset
+                    try
+                    {
+                        var userName = user.FullName ?? user.UserName ?? user.Email?.Split('@')[0] ?? "المستخدم";
+                        await _grcEmailService.SendPasswordChangedNotificationAsync(user.Email!, userName, isArabic: true);
+                        _logger.LogInformation("Password changed notification sent to {Email}", user.Email);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to send password changed notification to {Email}", user.Email);
+                    }
+                    
+                    return RedirectToAction(nameof(ResetPasswordConfirmation));
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed to send password changed notification to {Email}", user.Email);
+                    _logger.LogWarning(ex, "Failed to store password history for user {UserId}", user.Id);
+                    // Continue even if audit logging fails
+                    user.LastPasswordChangedAt = DateTime.UtcNow;
+                    user.MustChangePassword = false;
+                    await _userManager.UpdateAsync(user);
+                    return RedirectToAction(nameof(ResetPasswordConfirmation));
                 }
-                
-                return RedirectToAction(nameof(ResetPasswordConfirmation));
             }
 
             foreach (var error in result.Errors)

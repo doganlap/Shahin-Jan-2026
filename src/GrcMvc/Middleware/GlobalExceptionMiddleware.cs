@@ -3,6 +3,7 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using GrcMvc.Application.Policy;
+using GrcMvc.Exceptions;
 
 namespace GrcMvc.Middleware;
 
@@ -28,30 +29,18 @@ public class GlobalExceptionMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // #region agent log
-        try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "I", location = "GlobalExceptionMiddleware.cs:28", message = "Request entering middleware", data = new { path = context.Request.Path.Value, method = context.Request.Method, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-        // #endregion
         try
         {
             await _next(context);
-            // #region agent log
-            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "I", location = "GlobalExceptionMiddleware.cs:33", message = "Request after next middleware", data = new { statusCode = context.Response.StatusCode, hasStarted = context.Response.HasStarted, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-            // #endregion
 
             // Handle status code errors (404, 403, etc.)
             if (!context.Response.HasStarted && context.Response.StatusCode >= 400)
             {
-                // #region agent log
-                try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "I", location = "GlobalExceptionMiddleware.cs:37", message = "Handling status code error", data = new { statusCode = context.Response.StatusCode, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-                // #endregion
                 await HandleStatusCodeAsync(context);
             }
         }
         catch (Exception ex)
         {
-            // #region agent log
-            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "I", location = "GlobalExceptionMiddleware.cs:43", message = "Exception caught in middleware", data = new { exceptionType = ex.GetType().Name, exceptionMessage = ex.Message, stackTrace = ex.StackTrace?.Substring(0, Math.Min(500, ex.StackTrace?.Length ?? 0)), timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
-            // #endregion
             await HandleExceptionAsync(context, ex);
         }
     }
@@ -121,10 +110,17 @@ public class GlobalExceptionMiddleware
         {
             Success = false,
             StatusCode = statusCode,
+            ErrorCode = GetErrorCode(exception),
             Message = GetUserFriendlyMessage(exception),
             CorrelationId = correlationId,
             Timestamp = DateTime.UtcNow
         };
+
+        // Add validation errors if present
+        if (exception is Exceptions.ValidationException validationEx)
+        {
+            response.ValidationErrors = validationEx.Errors;
+        }
 
         // Include exception details only in development
         if (_environment.IsDevelopment())
@@ -164,11 +160,15 @@ public class GlobalExceptionMiddleware
     {
         return exception switch
         {
+            // GRC domain exceptions (ABP-style with suggested status codes)
+            GrcException grcEx => grcEx.SuggestedStatusCode,
+            // Standard .NET exceptions
             UnauthorizedAccessException => (int)HttpStatusCode.Forbidden,
             KeyNotFoundException => (int)HttpStatusCode.NotFound,
             ArgumentException => (int)HttpStatusCode.BadRequest,
             InvalidOperationException => (int)HttpStatusCode.BadRequest,
             PolicyViolationException => (int)HttpStatusCode.BadRequest,
+            OperationCanceledException => 499, // Client closed request
             _ => (int)HttpStatusCode.InternalServerError
         };
     }
@@ -177,12 +177,25 @@ public class GlobalExceptionMiddleware
     {
         return exception switch
         {
+            // GRC domain exceptions - use their message directly (already user-friendly)
+            GrcException grcEx => grcEx.Message,
+            // Standard .NET exceptions
             UnauthorizedAccessException => "You don't have permission to perform this action.",
             KeyNotFoundException => "The requested resource was not found.",
             ArgumentException => "Invalid input provided. Please check your data and try again.",
             InvalidOperationException => "This operation cannot be performed at this time.",
             PolicyViolationException pve => pve.Message,
+            OperationCanceledException => "The request was cancelled.",
             _ => "An unexpected error occurred. Please try again later."
+        };
+    }
+
+    private static string? GetErrorCode(Exception exception)
+    {
+        return exception switch
+        {
+            GrcException grcEx => grcEx.ErrorCode,
+            _ => null
         };
     }
 
@@ -218,11 +231,13 @@ public class ApiErrorResponse
 {
     public bool Success { get; set; }
     public int StatusCode { get; set; }
+    public string? ErrorCode { get; set; }
     public string Message { get; set; } = string.Empty;
     public string CorrelationId { get; set; } = string.Empty;
     public DateTime Timestamp { get; set; }
     public string? Details { get; set; }
     public string? StackTrace { get; set; }
+    public Dictionary<string, string[]>? ValidationErrors { get; set; }
 }
 
 /// <summary>

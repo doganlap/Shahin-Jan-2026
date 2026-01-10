@@ -125,9 +125,9 @@
                                                         <hr />
                                                         <h6 class="small"><i class="bi bi-exclamation-triangle text-warning"></i> Key Findings:</h6>
                                                         <ul class="small mb-0">
-                                                            @foreach (var finding in audit.Findings?.Take(3) ?? Enumerable.Empty<AuditFindingViewModel>())
+                                                            @foreach (var finding in (audit.Findings ?? Enumerable.Empty<string>()).Take(3))
                                                             {
-                                                                <li>[@finding.Type] @finding.Description</li>
+                                                                <li>@finding</li>
                                                             }
                                                             @if (audit.Findings?.Count() > 3)
                                                             {

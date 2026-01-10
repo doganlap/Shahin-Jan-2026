@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion"
 import { Quote, Star } from "lucide-react"
+import { useTranslations } from 'next-intl'
 
-const testimonials = [
+const testimonialsData = [
   {
     quote: "منصة شاهين ساعدتنا في تحقيق الامتثال الكامل مع متطلبات الهيئة الوطنية للأمن السيبراني في وقت قياسي",
     author: "أحمد الغامدي",
@@ -28,6 +29,7 @@ const testimonials = [
 ]
 
 export function Testimonials() {
+  const t = useTranslations('landing.testimonials')
   return (
     <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-900/50">
       <div className="container mx-auto px-6">
@@ -39,19 +41,19 @@ export function Testimonials() {
           viewport={{ once: true }}
         >
           <span className="text-emerald-600 dark:text-emerald-400 font-semibold mb-4 block">
-            آراء العملاء
+            {t('sectionLabel')}
           </span>
           <h2 className="section-title">
-            ماذا يقول عملاؤنا
+            {t('title')}
           </h2>
           <p className="section-subtitle mx-auto">
-            نفخر بثقة أكثر من 500 مؤسسة سعودية في منصة شاهين
+            {t('subtitle')}
           </p>
         </motion.div>
 
         {/* Testimonials Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
+          {testimonialsData.map((testimonial, index) => (
             <motion.div
               key={testimonial.author}
               className="relative p-8 rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-gray-100 dark:border-gray-700"

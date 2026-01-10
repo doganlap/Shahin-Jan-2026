@@ -11,6 +11,7 @@ This document provides comprehensive tables documenting each onboarding step, th
 4. [Comprehensive Wizard - Detailed Section Tables](#4-comprehensive-wizard---detailed-section-tables)
 5. [Post-Onboarding Feature Dependencies](#5-post-onboarding-feature-dependencies)
 6. [Why Each Step Exists](#6-why-each-step-exists)
+7. [Gaps & Missing Elements Analysis](#7-gaps--missing-elements-analysis)
 
 ---
 
@@ -615,5 +616,231 @@ This document provides comprehensive tables documenting each onboarding step, th
 
 ---
 
+## 7. Gaps & Missing Elements Analysis
+
+### 7.1 Implementation Status Summary
+
+| Feature | Status | Priority |
+|---------|--------|----------|
+| Signup & Tenant Creation | ✅ Complete | - |
+| 4-Step Simplified Onboarding | ✅ Complete | - |
+| 12-Step Professional Wizard | ⚠️ 70% (UI ready, logic incomplete) | HIGH |
+| Email Notifications | ❌ Missing | HIGH |
+| Team Member Provisioning | ❌ Missing | HIGH |
+| Abandonment Detection | ❌ Missing | HIGH |
+| Resume 12-Step Wizard | ❌ Missing | HIGH |
+| Conditional Logic | ❌ Missing | MEDIUM |
+| Data Import/Bulk Upload | ❌ Missing | MEDIUM |
+| Achievement System | ⚠️ 20% (DB ready, logic missing) | MEDIUM |
+| Trial-to-Paid Conversion | ❌ Missing | MEDIUM |
+| Advanced Validation | ⚠️ 40% (Basic done, cross-field missing) | MEDIUM |
+| Localization (Arabic) | ⚠️ 50% (Partial, missing error messages) | MEDIUM |
+| Audit Logging | ⚠️ 60% (Basic events, missing details) | LOW |
+| API Documentation | ❌ No Swagger/OpenAPI | LOW |
+
+---
+
+### 7.2 Critical Missing Features (HIGH PRIORITY)
+
+#### 7.2.1 Email Notifications
+
+| Gap | Description | Impact |
+|-----|-------------|--------|
+| Activation Email | Code references sending but no email service integration | Users cannot activate accounts |
+| Team Invitations | Section H collects team members but no emails sent | Team members not onboarded |
+| Abandonment Alerts | No emails for incomplete onboarding | Lost potential customers |
+| Progress Reminders | No reminder emails for stalled onboarding | Delayed completions |
+
+#### 7.2.2 Team Member Provisioning
+
+| Gap | Description | Impact |
+|-----|-------------|--------|
+| User Account Creation | Section H collects team data but doesn't create users | Team members cannot login |
+| Role Assignment | RACI mappings collected but not enforced | No access control |
+| Workspace Assignment | Team members not added to workspaces | Manual setup required |
+
+#### 7.2.3 Abandonment Handling
+
+| Gap | Description | Impact |
+|-----|-------------|--------|
+| Dropout Detection | No tracking of partially completed wizards | Unknown abandonment rate |
+| Recovery Mechanism | No "resume from last step" for 12-step wizard | Lost progress |
+| Data Cleanup | No cleanup of incomplete onboarding data | Database bloat |
+| Recovery Emails | No automated emails to recover abandoned users | Lost conversions |
+
+#### 7.2.4 Resume Functionality for 12-Step Wizard
+
+| Gap | Description | Impact |
+|-----|-------------|--------|
+| Auto-Save | No auto-save of answers during wizard | Progress lost on disconnect |
+| Browser Storage Fallback | No local storage backup | Data loss risk |
+| Resume API | Only 4-step flow has `ResumeOnboardingAsync` | 12-step users must restart |
+
+---
+
+### 7.3 Medium Priority Gaps
+
+#### 7.3.1 Conditional Logic
+
+| Gap | Description | Example |
+|-----|-------------|---------|
+| Dynamic Field Visibility | No show/hide based on previous answers | "If financial sector → show SAMA questions" |
+| Section Skipping | No ability to skip irrelevant sections | "If manufacturing → skip financial section" |
+| Branching Paths | No industry-specific onboarding paths | Different paths for banking vs healthcare |
+
+#### 7.3.2 Data Import/Migration
+
+| Gap | Description | Impact |
+|-----|-------------|--------|
+| CSV Import - Team Members | No bulk import capability | Manual entry for large teams |
+| CSV Import - Systems | No bulk import for IT assets | Time-consuming data entry |
+| CSV Import - Vendors | No bulk import for vendor list | Incomplete vendor risk data |
+| CMDB Integration | Section F asks about CMDB but not used | Manual asset entry |
+
+#### 7.3.3 Validation Gaps
+
+| Gap | Current State | Required |
+|-----|---------------|----------|
+| Cross-Field Validation | Not implemented | "PCI data requires specific controls" |
+| Constraint Checking | Not implemented | "Data residency conflicts with cloud region" |
+| Real-Time Validation | Only on submit | Field-level validation as user types |
+| Arabic Error Messages | Only blockers translated | All field-level errors in Arabic |
+
+#### 7.3.4 Subscription/Licensing
+
+| Gap | Description | Impact |
+|-----|-------------|--------|
+| Feature Gating | No limits based on tier | All features available regardless of tier |
+| Trial Enforcement | Trial expiry not checked | Free access continues after trial |
+| Upgrade Flow | No upgrade during onboarding | Users must contact sales |
+
+---
+
+### 7.4 Low Priority Gaps
+
+#### 7.4.1 Audit Logging Gaps
+
+| Missing Event | Description |
+|---------------|-------------|
+| Section Completion | No event per wizard section completion |
+| Abandonment | No event for onboarding timeout |
+| Answer Changes | No event for individual answer saves |
+| Validation Errors | No event for validation failures |
+| Email Events | No event for email success/failure |
+
+#### 7.4.2 Localization Gaps
+
+| Gap | Current State | Required |
+|-----|---------------|----------|
+| Questionnaire Fields | English labels only | Arabic translations needed |
+| DTO Descriptions | English only | Bilingual descriptions |
+| Section Descriptions | Not translated | Full Arabic support |
+
+#### 7.4.3 API Documentation
+
+| Gap | Description |
+|-----|-------------|
+| OpenAPI/Swagger | No API specification generated |
+| Versioning Strategy | No API version headers |
+| Pagination Support | No pagination on list endpoints |
+
+---
+
+### 7.5 Edge Cases Not Handled
+
+| Edge Case | Current Behavior | Expected Behavior |
+|-----------|------------------|-------------------|
+| Mid-Wizard Profile Changes | No conflict resolution | Warn user and revalidate scope |
+| Concurrent Edits | Last write wins | Conflict detection/resolution |
+| Very Large Teams (1000+) | No limits | Pagination or batch processing |
+| Multi-Subsidiary Structures | Single tenant only | Hierarchical tenant support |
+| Network Timeout | Progress lost | Auto-save with recovery |
+| Token Expiry | Token never expires | Configurable expiry with renewal |
+
+---
+
+### 7.6 Integration Gaps
+
+| Integration | Documented In | Status |
+|-------------|---------------|--------|
+| SSO (Azure AD, Okta) | Section F.1-F.2 | ❌ Field collected, not validated |
+| SCIM Provisioning | Section F.3 | ❌ Field collected, not integrated |
+| ITSM (ServiceNow, Jira) | Section F.4 | ❌ No remediation workflow |
+| Evidence Repository | Section F.5 | ⚠️ Partial (not enforced) |
+| SIEM (Splunk, Sentinel) | Section F.6 | ❌ No monitoring integration |
+| Teams/Slack Notifications | Section H.9 | ❌ No actual integration |
+
+---
+
+### 7.7 Post-Onboarding Feature Gaps
+
+| Feature | Onboarding Data Used | Gap |
+|---------|---------------------|-----|
+| RACI Mapping | Section G, H | Collected but not auto-generated |
+| Approval Workflows | Section G.3-G.5, H.7 | Collected but not configured |
+| Evidence Requirements | Section J | Collected but not enforced |
+| Notification Preferences | Section H.9 | Collected but not applied |
+| Data Residency | Section A.13 | Collected but not enforced |
+| Success Metrics Dashboard | Section L | Dashboard not configured |
+
+---
+
+### 7.8 Missing Documentation
+
+| Topic | Status | Impact |
+|-------|--------|--------|
+| Rules Engine Configuration | ❌ Not documented | Unknown how frameworks are selected |
+| Post-Onboarding Flow | ❌ Not documented | Unclear what happens after completion |
+| Email Templates | ❌ Not documented | No email template specifications |
+| Team Invitation Process | ❌ Not documented | No invitation workflow defined |
+| Data Retention Policy | ❌ Not documented | No cleanup policy for abandoned data |
+| Subscription Feature Matrix | ❌ Not documented | No tier-based feature list |
+
+---
+
+### 7.9 Database/Entity Gaps
+
+| Gap | Description | Impact |
+|-----|-------------|--------|
+| Abandonment Tracking Table | No dedicated table | Cannot analyze dropout |
+| Onboarding Events Log | Limited event types | Incomplete audit trail |
+| Index on WizardStatus | No index for incomplete wizards | Slow abandonment queries |
+| Progress Snapshots | No historical progress tracking | Cannot analyze time-to-complete |
+
+---
+
+### 7.10 Recommendations Summary
+
+#### HIGH Priority
+
+| # | Recommendation |
+|---|----------------|
+| 1 | Implement email notification service (activation, abandonment, team invitations) |
+| 2 | Add auto-save functionality for 12-step wizard |
+| 3 | Create onboarding abandonment detection with recovery emails |
+| 4 | Implement team member provisioning (user creation + invitations) |
+| 5 | Add resume mechanism for 12-step wizard |
+
+#### MEDIUM Priority
+
+| # | Recommendation |
+|---|----------------|
+| 6 | Implement conditional section/field visibility |
+| 7 | Add CSV import for team members, systems, vendors |
+| 8 | Implement cross-field validation |
+| 9 | Add subscription tier feature gating |
+| 10 | Complete Arabic localization |
+
+#### LOW Priority
+
+| # | Recommendation |
+|---|----------------|
+| 11 | Add detailed audit events for all actions |
+| 12 | Generate OpenAPI/Swagger documentation |
+| 13 | Implement achievement/scoring system |
+| 14 | Add trial-to-paid conversion flow |
+
+---
+
 *Document Generated: January 2026*
-*Version: 1.0*
+*Version: 1.1 - Added Gaps & Missing Elements Analysis*

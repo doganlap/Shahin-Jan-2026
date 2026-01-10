@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using GrcMvc.Models.DTOs;
 using GrcMvc.Models;
 using GrcMvc.Services.Interfaces;
@@ -32,6 +33,7 @@ namespace GrcMvc.Controllers
         /// </remarks>
         [HttpPost("login")]
         [AllowAnonymous]
+        [EnableRateLimiting("auth")] // SECURITY: Rate limiting to prevent brute force attacks
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequest)
         {
             try
@@ -77,6 +79,7 @@ namespace GrcMvc.Controllers
         /// </summary>
         [HttpPost("register")]
         [AllowAnonymous]
+        [EnableRateLimiting("auth")] // SECURITY: Rate limiting to prevent registration abuse
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequest)
         {
             try
@@ -128,8 +131,10 @@ namespace GrcMvc.Controllers
 
         /// <summary>
         /// Forgot password endpoint - sends reset link via email
+        /// SECURITY: Returns success even if user doesn't exist to prevent account enumeration
         /// </summary>
         [HttpPost("forgot-password")]
+        [EnableRateLimiting("auth")] // SECURITY: Rate limiting to prevent enumeration attacks
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto forgotPasswordRequest)
         {
             try
@@ -137,16 +142,17 @@ namespace GrcMvc.Controllers
                 if (string.IsNullOrWhiteSpace(forgotPasswordRequest?.Email))
                     return BadRequest(ApiResponse<object>.ErrorResponse("Email is required"));
 
+                // SECURITY: Always attempt the operation, don't reveal if user exists
                 var result = await _authenticationService.ForgotPasswordAsync(forgotPasswordRequest.Email);
 
-                if (!result.Success)
-                    return NotFound(ApiResponse<PasswordResetResponseDto>.ErrorResponse("User not found"));
-
-                return Ok(ApiResponse<PasswordResetResponseDto>.SuccessResponse(result, "Password reset link sent successfully"));
+                // SECURITY: Return success message regardless of whether user was found
+                // This prevents account enumeration attacks
+                return Ok(ApiResponse<object>.SuccessResponse(null, "If an account with that email exists, a password reset link has been sent."));
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
+                // SECURITY: Still return generic success to prevent enumeration
+                return Ok(ApiResponse<object>.SuccessResponse(null, "If an account with that email exists, a password reset link has been sent."));
             }
         }
 
@@ -154,6 +160,8 @@ namespace GrcMvc.Controllers
         /// Reset password endpoint
         /// </summary>
         [HttpPost("reset-password")]
+        [AllowAnonymous]
+        [EnableRateLimiting("auth")] // SECURITY: Rate limiting to prevent abuse
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto resetPasswordRequest)
         {
             try

@@ -137,7 +137,7 @@ public class SerialCodeApiController : ControllerBase
             var parsed = _serialCodeService.Parse(code);
             return Ok(parsed);
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
             return BadRequest(new ProblemDetails
             {
@@ -199,7 +199,7 @@ public class SerialCodeApiController : ControllerBase
             var history = await _serialCodeService.GetHistoryAsync(code);
             return Ok(history);
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
             return BadRequest(new ProblemDetails
             {
@@ -250,7 +250,7 @@ public class SerialCodeApiController : ControllerBase
             var result = await _serialCodeService.CreateNewVersionAsync(code, request?.ChangeReason);
             return CreatedAtAction(nameof(GetByCode), new { code = result.Code }, result);
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
             return NotFound(new ProblemDetails
             {
@@ -259,7 +259,7 @@ public class SerialCodeApiController : ControllerBase
                 Status = 404
             });
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
             return BadRequest(new ProblemDetails
             {
@@ -368,7 +368,7 @@ public class SerialCodeApiController : ControllerBase
 
             return StatusCode(201, result);
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
             return BadRequest(new ProblemDetails
             {
@@ -393,7 +393,7 @@ public class SerialCodeApiController : ControllerBase
             var result = await _serialCodeService.ConfirmReservationAsync(reservationId, request.EntityId);
             return Ok(result);
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
             return NotFound(new ProblemDetails
             {
@@ -402,7 +402,7 @@ public class SerialCodeApiController : ControllerBase
                 Status = 404
             });
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
             return BadRequest(new ProblemDetails
             {
@@ -427,7 +427,7 @@ public class SerialCodeApiController : ControllerBase
             await _serialCodeService.CancelReservationAsync(reservationId);
             return NoContent();
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
             return NotFound(new ProblemDetails
             {
@@ -436,7 +436,7 @@ public class SerialCodeApiController : ControllerBase
                 Status = 404
             });
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
             return BadRequest(new ProblemDetails
             {
@@ -465,7 +465,7 @@ public class SerialCodeApiController : ControllerBase
             await _serialCodeService.VoidAsync(code, request.Reason);
             return NoContent();
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
             return NotFound(new ProblemDetails
             {
@@ -474,7 +474,7 @@ public class SerialCodeApiController : ControllerBase
                 Status = 404
             });
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
             return BadRequest(new ProblemDetails
             {
@@ -498,7 +498,7 @@ public class SerialCodeApiController : ControllerBase
             var report = await _serialCodeService.GetTraceabilityReportAsync(code);
             return Ok(report);
         }
-        catch (ArgumentException ex)
+        catch (ArgumentException)
         {
             return NotFound(new ProblemDetails
             {

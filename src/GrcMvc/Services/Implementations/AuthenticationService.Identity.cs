@@ -33,19 +33,25 @@ namespace GrcMvc.Services.Implementations
         private readonly GrcDbContext _context;
         private readonly ILogger<IdentityAuthenticationService> _logger;
         private readonly JwtSettings _jwtSettings;
+        private readonly GrcAuthDbContext? _authContext;
+        private readonly IAuthenticationAuditService? _authAuditService;
 
         public IdentityAuthenticationService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IConfiguration configuration,
             GrcDbContext context,
-            ILogger<IdentityAuthenticationService> logger)
+            ILogger<IdentityAuthenticationService> logger,
+            GrcAuthDbContext? authContext = null,
+            IAuthenticationAuditService? authAuditService = null)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _context = context;
             _logger = logger;
+            _authContext = authContext;
+            _authAuditService = authAuditService;
             _jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>() 
                 ?? throw new InvalidOperationException("JWT settings are not configured");
         }
@@ -363,11 +369,52 @@ namespace GrcMvc.Services.Implementations
             if (user == null)
                 return false;
 
+            // CRITICAL FIX: Store old password hash BEFORE changing password
+            string? oldPasswordHash = user.PasswordHash;
+
             var result = await _userManager.ChangePasswordAsync(user, changePasswordDto.CurrentPassword, changePasswordDto.NewPassword);
             if (result.Succeeded)
             {
-                user.LastPasswordChangedAt = DateTime.UtcNow;
-                await _userManager.UpdateAsync(user);
+                // CRITICAL FIX: Store password history and log audit event
+                try
+                {
+                    // Store old password hash in history (captured before change)
+                    if (_authContext != null && !string.IsNullOrEmpty(oldPasswordHash))
+                    {
+                        var passwordHistory = new PasswordHistory
+                        {
+                            UserId = user.Id,
+                            PasswordHash = oldPasswordHash, // Store old hash (captured before change)
+                            ChangedAt = DateTime.UtcNow,
+                            ChangedByUserId = userId,
+                            Reason = "User initiated",
+                            IpAddress = null, // Not available in service layer
+                            UserAgent = null
+                        };
+                        _authContext.PasswordHistory.Add(passwordHistory);
+                        await _authContext.SaveChangesAsync();
+                    }
+
+                    // Update password change timestamp
+                    user.LastPasswordChangedAt = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+
+                    // Log audit event
+                    if (_authAuditService != null)
+                    {
+                        await _authAuditService.LogPasswordChangeAsync(
+                            userId: user.Id,
+                            changedByUserId: userId,
+                            reason: "User initiated",
+                            ipAddress: null,
+                            userAgent: null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to store password history or log audit event for user {UserId}", userId);
+                    // Don't fail password change if audit logging fails
+                }
             }
 
             return result.Succeeded;
@@ -406,11 +453,54 @@ namespace GrcMvc.Services.Implementations
             if (user == null)
                 return false;
 
+            // CRITICAL FIX: Store old password hash BEFORE resetting password
+            string? oldPasswordHash = user.PasswordHash;
+
             var result = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.NewPassword);
             if (result.Succeeded)
             {
-                user.LastPasswordChangedAt = DateTime.UtcNow;
-                await _userManager.UpdateAsync(user);
+                // CRITICAL FIX: Store password history and log audit event
+                try
+                {
+                    // Store old password hash in history (captured before change)
+                    if (_authContext != null && !string.IsNullOrEmpty(oldPasswordHash))
+                    {
+                        var passwordHistory = new PasswordHistory
+                        {
+                            UserId = user.Id,
+                            PasswordHash = oldPasswordHash, // Store old hash (captured before change)
+                            ChangedAt = DateTime.UtcNow,
+                            ChangedByUserId = user.Id,
+                            Reason = "Password reset via email",
+                            IpAddress = null, // Not available in service layer
+                            UserAgent = null
+                        };
+                        _authContext.PasswordHistory.Add(passwordHistory);
+                        await _authContext.SaveChangesAsync();
+                    }
+
+                    // Update password change timestamp
+                    user.LastPasswordChangedAt = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+
+                    // Log audit event
+                    if (_authAuditService != null)
+                    {
+                        await _authAuditService.LogPasswordChangeAsync(
+                            userId: user.Id,
+                            changedByUserId: user.Id,
+                            reason: "Password reset via email",
+                            ipAddress: null,
+                            userAgent: null);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to store password history or log audit event for user {UserId}", user.Id);
+                    // Don't fail password reset if audit logging fails
+                    user.LastPasswordChangedAt = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+                }
             }
 
             return result.Succeeded;

@@ -4,15 +4,17 @@ import { motion } from "framer-motion"
 import { ArrowLeft, Check, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useTranslations } from 'next-intl'
 
-const benefits = [
-  "تجربة مجانية 14 يوم",
-  "بدون بطاقة ائتمان",
-  "دعم فني باللغة العربية",
-  "إعداد سريع خلال دقائق",
+const benefitsConfig = [
+  "benefit_1",
+  "benefit_2",
+  "benefit_3",
+  "benefit_4",
 ]
 
 export function CTA() {
+  const t = useTranslations('landing.cta')
   return (
     <section className="py-24 relative overflow-hidden">
       {/* Background */}
@@ -52,7 +54,7 @@ export function CTA() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white text-sm font-medium mb-8"
           >
             <Sparkles className="w-4 h-4" />
-            عرض خاص لفترة محدودة
+            {t('badge')}
           </motion.div>
 
           {/* Title */}
@@ -63,7 +65,7 @@ export function CTA() {
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
           >
-            ابدأ رحلة الامتثال اليوم
+            {t('title')}
           </motion.h2>
 
           {/* Description */}
@@ -74,7 +76,7 @@ export function CTA() {
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            انضم لأكثر من 500 مؤسسة سعودية تثق في منصة شاهين لإدارة الامتثال والمخاطر
+            {t('subtitle')}
           </motion.p>
 
           {/* Benefits */}
@@ -85,12 +87,12 @@ export function CTA() {
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
-            {benefits.map((benefit) => (
+            {benefitsConfig.map((benefit) => (
               <div key={benefit} className="flex items-center gap-2 text-white">
                 <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
                   <Check className="w-3 h-3" />
                 </div>
-                <span>{benefit}</span>
+                <span>{t(benefit)}</span>
               </div>
             ))}
           </motion.div>
@@ -104,21 +106,21 @@ export function CTA() {
             transition={{ delay: 0.4 }}
           >
             <Link href="/trial">
-              <Button 
-                size="xl" 
+              <Button
+                size="xl"
                 className="bg-white text-emerald-700 hover:bg-gray-100 shadow-xl group"
               >
-                ابدأ تجربتك المجانية
+                {t('cta_primary')}
                 <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
               </Button>
             </Link>
             <Link href="/contact">
-              <Button 
-                size="xl" 
+              <Button
+                size="xl"
                 variant="outline"
                 className="border-white text-white hover:bg-white/10"
               >
-                تحدث مع فريق المبيعات
+                {t('cta_secondary')}
               </Button>
             </Link>
           </motion.div>

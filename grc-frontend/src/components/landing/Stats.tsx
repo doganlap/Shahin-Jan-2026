@@ -3,35 +3,32 @@
 import { motion, useInView } from "framer-motion"
 import { useRef, useEffect, useState } from "react"
 import { Building2, Shield, FileCheck, Bot } from "lucide-react"
+import { useTranslations } from 'next-intl'
 
-const stats = [
+const statsConfig = [
   {
+    key: "regulators",
     icon: Building2,
     value: 120,
     suffix: "+",
-    label: "جهة تنظيمية",
-    description: "محلية ودولية",
   },
   {
+    key: "frameworks_count",
     icon: Shield,
     value: 240,
     suffix: "+",
-    label: "إطار تنظيمي",
-    description: "معتمد ومحدث",
   },
   {
+    key: "controls",
     icon: FileCheck,
     value: 57000,
     suffix: "+",
-    label: "ضابط رقابي",
-    description: "جاهز للتطبيق",
   },
   {
+    key: "ai_agents",
     icon: Bot,
     value: 9,
     suffix: "",
-    label: "وكيل ذكاء اصطناعي",
-    description: "متخصص",
   },
 ]
 
