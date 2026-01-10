@@ -2,14 +2,15 @@
 
 import { motion } from "framer-motion"
 import Image from "next/image"
+import { useTranslations } from 'next-intl'
 
-const regulators = [
-  { name: "NCA", nameAr: "الهيئة الوطنية للأمن السيبراني", logo: "/images/regulators/nca.png" },
-  { name: "SAMA", nameAr: "البنك المركزي السعودي", logo: "/images/regulators/sama.png" },
-  { name: "CMA", nameAr: "هيئة السوق المالية", logo: "/images/regulators/cma.png" },
-  { name: "CITC", nameAr: "هيئة الاتصالات وتقنية المعلومات", logo: "/images/regulators/citc.png" },
-  { name: "SDAIA", nameAr: "هيئة البيانات والذكاء الاصطناعي", logo: "/images/regulators/sdaia.png" },
-  { name: "PDPL", nameAr: "نظام حماية البيانات الشخصية", logo: "/images/regulators/pdpl.png" },
+const regulatorsConfig = [
+  { key: "nca", name: "NCA", logo: "/images/regulators/nca.png" },
+  { key: "sama", name: "SAMA", logo: "/images/regulators/sama.png" },
+  { key: "cma", name: "CMA", logo: "/images/regulators/cma.png" },
+  { key: "citc", name: "CITC", logo: "/images/regulators/citc.png" },
+  { key: "sdaia", name: "SDAIA", logo: "/images/regulators/sdaia.png" },
+  { key: "pdpl", name: "PDPL", logo: "/images/regulators/pdpl.png" },
 ]
 
 const frameworks = [
@@ -26,6 +27,8 @@ const frameworks = [
 ]
 
 export function Regulators() {
+  const t = useTranslations('landing.regulators')
+  const tFrameworks = useTranslations('frameworks')
   return (
     <section className="py-24 bg-white dark:bg-gray-900">
       <div className="container mx-auto px-6">
@@ -37,13 +40,13 @@ export function Regulators() {
           viewport={{ once: true }}
         >
           <span className="text-emerald-600 dark:text-emerald-400 font-semibold mb-4 block">
-            الأطر التنظيمية
+            {t('sectionLabel')}
           </span>
           <h2 className="section-title">
-            دعم كامل للمتطلبات التنظيمية السعودية
+            {t('title')}
           </h2>
           <p className="section-subtitle mx-auto">
-            متوافق مع جميع الأطر والمعايير التنظيمية الصادرة من الجهات الحكومية السعودية
+            {t('subtitle')}
           </p>
         </motion.div>
 
@@ -55,10 +58,10 @@ export function Regulators() {
           viewport={{ once: true }}
           transition={{ staggerChildren: 0.1 }}
         >
-          {regulators.map((reg, index) => (
+          {regulatorsConfig.map((reg, index) => (
             <motion.div
               key={reg.name}
-              className="flex flex-col items-center p-6 rounded-2xl bg-gray-50 dark:bg-gray-800/50 
+              className="flex flex-col items-center p-6 rounded-2xl bg-gray-50 dark:bg-gray-800/50
                          border border-gray-100 dark:border-gray-700/50
                          hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -75,7 +78,7 @@ export function Regulators() {
                 {reg.name}
               </span>
               <span className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                {reg.nameAr}
+                {tFrameworks(reg.key)}
               </span>
             </motion.div>
           ))}

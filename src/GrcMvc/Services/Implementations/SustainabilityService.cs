@@ -500,5 +500,48 @@ namespace GrcMvc.Services.Implementations
         };
 
         #endregion
+
+        #region Program Management
+
+        /// <summary>
+        /// Get all initiatives for a tenant (alias for GetImprovementInitiativesAsync)
+        /// </summary>
+        public async Task<List<SustainabilityImprovementDto>> GetInitiativesAsync(Guid tenantId)
+        {
+            return await GetImprovementInitiativesAsync(tenantId);
+        }
+
+        /// <summary>
+        /// Get program execution metrics
+        /// </summary>
+        public async Task<ProgramExecutionDto> GetProgramExecutionAsync(Guid tenantId)
+        {
+            var initiatives = await GetImprovementInitiativesAsync(tenantId);
+            
+            return new ProgramExecutionDto
+            {
+                TenantId = tenantId,
+                TotalPrograms = initiatives.Count,
+                ActivePrograms = initiatives.Count(i => i.Status == "In Progress"),
+                CompletedPrograms = initiatives.Count(i => i.Status == "Completed"),
+                OverallProgress = initiatives.Any() 
+                    ? initiatives.Average(i => i.PercentComplete) 
+                    : 0m,
+                BudgetUtilization = 0m, // TODO: Implement budget tracking
+                Programs = initiatives.Select(i => new ProgramStatusDto
+                {
+                    Id = i.Id,
+                    Name = i.Title,
+                    NameAr = i.TitleAr ?? i.Title,
+                    Status = i.Status,
+                    Progress = i.PercentComplete,
+                    TargetDate = i.TargetDate,
+                    Owner = i.Owner ?? "Unassigned"
+                }).ToList(),
+                GeneratedAt = DateTime.UtcNow
+            };
+        }
+
+        #endregion
     }
 }

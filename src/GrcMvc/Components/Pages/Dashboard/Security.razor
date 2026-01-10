@@ -21,7 +21,7 @@
                 <span class="badge bg-success fs-6 animate__animated animate__pulse animate__infinite">
                     <i class="bi bi-broadcast me-1"></i>مباشر
                 </span>
-                <small class="text-muted">@DateTime.Now.ToString("HH:mm:ss")</small>
+                <small class="text-muted">@DateTime.UtcNow.ToString("HH:mm:ss")</small>
                 <button class="btn btn-sm btn-outline-danger" @onclick="RefreshData">
                     <i class="bi bi-arrow-clockwise"></i>
                 </button>
@@ -429,7 +429,7 @@
             {
                 Name = "قاعدة البيانات",
                 Status = "Down",
-                LastCheck = DateTime.Now,
+                LastCheck = DateTime.UtcNow,
                 LastError = ex.Message.Length > 50 ? ex.Message.Substring(0, 50) + "..." : ex.Message
             });
         }
@@ -440,7 +440,7 @@
         {
             Name = "نظام التدقيق",
             Status = recentEventCount > 0 ? "Healthy" : "Degraded",
-            LastCheck = DateTime.Now,
+            LastCheck = DateTime.UtcNow,
             LastError = recentEventCount == 0 ? "لا توجد أحداث في الساعة الأخيرة" : null
         });
 
@@ -450,7 +450,7 @@
         {
             Name = "نظام سير العمل",
             Status = "Healthy",
-            LastCheck = DateTime.Now
+            LastCheck = DateTime.UtcNow
         });
 
         // Check email by looking for recent email-related audit events
@@ -460,7 +460,7 @@
         {
             Name = "خدمة البريد",
             Status = emailErrors == 0 ? "Healthy" : (emailErrors < emailEvents / 2 ? "Degraded" : "Down"),
-            LastCheck = DateTime.Now,
+            LastCheck = DateTime.UtcNow,
             LastError = emailErrors > 0 ? $"{emailErrors} فشل في الإرسال" : null
         });
 

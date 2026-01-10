@@ -65,6 +65,8 @@ function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
 }
 
 export function Stats() {
+  const t = useTranslations('landing.statsSec')
+
   return (
     <section className="py-20 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600">
       <div className="container mx-auto px-6">
@@ -75,9 +77,9 @@ export function Stats() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          {stats.map((stat, index) => (
+          {statsConfig.map((stat, index) => (
             <motion.div
-              key={stat.label}
+              key={stat.key}
               className="text-center"
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -96,12 +98,12 @@ export function Stats() {
 
               {/* Label */}
               <div className="text-lg font-semibold text-white/90 mb-1">
-                {stat.label}
+                {t(`${stat.key}.label`)}
               </div>
 
               {/* Description */}
               <div className="text-sm text-white/70">
-                {stat.description}
+                {t(`${stat.key}.description`)}
               </div>
             </motion.div>
           ))}

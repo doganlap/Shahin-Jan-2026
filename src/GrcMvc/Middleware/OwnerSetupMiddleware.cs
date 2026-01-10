@@ -22,8 +22,9 @@ namespace GrcMvc.Middleware
             RequestDelegate next,
             ILogger<OwnerSetupMiddleware> logger)
         {
-            // #region agent log
-            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "K", location = "OwnerSetupMiddleware.cs:21", message = "OwnerSetupMiddleware constructor", data = new { nextExists = next != null, loggerExists = logger != null, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #region agent log - Use ILogger for Docker visibility
+            logger.LogInformation("OwnerSetupMiddleware: Constructor called | nextExists={NextExists} | loggerExists={LoggerExists}", 
+                next != null, logger != null);
             // #endregion
             _next = next;
             _logger = logger;
@@ -32,13 +33,15 @@ namespace GrcMvc.Middleware
 
         public async Task InvokeAsync(HttpContext context, IOwnerSetupService ownerSetupService)
         {
-            // #region agent log
-            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "K", location = "OwnerSetupMiddleware.cs:32", message = "InvokeAsync entry", data = new { path = context.Request.Path.Value, method = context.Request.Method, ownerSetupServiceExists = ownerSetupService != null, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch (Exception logEx) { _logger.LogError(logEx, "Failed to write debug log at InvokeAsync entry"); }
+            // #region agent log - Use ILogger for Docker visibility
+            _logger.LogInformation("OwnerSetupMiddleware: InvokeAsync entry | path={Path} | method={Method} | ownerSetupServiceExists={ServiceExists}", 
+                context.Request.Path.Value, context.Request.Method, ownerSetupService != null);
             // #endregion
             var path = context.Request.Path.Value?.ToLower() ?? "";
 
-            // #region agent log
-            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "K", location = "OwnerSetupMiddleware.cs:37", message = "After path lowercasing", data = new { path = path, originalPath = context.Request.Path.Value, pathLength = path.Length, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch (Exception logEx) { _logger.LogError(logEx, "Failed to write debug log after path lowercasing"); }
+            // #region agent log - Use ILogger instead of file (works in Docker)
+            _logger.LogInformation("OwnerSetupMiddleware: After path lowercasing | path={Path} | originalPath={OriginalPath} | pathLength={PathLength}", 
+                path, context.Request.Path.Value, path.Length);
             // #endregion
 
             _logger.LogDebug("OwnerSetupMiddleware processing path: {Path}", path);
@@ -50,9 +53,14 @@ namespace GrcMvc.Middleware
             // - API endpoints
             // - Health checks
             // Path is already lowercased above, so simple string comparison works
-            bool shouldSkip = path.StartsWith("/ownersetup") ||
-                path == "/" ||
+            bool pathEqualsSlash = path == "/";
+            bool pathStartsWithOwnersetup = path.StartsWith("/ownersetup", StringComparison.OrdinalIgnoreCase);
+            
+            bool shouldSkip = pathStartsWithOwnersetup ||
+                pathEqualsSlash ||
                 path == "/home" ||
+                path == "/home/error" ||
+                path.StartsWith("/error") ||
                 path.StartsWith("/landing/") ||
                 path.StartsWith("/pricing") ||
                 path.StartsWith("/features") ||
@@ -72,13 +80,14 @@ namespace GrcMvc.Middleware
                 path.StartsWith("/health") ||
                 path == "/favicon.ico";
 
-            // #region agent log
-            try { System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run2", hypothesisId = "K", location = "OwnerSetupMiddleware.cs:65", message = "Path skip check result", data = new { path = path, shouldSkip = shouldSkip, pathEqualsSlash = path == "/", pathStartsWithOwnersetup = path.StartsWith("/ownersetup"), timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch (Exception logEx) { _logger.LogError(logEx, "Failed to write debug log for skip check"); }
+            // #region agent log - Use ILogger for Docker visibility
+            _logger.LogInformation("OwnerSetupMiddleware: Path skip check result | path={Path} | shouldSkip={ShouldSkip} | pathEqualsSlash={PathEqualsSlash} | pathStartsWithOwnersetup={PathStartsWithOwnersetup}", 
+                path, shouldSkip, pathEqualsSlash, pathStartsWithOwnersetup);
             // #endregion
 
             if (shouldSkip)
             {
-                _logger.LogDebug("OwnerSetupMiddleware skipping path: {Path}", path);
+                _logger.LogInformation("OwnerSetupMiddleware: SKIPPING path {Path} - shouldSkip={ShouldSkip}", path, shouldSkip);
                 await _next(context);
                 return;
             }

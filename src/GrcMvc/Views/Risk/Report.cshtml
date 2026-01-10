@@ -124,7 +124,7 @@
 
     <div class="row mt-4 text-muted small d-print-block d-none">
         <div class="col-12 text-center">
-            <p>@L["Risk_GeneratedOn"] @DateTime.Now.ToString("f") @L["Risk_ByGRCSystem"]</p>
+            <p>@L["Risk_GeneratedOn"] @DateTime.UtcNow.ToString("f") @L["Risk_ByGRCSystem"]</p>
         </div>
     </div>
 </div>

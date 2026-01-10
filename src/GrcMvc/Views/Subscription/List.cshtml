@@ -41,7 +41,7 @@
                 };
 
                 var daysUntilRenewal = subscription.NextBillingDate.HasValue ? 
-                    (subscription.NextBillingDate.Value - DateTime.Now).Days : 0;
+                    (subscription.NextBillingDate.Value - DateTime.UtcNow).Days : 0;
 
                 <div class="col-md-6 mb-4">
                     <div class="card shadow-sm h-100">

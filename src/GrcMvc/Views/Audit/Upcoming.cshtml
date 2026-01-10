@@ -57,7 +57,7 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                                var daysLeft = (item.PlannedStartDate - DateTime.Now).Days;
+                                var daysLeft = (item.PlannedStartDate - DateTime.UtcNow).Days;
                                 var urgencyClass = daysLeft < 3 ? "text-danger fw-bold" : (daysLeft < 7 ? "text-warning" : "");
 
                                 <tr>

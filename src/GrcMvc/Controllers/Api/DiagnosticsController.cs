@@ -331,6 +331,166 @@ public class DiagnosticsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Test AI agents configuration and connectivity
+    /// </summary>
+    [HttpPost("test-ai-agents")]
+    [Authorize(Roles = "PlatformAdmin")]
+    public async Task<IActionResult> TestAiAgents([FromBody] TestAiAgentsRequest? request)
+    {
+        var config = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var results = new List<object>();
+
+        // Check Claude Agent configuration
+        var claudeEnabled = config.GetValue<bool>("ClaudeAgents:Enabled", false);
+        var claudeApiKey = config.GetValue<string>("ClaudeAgents:ApiKey") ?? "";
+        var claudeModel = config.GetValue<string>("ClaudeAgents:Model") ?? "claude-sonnet-4-20250514";
+
+        var claudeResult = new
+        {
+            agentName = "Claude AI Agent",
+            enabled = claudeEnabled,
+            model = claudeModel,
+            apiKeyConfigured = !string.IsNullOrEmpty(claudeApiKey),
+            status = !claudeEnabled ? "Disabled" 
+                   : string.IsNullOrEmpty(claudeApiKey) ? "Error - No API Key" 
+                   : "Configured",
+            message = !claudeEnabled ? "Set ClaudeAgents:Enabled=true to enable"
+                    : string.IsNullOrEmpty(claudeApiKey) ? "Set CLAUDE_API_KEY environment variable"
+                    : "API key configured"
+        };
+        results.Add(claudeResult);
+
+        // Check Copilot Agent configuration
+        var copilotEnabled = config.GetValue<bool>("CopilotAgent:Enabled", false);
+        var copilotClientId = config.GetValue<string>("CopilotAgent:ClientId") ?? "";
+
+        var copilotResult = new
+        {
+            agentName = "Microsoft Copilot Agent",
+            enabled = copilotEnabled,
+            clientIdConfigured = !string.IsNullOrEmpty(copilotClientId),
+            status = !copilotEnabled ? "Disabled"
+                   : string.IsNullOrEmpty(copilotClientId) ? "Error - No Client ID"
+                   : "Configured",
+            message = !copilotEnabled ? "Set CopilotAgent:Enabled=true to enable"
+                    : string.IsNullOrEmpty(copilotClientId) ? "Configure CopilotAgent:ClientId"
+                    : "Client ID configured"
+        };
+        results.Add(copilotResult);
+
+        // Run live test if requested
+        string? liveTestResult = null;
+        if (request?.RunLiveTest == true && claudeEnabled && !string.IsNullOrEmpty(claudeApiKey))
+        {
+            try
+            {
+                var claudeService = HttpContext.RequestServices.GetService<IClaudeAgentService>();
+                if (claudeService != null)
+                {
+                    var testPrompt = request.TestPrompt ?? "Respond with only the word 'success' in Arabic and English.";
+                    var chatResponse = await claudeService.ChatAsync(testPrompt);
+                    liveTestResult = chatResponse.Response.Length > 500 ? chatResponse.Response.Substring(0, 500) + "..." : chatResponse.Response;
+                }
+                else
+                {
+                    liveTestResult = "Error: IClaudeAgentService not registered in DI";
+                }
+            }
+            catch (Exception ex)
+            {
+                liveTestResult = $"Error: {ex.Message}";
+            }
+        }
+
+        return Ok(new
+        {
+            success = true,
+            testedAt = DateTime.UtcNow,
+            agents = results,
+            liveTest = request?.RunLiveTest == true ? new
+            {
+                requested = true,
+                result = liveTestResult
+            } : null
+        });
+    }
+
+    /// <summary>
+    /// Bulk test AI agents with multiple prompts
+    /// </summary>
+    [HttpPost("bulk-test-agents")]
+    [Authorize(Roles = "PlatformAdmin")]
+    public async Task<IActionResult> BulkTestAgents([FromBody] BulkAgentTestRequest request)
+    {
+        if (request.Prompts == null || request.Prompts.Count == 0)
+        {
+            return BadRequest(new { success = false, message = "At least one prompt is required" });
+        }
+
+        var config = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+        var claudeEnabled = config.GetValue<bool>("ClaudeAgents:Enabled", false);
+        var claudeApiKey = config.GetValue<string>("ClaudeAgents:ApiKey") ?? "";
+
+        if (!claudeEnabled || string.IsNullOrEmpty(claudeApiKey))
+        {
+            return Ok(new
+            {
+                success = false,
+                message = "Claude agent is not configured. Set ClaudeAgents:Enabled=true and CLAUDE_API_KEY environment variable."
+            });
+        }
+
+        var claudeService = HttpContext.RequestServices.GetService<IClaudeAgentService>();
+        if (claudeService == null)
+        {
+            return Ok(new
+            {
+                success = false,
+                message = "IClaudeAgentService not registered in DI"
+            });
+        }
+
+        var results = new List<object>();
+        var startTime = DateTime.UtcNow;
+
+        foreach (var prompt in request.Prompts.Take(10)) // Limit to 10 prompts
+        {
+            var promptStart = DateTime.UtcNow;
+            try
+            {
+                var chatResponse = await claudeService.ChatAsync(prompt);
+                results.Add(new
+                {
+                    prompt = prompt.Length > 100 ? prompt.Substring(0, 100) + "..." : prompt,
+                    success = true,
+                    response = chatResponse.Response.Length > 500 ? chatResponse.Response.Substring(0, 500) + "..." : chatResponse.Response,
+                    responseTimeMs = (int)(DateTime.UtcNow - promptStart).TotalMilliseconds
+                });
+            }
+            catch (Exception ex)
+            {
+                results.Add(new
+                {
+                    prompt = prompt.Length > 100 ? prompt.Substring(0, 100) + "..." : prompt,
+                    success = false,
+                    error = ex.Message,
+                    responseTimeMs = (int)(DateTime.UtcNow - promptStart).TotalMilliseconds
+                });
+            }
+        }
+
+        return Ok(new
+        {
+            success = true,
+            testedAt = DateTime.UtcNow,
+            totalPrompts = results.Count,
+            successfulTests = results.Count(r => ((dynamic)r).success),
+            totalTimeMs = (int)(DateTime.UtcNow - startTime).TotalMilliseconds,
+            results
+        });
+    }
+
     private string GetClientIp()
     {
         var forwardedFor = Request.Headers["X-Forwarded-For"].FirstOrDefault();
@@ -392,6 +552,17 @@ public class ErrorLog
 public class TestEmailRequest
 {
     public string? ToEmail { get; set; }
+}
+
+public class TestAiAgentsRequest
+{
+    public bool RunLiveTest { get; set; } = false;
+    public string? TestPrompt { get; set; }
+}
+
+public class BulkAgentTestRequest
+{
+    public List<string> Prompts { get; set; } = new();
 }
 
 #endregion

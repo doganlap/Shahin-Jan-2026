@@ -574,6 +574,90 @@ public class EmailProcessingJob
             firstResponseBreaches.Count, resolutionBreaches.Count);
     }
 
+    /// <summary>
+    /// Sync all active mailboxes - check for new emails and process them
+    /// Called by Hangfire recurring job every 5 minutes
+    /// </summary>
+    [Hangfire.AutomaticRetry(Attempts = 3, DelaysInSeconds = new[] { 30, 120, 300 })]
+    public async Task SyncAllMailboxesAsync()
+    {
+        _logger.LogInformation("Starting email polling sync for all mailboxes");
+
+        var mailboxes = await _db.Set<EmailMailbox>()
+            .Where(m => m.IsActive && m.GraphUserId != null && m.AutoReplyEnabled)
+            .ToListAsync();
+
+        if (!mailboxes.Any())
+        {
+            _logger.LogInformation("No active mailboxes with auto-reply enabled for polling");
+            return;
+        }
+
+        foreach (var mailbox in mailboxes)
+        {
+            try
+            {
+                _logger.LogInformation("Syncing mailbox: {Email}", mailbox.EmailAddress);
+
+                // Get access token
+                var token = await _graphService.GetAccessTokenAsync(
+                    mailbox.TenantId!,
+                    mailbox.ClientId!,
+                    DecryptSecret(mailbox.EncryptedClientSecret!));
+
+                // Get messages since last sync (or last hour if never synced)
+                var since = mailbox.LastSyncAt ?? DateTime.UtcNow.AddHours(-1);
+                var messages = await _graphService.GetMessagesAsync(
+                    token,
+                    mailbox.GraphUserId!,
+                    since: since,
+                    top: 50);
+
+                _logger.LogInformation("Found {Count} new messages in {Mailbox}", 
+                    messages.Count, mailbox.EmailAddress);
+
+                // Process each new message
+                foreach (var message in messages)
+                {
+                    try
+                    {
+                        // Check if already processed
+                        var existing = await _db.Set<EmailMessage>()
+                            .FirstOrDefaultAsync(m => m.GraphMessageId == message.Id);
+
+                        if (existing == null)
+                        {
+                            // Process new email
+                            await ProcessNewEmailAsync(mailbox.GraphUserId!, message.Id, null);
+                            _logger.LogInformation("Processed new email: {MessageId} from {From}", 
+                                message.Id, message.From?.Address);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to process message {MessageId} in mailbox {Mailbox}", 
+                            message.Id, mailbox.EmailAddress);
+                        // Continue with next message
+                    }
+                }
+
+                // Update last sync time
+                mailbox.LastSyncAt = DateTime.UtcNow;
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation("Completed sync for mailbox: {Email}, processed {Count} messages", 
+                    mailbox.EmailAddress, messages.Count);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to sync mailbox {Mailbox}", mailbox.EmailAddress);
+                // Continue with next mailbox
+            }
+        }
+
+        _logger.LogInformation("Email polling sync completed for {Count} mailboxes", mailboxes.Count);
+    }
+
     private string DecryptSecret(string encryptedSecret)
     {
         // In production, use proper encryption/decryption

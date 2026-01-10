@@ -366,7 +366,7 @@ namespace GrcMvc.Controllers
                     TotalItems = risks.Count,
                     SuccessfulItems = createdRisks.Count,
                     FailedItems = errors.Count,
-                    CompletedAt = DateTime.Now,
+                    CompletedAt = DateTime.UtcNow,
                     Errors = errors
                 };
 

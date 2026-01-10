@@ -20,7 +20,7 @@
             <div class="text-end">
                 <span class="badge @GetOverallHealthBadge(overallHealth) fs-6">@overallHealth</span>
                 <br>
-                <small class="text-muted">آخر تحديث: @DateTime.Now.ToString("HH:mm")</small>
+                <small class="text-muted">آخر تحديث: @DateTime.UtcNow.ToString("HH:mm")</small>
             </div>
         </div>
     </div>

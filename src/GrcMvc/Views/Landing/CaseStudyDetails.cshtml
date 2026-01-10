@@ -1,13 +1,21 @@
 @model CaseStudyDetailViewModel
 @using Microsoft.AspNetCore.Mvc.Localization
 @using GrcMvc.Services
+@using GrcMvc.Services.Interfaces
 @inject IHtmlLocalizer<SharedResource> L
 @inject IAppInfoService AppInfo
+@inject IHtmlSanitizerService HtmlSanitizer
 @{
     var isArabic = System.Threading.Thread.CurrentThread.CurrentCulture.Name.StartsWith("ar");
     ViewData["Title"] = (isArabic ? Model.TitleAr : Model.Title) + " | " + AppInfo.Name;
     ViewData["Description"] = isArabic ? Model.SummaryAr : Model.Summary;
     Layout = "_LandingLayout";
+    
+    // SECURITY: Sanitize user-generated HTML content to prevent XSS attacks
+    var challengeHtml = HtmlSanitizer.SanitizeHtml(isArabic ? Model.ChallengeAr ?? Model.Challenge : Model.Challenge);
+    var solutionHtml = HtmlSanitizer.SanitizeHtml(isArabic ? Model.SolutionAr ?? Model.Solution : Model.Solution);
+    var resultsHtml = HtmlSanitizer.SanitizeHtml(isArabic ? Model.ResultsAr ?? Model.Results : Model.Results);
+    var customerQuoteHtml = HtmlSanitizer.SanitizeHtml(isArabic ? Model.CustomerQuoteAr ?? Model.CustomerQuote : Model.CustomerQuote);
 }
 
 <style>
@@ -276,7 +284,8 @@
                     <i class="bi bi-exclamation-triangle me-2"></i>
                     @(isArabic ? "التحدي" : "The Challenge")
                 </h2>
-                <p>@Html.Raw(isArabic ? Model.ChallengeAr ?? Model.Challenge : Model.Challenge)</p>
+                @* XSS FIX: Content sanitized using HtmlSanitizerService - safe to use Html.Raw *@
+                <p>@Html.Raw(challengeHtml)</p>
             </div>
         }
 
@@ -288,7 +297,8 @@
                     <i class="bi bi-lightbulb me-2"></i>
                     @(isArabic ? "الحل" : "The Solution")
                 </h2>
-                <p>@Html.Raw(isArabic ? Model.SolutionAr ?? Model.Solution : Model.Solution)</p>
+                @* XSS FIX: Content sanitized using HtmlSanitizerService - safe to use Html.Raw *@
+                <p>@Html.Raw(solutionHtml)</p>
             </div>
         }
 
@@ -300,7 +310,8 @@
                     <i class="bi bi-graph-up-arrow me-2"></i>
                     @(isArabic ? "النتائج" : "The Results")
                 </h2>
-                <p>@Html.Raw(isArabic ? Model.ResultsAr ?? Model.Results : Model.Results)</p>
+                @* XSS FIX: Content sanitized using HtmlSanitizerService - safe to use Html.Raw *@
+                <p>@Html.Raw(resultsHtml)</p>
             </div>
         }
 
@@ -308,8 +319,9 @@
         @if (!string.IsNullOrEmpty(Model.CustomerQuote) || !string.IsNullOrEmpty(Model.CustomerQuoteAr))
         {
             <div class="customer-quote fade-up">
+                @* XSS FIX: Content sanitized using HtmlSanitizerService - safe to use Html.Raw *@
                 <p class="quote-text">
-                    @(isArabic ? Model.CustomerQuoteAr ?? Model.CustomerQuote : Model.CustomerQuote)
+                    @Html.Raw(customerQuoteHtml)
                 </p>
                 @if (!string.IsNullOrEmpty(Model.CustomerName))
                 {

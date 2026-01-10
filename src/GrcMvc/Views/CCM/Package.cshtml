@@ -50,7 +50,7 @@
                                         <tr>
                                             <td>@req.Name</td>
                                             <td><span class="badge bg-success">Compliant</span></td>
-                                            <td>@DateTime.Now.ToString("MMM dd, yyyy")</td>
+                                            <td>@DateTime.UtcNow.ToString("MMM dd, yyyy")</td>
                                         </tr>
                                     }
                                 </tbody>
@@ -110,11 +110,11 @@
                 <div class="card-body">
                     <div class="mb-2">
                         <small class="text-muted">Last Scan:</small>
-                        <strong>@DateTime.Now.ToString("MMM dd, yyyy HH:mm")</strong>
+                        <strong>@DateTime.UtcNow.ToString("MMM dd, yyyy HH:mm")</strong>
                     </div>
                     <div class="mb-2">
                         <small class="text-muted">Next Scan:</small>
-                        <strong>@DateTime.Now.AddHours(24).ToString("MMM dd, yyyy HH:mm")</strong>
+                        <strong>@DateTime.UtcNow.AddHours(24).ToString("MMM dd, yyyy HH:mm")</strong>
                     </div>
                     <div>
                         <small class="text-muted">Frequency:</small>

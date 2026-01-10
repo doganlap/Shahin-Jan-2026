@@ -1011,93 +1011,6 @@
   <data name="Nav_StartFreeTrial" xml:space="preserve">
     <value>Start Free Trial</value>
   </data>
-  <data name="Analytics" xml:space="preserve">
-    <value>Analytics</value>
-  </data>
-  <data name="APPLY_Scope" xml:space="preserve">
-    <value>APPLY - Scope</value>
-  </data>
-  <data name="AssessmentTemplates" xml:space="preserve">
-    <value>Assessment Templates</value>
-  </data>
-  <data name="AuditPackages" xml:space="preserve">
-    <value>Audit Packages</value>
-  </data>
-  <data name="AuditStatistics" xml:space="preserve">
-    <value>Audit Statistics</value>
-  </data>
-  <data name="CatalogAdmin" xml:space="preserve">
-    <value>Catalog Admin</value>
-  </data>
-  <data name="CCMTests" xml:space="preserve">
-    <value>CCM Tests</value>
-  </data>
-  <data name="ContactSupport" xml:space="preserve">
-    <value>Contact Support</value>
-  </data>
-  <data name="ControlMatrix" xml:space="preserve">
-    <value>Control Matrix</value>
-  </data>
-  <data name="DocumentFlow" xml:space="preserve">
-    <value>Document Flow</value>
-  </data>
-  <data name="EvidenceLifecycle" xml:space="preserve">
-    <value>Evidence Lifecycle</value>
-  </data>
-  <data name="EvidenceStatistics" xml:space="preserve">
-    <value>Evidence Statistics</value>
-  </data>
-  <data name="Exceptions" xml:space="preserve">
-    <value>Exceptions</value>
-  </data>
-  <data name="ExecutiveDashboard" xml:space="preserve">
-    <value>Executive Dashboard</value>
-  </data>
-  <data name="FAQ" xml:space="preserve">
-    <value>FAQ</value>
-  </data>
-  <data name="FIX_Remediation" xml:space="preserve">
-    <value>FIX - Remediation</value>
-  </data>
-  <data name="GettingStarted" xml:space="preserve">
-    <value>Getting Started</value>
-  </data>
-  <data name="Glossary" xml:space="preserve">
-    <value>Glossary</value>
-  </data>
-  <data name="HelpCenter" xml:space="preserve">
-    <value>Help Center</value>
-  </data>
-  <data name="Inbox" xml:space="preserve">
-    <value>Inbox</value>
-  </data>
-  <data name="IntegratedFlow" xml:space="preserve">
-    <value>Integrated Flow</value>
-  </data>
-  <data name="Invitations" xml:space="preserve">
-    <value>Invitations</value>
-  </data>
-  <data name="KRIDashboard" xml:space="preserve">
-    <value>KRI/KPI Dashboard</value>
-  </data>
-  <data name="MainDashboard" xml:space="preserve">
-    <value>Main Dashboard</value>
-  </data>
-  <data name="MAP_ControlLibrary" xml:space="preserve">
-    <value>MAP - Control Library</value>
-  </data>
-  <data name="MyProfile" xml:space="preserve">
-    <value>My Profile</value>
-  </data>
-  <data name="PolicyStatistics" xml:space="preserve">
-    <value>Policy Statistics</value>
-  </data>
-  <data name="PROVE_Evidence" xml:space="preserve">
-    <value>PROVE - Evidence</value>
-  </data>
-  <data name="RiskReports" xml:space="preserve">
-    <value>Risk Reports</value>
-  </data>
   <!-- App Name -->
   <data name="AppName" xml:space="preserve">
     <value>GRC Management System</value>
@@ -1337,9 +1250,6 @@
   <data name="Dashboard_RecentActivity" xml:space="preserve">
     <value>Recent Activity</value>
   </data>
-  <data name="ViewAll" xml:space="preserve">
-    <value>View All</value>
-  </data>
   <data name="Dashboard_CriticalAlerts" xml:space="preserve">
     <value>Critical Alerts</value>
   </data>
@@ -1351,12 +1261,6 @@
   </data>
   <data name="Task" xml:space="preserve">
     <value>Task</value>
-  </data>
-  <data name="Priority" xml:space="preserve">
-    <value>Priority</value>
-  </data>
-  <data name="DueDate" xml:space="preserve">
-    <value>Due Date</value>
   </data>
   <data name="Priority_Urgent" xml:space="preserve">
     <value>Urgent</value>
@@ -1391,41 +1295,11 @@
   <data name="By" xml:space="preserve">
     <value>By</value>
   </data>
-  <data name="Department" xml:space="preserve">
-    <value>Department</value>
-  </data>
-  <data name="ViewDetails" xml:space="preserve">
-    <value>View Details</value>
-  </data>
-  <data name="TotalRisks" xml:space="preserve">
-    <value>Total Risks</value>
-  </data>
-  <data name="ActiveControls" xml:space="preserve">
-    <value>Active Controls</value>
-  </data>
-  <data name="PendingAudits" xml:space="preserve">
-    <value>Pending Audits</value>
-  </data>
-  <data name="ComplianceScore" xml:space="preserve">
-    <value>Compliance Score</value>
-  </data>
-  <data name="RecentRisks" xml:space="preserve">
-    <value>Recent Risks</value>
-  </data>
-  <data name="RecentActivity" xml:space="preserve">
-    <value>Recent Activity</value>
-  </data>
   <data name="NoDataAvailable" xml:space="preserve">
     <value>No data available</value>
   </data>
   <data name="LoadingData" xml:space="preserve">
     <value>Loading data...</value>
-  </data>
-  <data name="UpcomingAudits" xml:space="preserve">
-    <value>Upcoming Audits</value>
-  </data>
-  <data name="QuickActions" xml:space="preserve">
-    <value>Quick Actions</value>
   </data>
   <data name="NewRisk" xml:space="preserve">
     <value>New Risk</value>
@@ -1435,9 +1309,6 @@
   </data>
   <data name="NewAssessment" xml:space="preserve">
     <value>New Assessment</value>
-  </data>
-  <data name="GenerateReport" xml:space="preserve">
-    <value>Generate Report</value>
   </data>
   <data name="WelcomeToGrc" xml:space="preserve">
     <value>Welcome to the Governance, Risk, and Compliance Management System</value>
@@ -1475,17 +1346,11 @@
   <data name="DemoDescription" xml:space="preserve">
     <value>Pre-configured Shahin-AI demo organization</value>
   </data>
-  <data name="RiskName" xml:space="preserve">
-    <value>Risk Name</value>
-  </data>
   <data name="Level" xml:space="preserve">
     <value>Level</value>
   </data>
   <data name="AuditTitle" xml:space="preserve">
     <value>Audit Title</value>
-  </data>
-  <data name="AuditType" xml:space="preserve">
-    <value>Type</value>
   </data>
   <data name="Internal" xml:space="preserve">
     <value>Internal</value>
@@ -1499,9 +1364,6 @@
   <data name="RiskMatrix" xml:space="preserve">
     <value>Risk Matrix</value>
   </data>
-  <data name="Report" xml:space="preserve">
-    <value>Report</value>
-  </data>
   <data name="EvidenceManagement" xml:space="preserve">
     <value>Evidence Management</value>
   </data>
@@ -1510,9 +1372,6 @@
   </data>
   <data name="ExpiringSoon" xml:space="preserve">
     <value>Expiring Soon</value>
-  </data>
-  <data name="Statistics" xml:space="preserve">
-    <value>Statistics</value>
   </data>
   <data name="Probability" xml:space="preserve">
     <value>Probability</value>
@@ -1531,9 +1390,6 @@
   </data>
   <data name="Classification" xml:space="preserve">
     <value>Classification</value>
-  </data>
-  <data name="Download" xml:space="preserve">
-    <value>Download</value>
   </data>
   <data name="NoRecordsFound" xml:space="preserve">
     <value>No records found</value>
@@ -1594,9 +1450,6 @@
   </data>
   <data name="AI_Confidence" xml:space="preserve">
     <value>Analysis Confidence</value>
-  </data>
-  <data name="Priority" xml:space="preserve">
-    <value>Priority</value>
   </data>
   <data name="High" xml:space="preserve">
     <value>High</value>

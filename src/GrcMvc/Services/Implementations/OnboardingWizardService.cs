@@ -8,6 +8,7 @@ using GrcMvc.Models.DTOs;
 using GrcMvc.Models.Entities;
 using GrcMvc.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace GrcMvc.Services.Implementations
@@ -22,6 +23,9 @@ namespace GrcMvc.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRulesEngineService _rulesEngine;
         private readonly IAuditEventService _auditService;
+        private readonly IOnboardingCoverageService _coverageService;
+        private readonly IFieldRegistryService _fieldRegistryService;
+        private readonly IConfiguration _configuration;
         private readonly ILogger<OnboardingWizardService> _logger;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
@@ -35,11 +39,17 @@ namespace GrcMvc.Services.Implementations
             IUnitOfWork unitOfWork,
             IRulesEngineService rulesEngine,
             IAuditEventService auditService,
+            IOnboardingCoverageService coverageService,
+            IFieldRegistryService fieldRegistryService,
+            IConfiguration configuration,
             ILogger<OnboardingWizardService> logger)
         {
             _unitOfWork = unitOfWork;
             _rulesEngine = rulesEngine;
             _auditService = auditService;
+            _coverageService = coverageService;
+            _fieldRegistryService = fieldRegistryService;
+            _configuration = configuration;
             _logger = logger;
         }
 
@@ -107,6 +117,77 @@ namespace GrcMvc.Services.Implementations
             var sections = BuildSectionProgress(completedSections);
             var requiredComplete = new[] { "A", "D", "E", "F", "H", "I" }.All(s => completedSections.Contains(s));
 
+            // Add coverage validation if enabled
+            var enableCoverageValidation = _configuration?.GetValue<bool>("Onboarding:EnableCoverageValidation", true) ?? true;
+            // #region agent log
+            System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "A", location = "OnboardingWizardService.cs:121", message = "Coverage validation enabled check", data = new { enableCoverageValidation, configValue = _configuration?.GetValue<bool>("Onboarding:EnableCoverageValidation", true), hasConfig = _configuration != null }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+            // #endregion
+            Dictionary<string, CoverageValidationResult>? sectionCoverage = null;
+            int overallCoveragePercent = 0;
+            bool coverageComplete = false;
+
+            if (enableCoverageValidation)
+            {
+                try
+                {
+                    // #region agent log
+                    System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "B", location = "OnboardingWizardService.cs:130", message = "Calling GetAllSectionsCoverageAsync", data = new { tenantId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                    // #endregion
+                    var allCoverage = await GetAllSectionsCoverageAsync(tenantId);
+                    // #region agent log
+                    System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "C", location = "OnboardingWizardService.cs:133", message = "GetAllSectionsCoverageAsync result", data = new { coverageCount = allCoverage?.Count ?? 0, hasCoverage = allCoverage != null, coverageKeys = allCoverage?.Keys.ToList() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                    // #endregion
+                    sectionCoverage = allCoverage;
+
+                    // Update section progress with coverage information
+                    foreach (var (sectionCode, sectionProgress) in sections)
+                    {
+                        if (allCoverage.TryGetValue(sectionCode, out var coverageResult))
+                        {
+                            sectionProgress.CoverageValidation = coverageResult;
+                            sectionProgress.CoverageCompletionPercent = coverageResult.OverallCompletionPercentage;
+                            sectionProgress.CoverageValid = coverageResult.IsValid;
+
+                            if (coverageResult.NodeResults != null && coverageResult.NodeResults.Count > 0)
+                            {
+                                var nodeId = MapSectionToNodeId(sectionCode);
+                                if (coverageResult.NodeResults.TryGetValue(nodeId, out var nodeResult))
+                                {
+                                    sectionProgress.MissingRequiredFields = nodeResult.MissingRequiredFields ?? new List<string>();
+                                }
+                            }
+                        }
+                    }
+
+                    // Calculate overall coverage percentage
+                    if (sections.Values.Any(s => s.CoverageCompletionPercent > 0))
+                    {
+                        overallCoveragePercent = (int)sections.Values
+                            .Where(s => s.CoverageCompletionPercent > 0)
+                            .Average(s => s.CoverageCompletionPercent);
+                    }
+
+                    // Check if all required sections have complete coverage
+                    var requiredSections = new[] { "A", "D", "E", "F", "H", "I" };
+                    coverageComplete = requiredSections.All(s =>
+                    {
+                        if (sections.TryGetValue(s, out var section))
+                        {
+                            return section.CoverageValid && section.CoverageCompletionPercent == 100;
+                        }
+                        return false;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    // #region agent log
+                    System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "D", location = "OnboardingWizardService.cs:174", message = "Exception in coverage validation", data = new { exceptionType = ex.GetType().Name, exceptionMessage = ex.Message, stackTrace = ex.StackTrace }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                    // #endregion
+                    _logger.LogWarning(ex, "Error getting coverage validation for progress in tenant {TenantId}", tenantId);
+                    // Don't fail progress if coverage check fails
+                }
+            }
+
             return new WizardProgressSummary
             {
                 TenantId = tenantId,
@@ -115,8 +196,11 @@ namespace GrcMvc.Services.Implementations
                 TotalSteps = 12,
                 ProgressPercent = wizard.ProgressPercent,
                 Sections = sections,
-                CanComplete = requiredComplete,
-                LastUpdated = wizard.ModifiedDate ?? wizard.CreatedDate
+                CanComplete = requiredComplete && (!enableCoverageValidation || coverageComplete),
+                LastUpdated = wizard.ModifiedDate ?? wizard.CreatedDate,
+                SectionCoverage = sectionCoverage,
+                OverallCoveragePercent = overallCoveragePercent,
+                CoverageComplete = coverageComplete
             };
         }
 
@@ -147,7 +231,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("A", section.IsComplete, wizard, "Organization Identity saved successfully.");
+            return await CreateSaveResponseAsync("A", section.IsComplete, wizard, "Organization Identity saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionBAsync(Guid tenantId, SectionB_AssuranceObjective section, string userId)
@@ -165,7 +249,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("B", section.IsComplete, wizard, "Assurance Objective saved successfully.");
+            return await CreateSaveResponseAsync("B", section.IsComplete, wizard, "Assurance Objective saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionCAsync(Guid tenantId, SectionC_RegulatoryApplicability section, string userId)
@@ -185,7 +269,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("C", section.IsComplete, wizard, "Regulatory Applicability saved successfully.");
+            return await CreateSaveResponseAsync("C", section.IsComplete, wizard, "Regulatory Applicability saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionDAsync(Guid tenantId, SectionD_ScopeDefinition section, string userId)
@@ -207,7 +291,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("D", section.IsComplete, wizard, "Scope Definition saved successfully.");
+            return await CreateSaveResponseAsync("D", section.IsComplete, wizard, "Scope Definition saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionEAsync(Guid tenantId, SectionE_DataRiskProfile section, string userId)
@@ -232,7 +316,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("E", section.IsComplete, wizard, "Data & Risk Profile saved successfully.");
+            return await CreateSaveResponseAsync("E", section.IsComplete, wizard, "Data & Risk Profile saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionFAsync(Guid tenantId, SectionF_TechnologyLandscape section, string userId)
@@ -258,7 +342,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("F", section.IsComplete, wizard, "Technology Landscape saved successfully.");
+            return await CreateSaveResponseAsync("F", section.IsComplete, wizard, "Technology Landscape saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionGAsync(Guid tenantId, SectionG_ControlOwnership section, string userId)
@@ -279,7 +363,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("G", section.IsComplete, wizard, "Control Ownership saved successfully.");
+            return await CreateSaveResponseAsync("G", section.IsComplete, wizard, "Control Ownership saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionHAsync(Guid tenantId, SectionH_TeamsRolesAccess section, string userId)
@@ -305,7 +389,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("H", section.IsComplete, wizard, "Teams, Roles & Access saved successfully.");
+            return await CreateSaveResponseAsync("H", section.IsComplete, wizard, "Teams, Roles & Access saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionIAsync(Guid tenantId, SectionI_WorkflowCadence section, string userId)
@@ -329,7 +413,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("I", section.IsComplete, wizard, "Workflow & Cadence saved successfully.");
+            return await CreateSaveResponseAsync("I", section.IsComplete, wizard, "Workflow & Cadence saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionJAsync(Guid tenantId, SectionJ_EvidenceStandards section, string userId)
@@ -351,7 +435,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("J", section.IsComplete, wizard, "Evidence Standards saved successfully.");
+            return await CreateSaveResponseAsync("J", section.IsComplete, wizard, "Evidence Standards saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionKAsync(Guid tenantId, SectionK_BaselineOverlays section, string userId)
@@ -368,7 +452,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("K", section.IsComplete, wizard, "Baseline & Overlays saved successfully.");
+            return await CreateSaveResponseAsync("K", section.IsComplete, wizard, "Baseline & Overlays saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveSectionLAsync(Guid tenantId, SectionL_GoLiveMetrics section, string userId)
@@ -387,7 +471,7 @@ namespace GrcMvc.Services.Implementations
             wizard.ModifiedBy = userId;
 
             await _unitOfWork.SaveChangesAsync();
-            return CreateSaveResponse("L", section.IsComplete, wizard, "Go-Live & Metrics saved successfully.");
+            return await CreateSaveResponseAsync("L", section.IsComplete, wizard, "Go-Live & Metrics saved successfully.");
         }
 
         public async Task<WizardSectionSaveResponse> SaveMinimalOnboardingAsync(Guid tenantId, MinimalOnboardingDto minimal, string userId)
@@ -466,14 +550,9 @@ namespace GrcMvc.Services.Implementations
 
             await _unitOfWork.SaveChangesAsync();
 
-            return new WizardSectionSaveResponse
-            {
-                Success = true,
-                Section = "Minimal",
-                SectionComplete = true,
-                OverallProgress = wizard.ProgressPercent,
-                Message = "Minimal onboarding complete. Ready to derive scope."
-            };
+            var response = await CreateSaveResponseAsync("Minimal", true, wizard, "Minimal onboarding complete. Ready to derive scope.");
+            response.Section = "Minimal";
+            return response;
         }
 
         #endregion
@@ -722,13 +801,13 @@ namespace GrcMvc.Services.Implementations
             };
         }
 
-        private WizardSectionSaveResponse CreateSaveResponse(string section, bool complete, OnboardingWizard wizard, string message)
+        private async Task<WizardSectionSaveResponse> CreateSaveResponseAsync(string section, bool complete, OnboardingWizard wizard, string message)
         {
             var sectionOrder = new[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" };
             var currentIndex = Array.IndexOf(sectionOrder, section);
             var nextSection = currentIndex < 11 ? sectionOrder[currentIndex + 1] : null;
 
-            return new WizardSectionSaveResponse
+            var response = new WizardSectionSaveResponse
             {
                 Success = true,
                 Section = section,
@@ -737,6 +816,62 @@ namespace GrcMvc.Services.Implementations
                 NextSection = nextSection,
                 Message = message
             };
+
+            // Add coverage validation if enabled
+            var enableCoverageValidation = _configuration?.GetValue<bool>("Onboarding:ValidateOnSectionSave", true) ?? true;
+            // #region agent log
+            System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "E", location = "OnboardingWizardService.cs:809", message = "ValidateOnSectionSave check", data = new { enableCoverageValidation, section, tenantId = wizard.TenantId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+            // #endregion
+            if (enableCoverageValidation)
+            {
+                try
+                {
+                    // #region agent log
+                    System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "F", location = "OnboardingWizardService.cs:814", message = "Calling ValidateSectionCoverageAsync", data = new { section, tenantId = wizard.TenantId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                    // #endregion
+                    var coverageResult = await ValidateSectionCoverageAsync(wizard.TenantId, section);
+                    // #region agent log
+                    System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "G", location = "OnboardingWizardService.cs:816", message = "ValidateSectionCoverageAsync result", data = new { hasResult = coverageResult != null, isValid = coverageResult?.IsValid, completionPercent = coverageResult?.OverallCompletionPercentage }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                    // #endregion
+                    if (coverageResult != null)
+                    {
+                        response.CoverageValidation = coverageResult;
+                        response.CoverageValid = coverageResult.IsValid;
+                        response.CoverageCompletionPercent = coverageResult.OverallCompletionPercentage;
+
+                        // Extract missing fields from node results
+                        if (coverageResult.NodeResults != null && coverageResult.NodeResults.Count > 0)
+                        {
+                            var nodeId = MapSectionToNodeId(section);
+                            if (coverageResult.NodeResults.TryGetValue(nodeId, out var nodeResult))
+                            {
+                                response.MissingRequiredFields = nodeResult.MissingRequiredFields ?? new List<string>();
+                                
+                                // Add conditional required fields
+                                var conditionalFields = _coverageService.EvaluateConditionalRequired(
+                                    new OnboardingFieldValueProvider(wizard),
+                                    await _coverageService.LoadManifestAsync());
+                                
+                                var missingConditional = conditionalFields
+                                    .Where(f => !new OnboardingFieldValueProvider(wizard).HasFieldValue(f))
+                                    .ToList();
+                                
+                                response.MissingConditionalFields = missingConditional;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // #region agent log
+                    System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "H", location = "OnboardingWizardService.cs:845", message = "Exception in ValidateSectionCoverageAsync", data = new { section, exceptionType = ex.GetType().Name, exceptionMessage = ex.Message, stackTrace = ex.StackTrace }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                    // #endregion
+                    _logger.LogWarning(ex, "Error validating coverage for section {Section} in tenant {TenantId}", section, wizard.TenantId);
+                    // Don't fail the save operation if coverage validation fails
+                }
+            }
+
+            return response;
         }
 
         private OnboardingWizardStateDto MapToDto(OnboardingWizard wizard)
@@ -801,6 +936,176 @@ namespace GrcMvc.Services.Implementations
             {
                 return new T();
             }
+        }
+
+        /// <summary>
+        /// Validate coverage for a specific section/node
+        /// </summary>
+        public async Task<CoverageValidationResult?> ValidateSectionCoverageAsync(Guid tenantId, string sectionId)
+        {
+            try
+            {
+                var wizard = await GetWizardAsync(tenantId);
+                if (wizard == null)
+                {
+                    _logger.LogWarning("Wizard not found for tenant {TenantId}", tenantId);
+                    return null;
+                }
+
+                // Create field value provider from wizard
+                var fieldProvider = new OnboardingFieldValueProvider(wizard);
+
+                // Map section ID to node ID
+                var nodeId = MapSectionToNodeId(sectionId);
+
+                // Validate node coverage
+                var nodeResult = await _coverageService.ValidateNodeCoverageAsync(nodeId, fieldProvider);
+                
+                // Get mission coverage if applicable
+                var missionId = MapSectionToMissionId(sectionId);
+                MissionCoverageResult? missionResult = null;
+                if (!string.IsNullOrEmpty(missionId))
+                {
+                    missionResult = await _coverageService.ValidateMissionCoverageAsync(missionId, fieldProvider);
+                }
+
+                // Build validation result
+                var result = new CoverageValidationResult
+                {
+                    IsValid = nodeResult.IsValid && (missionResult == null || missionResult.IsValid),
+                    NodeResults = new Dictionary<string, NodeCoverageResult>
+                    {
+                        [nodeId] = nodeResult
+                    },
+                    MissionResults = missionResult != null 
+                        ? new Dictionary<string, MissionCoverageResult> { [missionId] = missionResult }
+                        : new Dictionary<string, MissionCoverageResult>()
+                };
+
+                // Calculate completion percentage
+                var totalRequired = nodeResult.PresentRequiredFields.Count + nodeResult.MissingRequiredFields.Count;
+                result.OverallCompletionPercentage = totalRequired > 0 
+                    ? (int)((nodeResult.PresentRequiredFields.Count / (double)totalRequired) * 100)
+                    : 100;
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating coverage for section {SectionId} in tenant {TenantId}", sectionId, tenantId);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get coverage status for all sections
+        /// </summary>
+        public async Task<Dictionary<string, CoverageValidationResult>> GetAllSectionsCoverageAsync(Guid tenantId)
+        {
+            var results = new Dictionary<string, CoverageValidationResult>();
+            
+            try
+            {
+                // #region agent log
+                System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "I", location = "OnboardingWizardService.cs:981", message = "GetAllSectionsCoverageAsync entry", data = new { tenantId, hasCoverageService = _coverageService != null }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                // #endregion
+                var wizard = await GetWizardAsync(tenantId);
+                if (wizard == null)
+                {
+                    // #region agent log
+                    System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "J", location = "OnboardingWizardService.cs:987", message = "Wizard not found", data = new { tenantId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                    // #endregion
+                    return results;
+                }
+
+                var fieldProvider = new OnboardingFieldValueProvider(wizard);
+                
+                // Validate complete coverage
+                // #region agent log
+                System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "K", location = "OnboardingWizardService.cs:994", message = "Calling ValidateCompleteCoverageAsync", data = new { tenantId }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                // #endregion
+                var completeResult = await _coverageService.ValidateCompleteCoverageAsync(fieldProvider);
+                // #region agent log
+                System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "L", location = "OnboardingWizardService.cs:996", message = "ValidateCompleteCoverageAsync result", data = new { hasResult = completeResult != null, nodeResultsCount = completeResult?.NodeResults?.Count ?? 0 }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                // #endregion
+                
+                // Group results by section
+                var sectionMap = new Dictionary<string, string>
+                {
+                    ["A"] = "M3.A",
+                    ["B"] = "M2.B",
+                    ["C"] = "M1.C",
+                    ["D"] = "M1.D",
+                    ["E"] = "M1.E",
+                    ["F"] = "M3.F",
+                    ["G"] = "M2.G",
+                    ["H"] = "M2.H",
+                    ["I"] = "M2.I",
+                    ["J"] = "M3.J",
+                    ["K"] = "M3.K",
+                    ["L"] = "M2.L"
+                };
+
+                foreach (var (section, nodeId) in sectionMap)
+                {
+                    if (completeResult.NodeResults.TryGetValue(nodeId, out var nodeResult))
+                    {
+                        var totalRequired = nodeResult.RequiredFields.Count;
+                        results[section] = new CoverageValidationResult
+                        {
+                            IsValid = nodeResult.IsValid,
+                            NodeResults = new Dictionary<string, NodeCoverageResult> { [nodeId] = nodeResult },
+                            MissionResults = new Dictionary<string, MissionCoverageResult>(),
+                            OverallCompletionPercentage = totalRequired > 0
+                                ? (int)((nodeResult.PresentRequiredFields.Count / (double)totalRequired) * 100)
+                                : 100
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // #region agent log
+                System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "M", location = "OnboardingWizardService.cs:1032", message = "Exception in GetAllSectionsCoverageAsync", data = new { tenantId, exceptionType = ex.GetType().Name, exceptionMessage = ex.Message, stackTrace = ex.StackTrace }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+                // #endregion
+                _logger.LogError(ex, "Error getting all sections coverage for tenant {TenantId}", tenantId);
+            }
+
+            // #region agent log
+            System.IO.File.AppendAllText("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "N", location = "OnboardingWizardService.cs:1036", message = "GetAllSectionsCoverageAsync exit", data = new { resultsCount = results.Count, resultKeys = results.Keys.ToList() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n");
+            // #endregion
+            return results;
+        }
+
+        private string MapSectionToNodeId(string sectionId)
+        {
+            return sectionId.ToUpper() switch
+            {
+                "A" => "M3.A",
+                "B" => "M2.B",
+                "C" => "M1.C",
+                "D" => "M1.D",
+                "E" => "M1.E",
+                "F" => "M3.F",
+                "G" => "M2.G",
+                "H" => "M2.H",
+                "I" => "M2.I",
+                "J" => "M3.J",
+                "K" => "M3.K",
+                "L" => "M2.L",
+                _ => sectionId
+            };
+        }
+
+        private string? MapSectionToMissionId(string sectionId)
+        {
+            return sectionId.ToUpper() switch
+            {
+                "A" or "F" or "J" or "K" => "MISSION_3_SYSTEMS_EVIDENCE",
+                "B" or "G" or "H" or "I" or "L" => "MISSION_2_PEOPLE_WORKFLOW",
+                "C" or "D" or "E" => "MISSION_1_SCOPE_RISK",
+                _ => null
+            };
         }
 
         #endregion

@@ -370,10 +370,20 @@ builder.Services.AddHealthChecks()
         failureStatus: HealthStatus.Degraded,
         tags: new[] { "jobs", "hangfire" },
         timeout: TimeSpan.FromSeconds(3))
+    .AddCheck<GrcMvc.HealthChecks.OnboardingCoverageHealthCheck>(
+        name: "onboarding-coverage",
+        failureStatus: HealthStatus.Degraded,
+        tags: new[] { "onboarding", "coverage", "manifest" },
+        timeout: TimeSpan.FromSeconds(5))
+    .AddCheck<GrcMvc.HealthChecks.FieldRegistryHealthCheck>(
+        name: "field-registry",
+        failureStatus: HealthStatus.Degraded,
+        tags: new[] { "onboarding", "field-registry", "validation" },
+        timeout: TimeSpan.FromSeconds(5))
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Application is running"),
         tags: new[] { "api", "self" });
 
-Console.WriteLine("[HEALTH] Enhanced health checks configured (Database, Hangfire, Self)");
+Console.WriteLine("[HEALTH] Enhanced health checks configured (Database, Hangfire, Onboarding Coverage, Field Registry, Self)");
 
 // Configure Data Protection
 builder.Services.AddDataProtection()
@@ -586,6 +596,11 @@ builder.Services.AddScoped<ITenantService, TenantService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<IOnboardingWizardService, OnboardingWizardService>();
 builder.Services.AddScoped<IAuditEventService, AuditEventService>();
+
+// Onboarding Coverage Services - Coverage validation and field registry
+builder.Services.AddScoped<IOnboardingCoverageService, OnboardingCoverageService>();
+builder.Services.AddScoped<IFieldRegistryService, FieldRegistryService>();
+// Note: OnboardingFieldValueProvider is created per-request, not registered as singleton
 
 // Owner Dashboard Service - replaces direct DbContext access in OwnerController
 builder.Services.AddScoped<IOwnerDashboardService, OwnerDashboardService>();
@@ -809,6 +824,9 @@ builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
 // Authentication Audit Service (comprehensive security audit logging)
 builder.Services.AddScoped<IAuthenticationAuditService, AuthenticationAuditService>();
 
+// HTML Sanitization Service (XSS protection for user-generated content)
+builder.Services.AddScoped<IHtmlSanitizerService, HtmlSanitizerService>();
+
 // Password History Service (prevents password reuse - GRC compliance)
 builder.Services.AddScoped<IPasswordHistoryService, PasswordHistoryService>();
 
@@ -858,6 +876,9 @@ builder.Services.AddScoped<ApplicationInitializer>();
 
 // Register User Seeding Hosted Service (runs on startup)
 builder.Services.AddHostedService<UserSeedingHostedService>();
+
+// Register Onboarding Services Startup Validator (validates onboarding services on startup)
+builder.Services.AddHostedService<GrcMvc.Services.StartupValidators.OnboardingServicesStartupValidator>();
 
 // Register Catalog Seeder Service
 builder.Services.AddScoped<CatalogSeederService>();
@@ -1228,6 +1249,9 @@ builder.Services.AddHttpClient("WebhookClient")
 // Email Operations Services (Shahin + Dogan Consult)
 builder.Services.AddHttpClient<GrcMvc.Services.EmailOperations.IMicrosoftGraphEmailService,
     GrcMvc.Services.EmailOperations.MicrosoftGraphEmailService>();
+
+// Adaptive Cards for email notifications
+builder.Services.AddScoped<GrcMvc.Services.EmailOperations.AdaptiveCardEmailService>();
 builder.Services.AddScoped<GrcMvc.Services.EmailOperations.IEmailAiService,
     GrcMvc.Services.EmailOperations.EmailAiService>();
 builder.Services.AddScoped<GrcMvc.Services.EmailOperations.IEmailOperationsService,
@@ -1448,6 +1472,16 @@ if (enableHangfire)
         new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
 
     appLogger.LogInformation("✅ Email Operations SLA check job scheduled");
+
+    // Email Operations - Polling sync for new emails (alternative to webhooks)
+    // Checks for new emails every 5 minutes and processes them with auto-reply rules
+    RecurringJob.AddOrUpdate<GrcMvc.Services.EmailOperations.EmailProcessingJob>(
+        "email-polling-sync",
+        job => job.SyncAllMailboxesAsync(),
+        "*/5 * * * *", // Every 5 minutes
+        new RecurringJobOptions { TimeZone = TimeZoneInfo.Local });
+
+    appLogger.LogInformation("✅ Email polling sync job scheduled (every 5 minutes)");
 
     // Integration Layer - Sync scheduler every 5 minutes
     RecurringJob.AddOrUpdate<SyncSchedulerJob>(

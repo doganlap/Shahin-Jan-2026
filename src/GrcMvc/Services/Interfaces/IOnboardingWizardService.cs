@@ -106,6 +106,16 @@ namespace GrcMvc.Services.Interfaces
         /// Get derived scope based on wizard answers.
         /// </summary>
         Task<OnboardingScopeDto> GetDerivedScopeAsync(Guid tenantId);
+
+        /// <summary>
+        /// Validate coverage for a specific section/node
+        /// </summary>
+        Task<CoverageValidationResult?> ValidateSectionCoverageAsync(Guid tenantId, string sectionId);
+
+        /// <summary>
+        /// Get coverage status for all sections
+        /// </summary>
+        Task<System.Collections.Generic.Dictionary<string, CoverageValidationResult>> GetAllSectionsCoverageAsync(Guid tenantId);
     }
 
     /// <summary>

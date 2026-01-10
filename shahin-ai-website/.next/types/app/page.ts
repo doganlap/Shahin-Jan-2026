@@ -1,4 +1,4 @@
-// File: /home/dogan/grc-system/shahin-ai-website/app/page.tsx
+// File: /home/Shahin-ai/Shahin-Jan-2026/shahin-ai-website/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

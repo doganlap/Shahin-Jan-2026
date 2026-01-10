@@ -110,10 +110,10 @@
                             Your subscription automatically renews on <strong>@(Model.NextBillingDate?.ToString("MMMM d, yyyy") ?? "N/A")</strong>
                         </p>
 
-                        @if (Model.NextBillingDate.HasValue && (Model.NextBillingDate.Value - DateTime.Now).Days <= 7)
+                        @if (Model.NextBillingDate.HasValue && (Model.NextBillingDate.Value - DateTime.UtcNow).Days <= 7)
                         {
                             <div class="alert alert-warning">
-                                <small>Your subscription renews in @(Model.NextBillingDate.HasValue ? Math.Max(1, (Model.NextBillingDate.Value - DateTime.Now).Days) : 0) days</small>
+                                <small>Your subscription renews in @(Model.NextBillingDate.HasValue ? Math.Max(1, (Model.NextBillingDate.Value - DateTime.UtcNow).Days) : 0) days</small>
                             </div>
                         }
 

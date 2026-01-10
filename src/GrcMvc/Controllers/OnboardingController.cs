@@ -34,6 +34,7 @@ namespace GrcMvc.Controllers
     [Route("api/onboarding")]
     [Consumes("application/json")]
     [Produces("application/json")]
+    [IgnoreAntiforgeryToken] // API endpoints don't require CSRF tokens
     public class OnboardingApiController : ControllerBase
     {
         private readonly ITenantService _tenantService;

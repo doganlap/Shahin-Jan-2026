@@ -803,6 +803,31 @@ namespace GrcMvc.Models.DTOs
         public string? NextSection { get; set; }
         public List<string> ValidationErrors { get; set; } = new();
         public string Message { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// Coverage validation result for this section
+        /// </summary>
+        public CoverageValidationResult? CoverageValidation { get; set; }
+        
+        /// <summary>
+        /// Missing required fields for this section
+        /// </summary>
+        public List<string> MissingRequiredFields { get; set; } = new();
+        
+        /// <summary>
+        /// Missing conditional required fields (required based on answers)
+        /// </summary>
+        public List<string> MissingConditionalFields { get; set; } = new();
+        
+        /// <summary>
+        /// Coverage completion percentage for this section
+        /// </summary>
+        public int CoverageCompletionPercent { get; set; }
+        
+        /// <summary>
+        /// Whether this section has all required fields (coverage validation)
+        /// </summary>
+        public bool CoverageValid { get; set; }
     }
 
     /// <summary>
@@ -897,6 +922,21 @@ namespace GrcMvc.Models.DTOs
         public List<string> PendingRequiredFields { get; set; } = new();
         public bool CanComplete { get; set; }
         public DateTime? LastUpdated { get; set; }
+        
+        /// <summary>
+        /// Coverage validation results for all sections
+        /// </summary>
+        public Dictionary<string, CoverageValidationResult>? SectionCoverage { get; set; }
+        
+        /// <summary>
+        /// Overall coverage completion percentage
+        /// </summary>
+        public int OverallCoveragePercent { get; set; }
+        
+        /// <summary>
+        /// Whether all required sections have complete coverage
+        /// </summary>
+        public bool CoverageComplete { get; set; }
     }
 
     public class SectionProgress
@@ -907,7 +947,26 @@ namespace GrcMvc.Models.DTOs
         public bool IsRequired { get; set; }
         public int QuestionsTotal { get; set; }
         public int QuestionsAnswered { get; set; }
+        
+        /// <summary>
+        /// Missing required fields for this section (from validation)
+        /// </summary>
         public List<string> MissingRequiredFields { get; set; } = new();
+        
+        /// <summary>
+        /// Coverage validation for this section
+        /// </summary>
+        public CoverageValidationResult? CoverageValidation { get; set; }
+        
+        /// <summary>
+        /// Coverage completion percentage for this section
+        /// </summary>
+        public int CoverageCompletionPercent { get; set; }
+        
+        /// <summary>
+        /// Whether this section has complete coverage (all required fields present)
+        /// </summary>
+        public bool CoverageValid { get; set; }
     }
 
     #endregion

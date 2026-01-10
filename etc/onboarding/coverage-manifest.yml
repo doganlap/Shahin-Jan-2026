@@ -1,0 +1,329 @@
+version: "1.0"
+namespace: "grc.onboarding.coverage"
+generated_at: "2026-01-10"
+
+# Purpose:
+# - required_ids_by_node: what MUST be present to complete/advance a given node
+# - required_ids_by_mission: union of required ids across nodes in that mission
+# - optional_ids_by_node: allowed but not required (for completeness/telemetry)
+
+required_ids_by_node:
+
+  # -------------------------
+  # FAST START
+  # -------------------------
+  "FS.1":
+    - "SF.S1.organization_name"
+    - "SF.S1.admin_email"
+    - "SF.S1.subscription_tier"
+    - "SF.S1.country_of_operation"
+    - "SF.S1.tos_accepted"
+    - "SF.S1.privacy_policy_accepted"
+    - "SF.S1.data_processing_consent"
+
+  "FS.2":
+    - "SF.S2.organization_type"
+    - "SF.S2.sector"
+    - "SF.S2.primary_country"
+    - "SF.S2.data_hosting_model"
+    - "SF.S2.data_types_processed"
+    - "SF.S2.organization_size"
+    - "SF.S2.compliance_maturity"
+
+  "FS.3":
+    # Derived (must exist before user can confirm)
+    - "SF.S3.applicable_baselines"
+    - "SF.S3.baseline_reason"
+    - "SF.S3.estimated_controls"
+    # User confirmation (must be true to advance; enforced by flow guard)
+    - "SF.S3.user_confirmation"
+    # Baseline adoption is required in the wizard model
+    - "W.K.1.adopt_default_baseline"
+
+  "FS.4":
+    - "SF.S4.plan_name"
+    - "SF.S4.plan_type"
+    - "SF.S4.start_date"
+    - "SF.S4.target_end_date"
+    - "W.B.1.primary_driver"
+
+  # -------------------------
+  # MISSION 1: Scope & Risk
+  # -------------------------
+  "M1.C":
+    - "W.C.1.primary_regulators"
+
+  "M1.D":
+    # Scope is optional in your current spec; minimum required for boundary definition is environments or systems.
+    # Choose one policy; here we enforce at least environments selection.
+    - "W.D.5.in_scope_environments"
+
+  "M1.E":
+    - "W.E.1.data_types_processed"
+
+  "M1.EXIT":
+    # No user fields required; completion depends on upstream nodes being completed.
+    - "W.C.1.primary_regulators"
+    - "W.D.5.in_scope_environments"
+    - "W.E.1.data_types_processed"
+
+  # -------------------------
+  # MISSION 2: People & Workflow
+  # -------------------------
+  "M2.G":
+    # Governance can be optional; minimum required is ownership approach to route tasks.
+    - "W.G.1.ownership_approach"
+
+  "M2.H":
+    # Minimum: at least one admin defined OR org admins already exist from SF.S1.admin_email.
+    # Here we enforce H.1 for completeness in enterprise setups.
+    - "W.H.1.organization_admins"
+
+  "M2.I":
+    # Minimum operationalization: evidence SLA or evidence frequency defaults
+    - "W.I.8.evidence_sla_submit_days"
+
+  "M2.B":
+    # Remaining assurance objective are optional; no hard required fields.
+    []
+
+  "M2.L":
+    # Success metrics optional; no hard required fields.
+    []
+
+  "M2.EXIT":
+    - "W.G.1.ownership_approach"
+    - "W.H.1.organization_admins"
+    - "W.I.8.evidence_sla_submit_days"
+
+  # -------------------------
+  # MISSION 3: Systems & Evidence
+  # -------------------------
+  "M3.A":
+    # Identity deepening optional; no hard required fields.
+    []
+
+  "M3.F":
+    # Technology integration optional; no hard required fields.
+    []
+
+  "M3.J":
+    # Evidence standards optional; but if naming convention required then naming pattern becomes required by rule.
+    []
+
+  "M3.K":
+    - "W.K.1.adopt_default_baseline"
+
+  "M3.EXIT":
+    - "W.K.1.adopt_default_baseline"
+
+
+optional_ids_by_node:
+
+  "FS.2":
+    - "SF.S2.is_critical_infrastructure"
+    - "SF.S2.third_party_vendors"
+
+  "FS.3":
+    - "SF.S3.recommended_packages"
+    - "SF.S3.recommended_templates"
+    - "W.K.2.select_overlays"
+
+  "FS.4":
+    - "SF.S4.description"
+
+  "M1.C":
+    - "W.C.2.secondary_regulators"
+    - "W.C.3.mandatory_frameworks"
+    - "W.C.4.benchmarking_frameworks"
+    - "W.C.5.internal_policies_standards"
+    - "W.C.6.certifications_held"
+    - "W.C.7.audit_scope_type"
+
+  "M1.D":
+    - "W.D.1.in_scope_legal_entities"
+    - "W.D.2.in_scope_business_units"
+    - "W.D.3.in_scope_systems_apps"
+    - "W.D.4.in_scope_processes"
+    - "W.D.6.in_scope_locations"
+    - "W.D.7.system_criticality_tiers"
+    - "W.D.8.important_business_services"
+    - "W.D.9.exclusions_with_rationale"
+
+  "M1.E":
+    - "W.E.2.payment_card_data"
+    - "W.E.2b.payment_card_details"
+    - "W.E.3.cross_border_transfers"
+    - "W.E.4.customer_volume_tier"
+    - "W.E.5.transaction_volume_tier"
+    - "W.E.6.third_party_data_processors"
+
+  "M2.G":
+    - "W.G.2.default_control_owner_team"
+    - "W.G.3.exception_approver_role"
+    - "W.G.4.regulatory_interpreter_role"
+    - "W.G.5.effectiveness_signoff_role"
+    - "W.G.6.internal_audit_contact"
+    - "W.G.7.risk_committee"
+
+  "M2.H":
+    - "W.H.2.create_teams_now"
+    - "W.H.3.team_definitions"
+    - "W.H.4.team_members"
+    - "W.H.5.role_catalog"
+    - "W.H.6.raci_mapping_needed"
+    - "W.H.6b.raci_matrix"
+    - "W.H.7.approval_gates"
+    - "W.H.7b.approval_gate_config"
+    - "W.H.8.delegation_rules"
+    - "W.H.9.notification_preferences"
+    - "W.H.10.escalation_path"
+
+  "M2.I":
+    - "W.I.1.evidence_frequency_defaults"
+    - "W.I.2.access_review_frequency"
+    - "W.I.3.vulnerability_review_frequency"
+    - "W.I.4.backup_review_frequency"
+    - "W.I.5.restore_test_cadence"
+    - "W.I.6.dr_exercise_cadence"
+    - "W.I.7.incident_tabletop_cadence"
+    - "W.I.9.remediation_sla_by_severity"
+    - "W.I.10.exception_expiry_days"
+
+  "M2.B":
+    - "W.B.2.target_timeline_milestone"
+    - "W.B.3.pain_points_rank_1_3"
+    - "W.B.4.desired_maturity_level"
+    - "W.B.5.reporting_audience"
+
+  "M2.L":
+    - "W.L.1.success_metrics_top3"
+    - "W.L.2.current_audit_prep_hours_per_month"
+    - "W.L.3.current_remediation_closure_days"
+    - "W.L.4.current_overdue_controls_per_month"
+    - "W.L.5.target_improvement_percent"
+    - "W.L.6.pilot_scope"
+
+  "M3.A":
+    - "W.A.1.legal_name_en"
+    - "W.A.2.legal_name_ar"
+    - "W.A.3.trade_name"
+    - "W.A.4.country_of_incorporation"
+    - "W.A.5.operating_countries"
+    - "W.A.6.primary_hq_location"
+    - "W.A.7.timezone"
+    - "W.A.8.primary_language"
+    - "W.A.9.corporate_email_domains"
+    - "W.A.10.domain_verification_method"
+    - "W.A.11.organization_type"
+    - "W.A.12.industry_sector"
+    - "W.A.13.data_residency_requirements"
+
+  "M3.F":
+    - "W.F.1.identity_provider"
+    - "W.F.2.sso_enabled"
+    - "W.F.2b.sso_protocol"
+    - "W.F.3.scim_provisioning"
+    - "W.F.4.itsm_ticketing_platform"
+    - "W.F.5.evidence_repository"
+    - "W.F.6.siem_soc_platform"
+    - "W.F.7.vulnerability_management"
+    - "W.F.8.edr_platform"
+    - "W.F.9.cloud_providers"
+    - "W.F.10.erp_platform"
+    - "W.F.11.cmdb_asset_inventory"
+    - "W.F.12.cicd_tooling"
+    - "W.F.13.backup_dr_tooling"
+
+  "M3.J":
+    - "W.J.1.naming_convention_required"
+    - "W.J.1b.naming_pattern"
+    - "W.J.2.storage_location_by_domain"
+    - "W.J.3.retention_period_years"
+    - "W.J.4.access_rules"
+    - "W.J.5.acceptable_evidence_types"
+    - "W.J.6.sampling_guidance"
+    - "W.J.7.confidential_evidence_handling"
+
+  "M3.K":
+    - "W.K.2.select_overlays"
+    - "W.K.3.custom_control_requirements"
+
+
+required_ids_by_mission:
+
+  "FAST_START":
+    - "SF.S1.organization_name"
+    - "SF.S1.admin_email"
+    - "SF.S1.subscription_tier"
+    - "SF.S1.country_of_operation"
+    - "SF.S1.tos_accepted"
+    - "SF.S1.privacy_policy_accepted"
+    - "SF.S1.data_processing_consent"
+    - "SF.S2.organization_type"
+    - "SF.S2.sector"
+    - "SF.S2.primary_country"
+    - "SF.S2.data_hosting_model"
+    - "SF.S2.data_types_processed"
+    - "SF.S2.organization_size"
+    - "SF.S2.compliance_maturity"
+    - "SF.S3.applicable_baselines"
+    - "SF.S3.baseline_reason"
+    - "SF.S3.estimated_controls"
+    - "SF.S3.user_confirmation"
+    - "W.K.1.adopt_default_baseline"
+    - "SF.S4.plan_name"
+    - "SF.S4.plan_type"
+    - "SF.S4.start_date"
+    - "SF.S4.target_end_date"
+    - "W.B.1.primary_driver"
+
+  "MISSION_1_SCOPE_RISK":
+    - "W.C.1.primary_regulators"
+    - "W.D.5.in_scope_environments"
+    - "W.E.1.data_types_processed"
+
+  "MISSION_2_PEOPLE_WORKFLOW":
+    - "W.G.1.ownership_approach"
+    - "W.H.1.organization_admins"
+    - "W.I.8.evidence_sla_submit_days"
+
+  "MISSION_3_SYSTEMS_EVIDENCE":
+    - "W.K.1.adopt_default_baseline"
+
+
+# Conditional-required manifest for rule-driven requirements.
+# These are "required when condition holds" (enforced by rules engine + UI).
+conditional_required:
+
+  - id: "CR.PCI.details_required"
+    if: { field: "W.E.2.payment_card_data", op: "==", value: true }
+    then_require: ["W.E.2b.payment_card_details"]
+
+  - id: "CR.SSO.requires_idp_and_protocol"
+    if: { field: "W.F.2.sso_enabled", op: "==", value: true }
+    then_require: ["W.F.1.identity_provider","W.F.2b.sso_protocol"]
+
+  - id: "CR.TEAMS.require_definitions_and_members"
+    if: { field: "W.H.2.create_teams_now", op: "==", value: true }
+    then_require: ["W.H.3.team_definitions","W.H.4.team_members"]
+
+  - id: "CR.RACI.matrix_required"
+    if: { field: "W.H.6.raci_mapping_needed", op: "==", value: true }
+    then_require: ["W.H.6b.raci_matrix"]
+
+  - id: "CR.EVID.naming_pattern_required"
+    if: { field: "W.J.1.naming_convention_required", op: "==", value: true }
+    then_require: ["W.J.1b.naming_pattern"]
+
+
+# Strong recommendation: use this check in CI / runtime gate
+# - Ensure every required ID exists in field_registry
+# - Ensure required_ids_by_mission is union of required_ids_by_node
+integrity_checks:
+  - name: "all_required_ids_exist_in_registry"
+    description: "Fail build if any required id is not present in canonical field registry"
+  - name: "mission_union_equals_nodes_union"
+    description: "Fail build if required_ids_by_mission differs from union of nodes in that mission"
+  - name: "conditional_required_ids_exist_in_registry"
+    description: "Fail build if conditional required target ids are not registered"

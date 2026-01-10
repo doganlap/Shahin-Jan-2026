@@ -86,6 +86,42 @@ namespace GrcMvc.Services.Interfaces
         /// Get comprehensive sustainability dashboard
         /// </summary>
         Task<SustainabilityDashboardDto> GetDashboardAsync(Guid tenantId);
+
+        // ===== Program Management (Stage 5) =====
+        /// <summary>
+        /// Get all sustainability/improvement initiatives for a tenant
+        /// </summary>
+        Task<List<SustainabilityImprovementDto>> GetInitiativesAsync(Guid tenantId);
+
+        /// <summary>
+        /// Get program execution metrics and status
+        /// </summary>
+        Task<ProgramExecutionDto> GetProgramExecutionAsync(Guid tenantId);
+    }
+
+    // ===== Program Execution DTO =====
+    
+    public class ProgramExecutionDto
+    {
+        public Guid TenantId { get; set; }
+        public int TotalPrograms { get; set; }
+        public int ActivePrograms { get; set; }
+        public int CompletedPrograms { get; set; }
+        public decimal OverallProgress { get; set; }
+        public decimal BudgetUtilization { get; set; }
+        public List<ProgramStatusDto> Programs { get; set; } = new();
+        public DateTime GeneratedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public class ProgramStatusDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string NameAr { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty; // Active, Completed, OnHold, Cancelled
+        public decimal Progress { get; set; }
+        public DateTime? TargetDate { get; set; }
+        public string Owner { get; set; } = string.Empty;
     }
 
     // ===== Maturity DTOs =====

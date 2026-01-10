@@ -2,39 +2,41 @@
 
 import { motion } from "framer-motion"
 import { ClipboardCheck, Settings, Upload, Eye } from "lucide-react"
+import { useTranslations } from "next-intl"
 
-const steps = [
+const stepsConfig = [
   {
     number: 1,
+    key: "assess",
     icon: ClipboardCheck,
-    title: "التقييم",
-    description: "حدد الأطر التنظيمية المطبقة على مؤسستك واحصل على تقييم فوري لوضع الامتثال الحالي",
-    details: ["تحديد نطاق الامتثال", "تقييم الفجوات", "تحديد الأولويات"],
   },
   {
     number: 2,
+    key: "design",
     icon: Settings,
-    title: "التصميم",
-    description: "صمم خارطة طريق الامتثال وحدد الضوابط والسياسات المطلوبة لكل إطار تنظيمي",
-    details: ["تصميم الضوابط", "إعداد السياسات", "تعيين المسؤوليات"],
   },
   {
     number: 3,
+    key: "implement",
     icon: Upload,
-    title: "التنفيذ",
-    description: "نفذ خطة الامتثال مع جمع الأدلة وتوثيق العمليات ومتابعة التقدم بشكل مستمر",
-    details: ["جمع الأدلة", "تنفيذ الإجراءات", "توثيق العمليات"],
   },
   {
     number: 4,
+    key: "monitor",
     icon: Eye,
-    title: "المراقبة",
-    description: "راقب حالة الامتثال باستمرار مع تنبيهات ذكية وتقارير دورية وجاهزية دائمة للتدقيق",
-    details: ["مراقبة مستمرة", "تنبيهات استباقية", "جاهزية التدقيق"],
   },
 ]
 
+const statsConfig = [
+  { key: "implementation" },
+  { key: "timeSaving" },
+  { key: "accuracy" },
+  { key: "support" },
+]
+
 export function HowItWorks() {
+  const t = useTranslations("landing.howItWorks")
+
   return (
     <section className="py-24 bg-white dark:bg-gray-950">
       <div className="container mx-auto px-6">
@@ -46,13 +48,13 @@ export function HowItWorks() {
           viewport={{ once: true }}
         >
           <span className="text-emerald-600 dark:text-emerald-400 font-semibold mb-4 block">
-            كيف تعمل المنصة
+            {t("sectionLabel")}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            أربع خطوات نحو الامتثال الكامل
+            {t("title")}
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            منهجية مثبتة لتحقيق الامتثال والحفاظ عليه بأقل جهد وأعلى كفاءة
+            {t("subtitle")}
           </p>
         </motion.div>
 
@@ -62,7 +64,7 @@ export function HowItWorks() {
           <div className="hidden lg:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 transform -translate-y-1/2 rounded-full" />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, index) => (
+            {stepsConfig.map((step, index) => (
               <motion.div
                 key={step.number}
                 className="relative"
@@ -85,28 +87,28 @@ export function HowItWorks() {
 
                   {/* Content */}
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                    {step.title}
+                    {t(`${step.key}.title`)}
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-4">
-                    {step.description}
+                    {t(`${step.key}.description`)}
                   </p>
 
                   {/* Details List */}
                   <ul className="space-y-2">
-                    {step.details.map((detail) => (
+                    {[1, 2, 3].map((detailNum) => (
                       <li
-                        key={detail}
+                        key={detailNum}
                         className="flex items-center text-sm text-gray-500 dark:text-gray-500"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-2" />
-                        {detail}
+                        {t(`${step.key}.detail${detailNum}`)}
                       </li>
                     ))}
                   </ul>
                 </div>
 
                 {/* Arrow for desktop */}
-                {index < steps.length - 1 && (
+                {index < stepsConfig.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -left-4 transform -translate-y-1/2 z-20">
                     <div className="w-8 h-8 rounded-full bg-white dark:bg-gray-950 border-4 border-emerald-500 flex items-center justify-center">
                       <span className="text-emerald-500 text-lg">←</span>
@@ -126,21 +128,16 @@ export function HowItWorks() {
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
         >
-          {[
-            { value: "2-4", label: "أسابيع للتطبيق" },
-            { value: "80%", label: "توفير في الوقت" },
-            { value: "99%", label: "دقة التقييم" },
-            { value: "24/7", label: "دعم فني" },
-          ].map((stat) => (
+          {statsConfig.map((stat) => (
             <div
-              key={stat.label}
+              key={stat.key}
               className="text-center p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800"
             >
               <div className="text-2xl md:text-3xl font-bold text-emerald-600 dark:text-emerald-400">
-                {stat.value}
+                {t(`stats.${stat.key}.value`)}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {stat.label}
+                {t(`stats.${stat.key}.label`)}
               </div>
             </div>
           ))}

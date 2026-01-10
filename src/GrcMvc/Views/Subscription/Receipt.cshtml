@@ -32,7 +32,7 @@
                         </div>
                         <div class="col-md-6 text-md-end">
                             <h6 class="text-muted">Date</h6>
-                            <p>@DateTime.Now.ToString("MMM d, yyyy")</p>
+                            <p>@DateTime.UtcNow.ToString("MMM d, yyyy")</p>
                         </div>
                     </div>
 
@@ -107,7 +107,7 @@
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle"></i>
                         <strong>Next Billing Date:</strong> Your subscription will automatically renew on
-                        <strong>@DateTime.Now.AddMonths(1).ToString("MMM d, yyyy")</strong>.
+                        <strong>@DateTime.UtcNow.AddMonths(1).ToString("MMM d, yyyy")</strong>.
                         You can manage your subscription at any time from your account settings.
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using GrcMvc.Models;
 using GrcMvc.Models.DTOs;
 using GrcMvc.Services.Interfaces;
@@ -31,6 +32,7 @@ namespace GrcMvc.Controllers
         private readonly ISubscriptionService _subscriptionService;
         private readonly IAuthenticationService _authenticationService;
         private readonly GrcAuthorizationService _authorizationService;
+        private readonly ILogger<ApiController> _logger;
 
         public ApiController(
             IWorkflowService workflowService,
@@ -44,7 +46,8 @@ namespace GrcMvc.Controllers
             IPlanService planService,
             ISubscriptionService subscriptionService,
             IAuthenticationService authenticationService,
-            GrcAuthorizationService authorizationService)
+            GrcAuthorizationService authorizationService,
+            ILogger<ApiController> logger)
         {
             _workflowService = workflowService;
             _assessmentService = assessmentService;
@@ -58,6 +61,7 @@ namespace GrcMvc.Controllers
             _subscriptionService = subscriptionService;
             _authenticationService = authenticationService;
             _authorizationService = authorizationService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -74,6 +78,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in {ActionName}", nameof(CreateWorkflow));
                 return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
@@ -91,6 +96,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in {ActionName}", nameof(AssessControl));
                 return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
@@ -109,6 +115,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in {ActionName}", nameof(SubmitEvidence));
                 return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
@@ -123,15 +130,16 @@ namespace GrcMvc.Controllers
             {
                 var evidence = new[]
                 {
-                    new EvidenceListItemDto { Id = Guid.NewGuid(), Name = "Security Assessment Report.pdf", Type = "Document", LinkedItemId = "ASMT-SEC-001", UploadedBy = "Ahmed Al-Mansouri", UploadedDate = DateTime.Now.AddDays(-5), FileSize = "2.4 MB" },
-                    new EvidenceListItemDto { Id = Guid.NewGuid(), Name = "Control Testing Results.xlsx", Type = "Spreadsheet", LinkedItemId = "ASMT-CTRL-001", UploadedBy = "Sarah Johnson", UploadedDate = DateTime.Now.AddDays(-3), FileSize = "850 KB" },
-                    new EvidenceListItemDto { Id = Guid.NewGuid(), Name = "Audit Evidence Package", Type = "Folder", LinkedItemId = "AUD-INT-001", UploadedBy = "Fatima Al-Dosari", UploadedDate = DateTime.Now.AddDays(-1), FileSize = "15.6 MB" }
+                    new EvidenceListItemDto { Id = Guid.NewGuid(), Name = "Security Assessment Report.pdf", Type = "Document", LinkedItemId = "ASMT-SEC-001", UploadedBy = "Ahmed Al-Mansouri", UploadedDate = DateTime.UtcNow.AddDays(-5), FileSize = "2.4 MB" },
+                    new EvidenceListItemDto { Id = Guid.NewGuid(), Name = "Control Testing Results.xlsx", Type = "Spreadsheet", LinkedItemId = "ASMT-CTRL-001", UploadedBy = "Sarah Johnson", UploadedDate = DateTime.UtcNow.AddDays(-3), FileSize = "850 KB" },
+                    new EvidenceListItemDto { Id = Guid.NewGuid(), Name = "Audit Evidence Package", Type = "Folder", LinkedItemId = "AUD-INT-001", UploadedBy = "Fatima Al-Dosari", UploadedDate = DateTime.UtcNow.AddDays(-1), FileSize = "15.6 MB" }
                 };
 
                 return Ok(ApiResponse<EvidenceListItemDto[]>.SuccessResponse(evidence, "Evidence retrieved successfully"));
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in {ActionName}", nameof(GetEvidence));
                 return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
@@ -146,15 +154,16 @@ namespace GrcMvc.Controllers
             {
                 var approvals = new[]
                 {
-                    new ApprovalListItemDto { Id = Guid.NewGuid(), WorkflowName = "Q4 Audit", Status = "Pending", DueDate = DateTime.Now.AddDays(2), Priority = "High" },
-                    new ApprovalListItemDto { Id = Guid.NewGuid(), WorkflowName = "Risk Assessment", Status = "Approved", DueDate = DateTime.Now.AddDays(-1), Priority = "Normal" },
-                    new ApprovalListItemDto { Id = Guid.NewGuid(), WorkflowName = "Policy Review", Status = "Pending", DueDate = DateTime.Now.AddDays(5), Priority = "Normal" }
+                    new ApprovalListItemDto { Id = Guid.NewGuid(), WorkflowName = "Q4 Audit", Status = "Pending", DueDate = DateTime.UtcNow.AddDays(2), Priority = "High" },
+                    new ApprovalListItemDto { Id = Guid.NewGuid(), WorkflowName = "Risk Assessment", Status = "Approved", DueDate = DateTime.UtcNow.AddDays(-1), Priority = "Normal" },
+                    new ApprovalListItemDto { Id = Guid.NewGuid(), WorkflowName = "Policy Review", Status = "Pending", DueDate = DateTime.UtcNow.AddDays(5), Priority = "Normal" }
                 };
 
                 return Ok(ApiResponse<ApprovalListItemDto[]>.SuccessResponse(approvals, "Approvals retrieved successfully"));
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in {ActionName}", nameof(GetApprovals));
                 return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
@@ -176,13 +185,14 @@ namespace GrcMvc.Controllers
                     Status = "Pending",
                     Priority = "High",
                     SubmittedByName = "Ahmed Al-Mansouri",
-                    SubmittedDate = DateTime.Now.AddDays(-2)
+                    SubmittedDate = DateTime.UtcNow.AddDays(-2)
                 };
 
                 return Ok(ApiResponse<ApprovalReviewDto>.SuccessResponse(approval, "Approval retrieved successfully"));
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in {ActionName}", nameof(GetApprovalDetail));
                 return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
@@ -229,8 +239,8 @@ namespace GrcMvc.Controllers
             {
                 var escalations = new[]
                 {
-                    new { id = Guid.NewGuid(), workflowName = "Overdue Approval", escalatedTo = "Manager", escalatedAt = DateTime.Now.AddDays(-1), status = "Active" },
-                    new { id = Guid.NewGuid(), workflowName = "Risk Review", escalatedTo = "Director", escalatedAt = DateTime.Now.AddDays(-2), status = "Active" }
+                    new { id = Guid.NewGuid(), workflowName = "Overdue Approval", escalatedTo = "Manager", escalatedAt = DateTime.UtcNow.AddDays(-1), status = "Active" },
+                    new { id = Guid.NewGuid(), workflowName = "Risk Review", escalatedTo = "Director", escalatedAt = DateTime.UtcNow.AddDays(-2), status = "Active" }
                 };
 
                 return Ok(ApiResponse<object[]>.SuccessResponse(escalations, "Escalations retrieved successfully"));
@@ -358,7 +368,7 @@ namespace GrcMvc.Controllers
                     id = id,
                     workflowName = "Sample Workflow",
                     escalatedTo = "Manager",
-                    escalatedAt = DateTime.Now.AddDays(-1),
+                    escalatedAt = DateTime.UtcNow.AddDays(-1),
                     reason = "Approval SLA exceeded",
                     status = "Active"
                 };
@@ -387,14 +397,14 @@ namespace GrcMvc.Controllers
                     Priority = "High",
                     AssignedToName = "Ahmed Al-Mansouri",
                     AssignedByName = "Sarah Johnson",
-                    DueDate = DateTime.Now.AddDays(2),
-                    CreatedAt = DateTime.Now.AddDays(-5),
-                    ModifiedAt = DateTime.Now.AddHours(-2),
+                    DueDate = DateTime.UtcNow.AddDays(2),
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    ModifiedAt = DateTime.UtcNow.AddHours(-2),
                     Comments = new System.Collections.Generic.List<TaskCommentDto>
                     {
-                        new TaskCommentDto { Id = Guid.NewGuid(), Content = "Started the review. Initial findings look good.", Author = "Ahmed Al-Mansouri", CreatedAt = DateTime.Now.AddDays(-3) },
-                        new TaskCommentDto { Id = Guid.NewGuid(), Content = "Section 3 needs clarification on the control procedures.", Author = "Sarah Johnson", CreatedAt = DateTime.Now.AddDays(-2) },
-                        new TaskCommentDto { Id = Guid.NewGuid(), Content = "Clarification added to section 3. Ready for final review.", Author = "Ahmed Al-Mansouri", CreatedAt = DateTime.Now.AddHours(-4) }
+                        new TaskCommentDto { Id = Guid.NewGuid(), Content = "Started the review. Initial findings look good.", Author = "Ahmed Al-Mansouri", CreatedAt = DateTime.UtcNow.AddDays(-3) },
+                        new TaskCommentDto { Id = Guid.NewGuid(), Content = "Section 3 needs clarification on the control procedures.", Author = "Sarah Johnson", CreatedAt = DateTime.UtcNow.AddDays(-2) },
+                        new TaskCommentDto { Id = Guid.NewGuid(), Content = "Clarification added to section 3. Ready for final review.", Author = "Ahmed Al-Mansouri", CreatedAt = DateTime.UtcNow.AddHours(-4) }
                     }
                 };
 
@@ -433,9 +443,9 @@ namespace GrcMvc.Controllers
             {
                 var tasks = new[]
                 {
-                    new { id = Guid.NewGuid(), title = "Review Quarterly Compliance Report", status = "In Progress", priority = "High", dueDate = DateTime.Now.AddDays(2) },
-                    new { id = Guid.NewGuid(), title = "Complete Risk Assessment", status = "Pending", priority = "High", dueDate = DateTime.Now.AddDays(5) },
-                    new { id = Guid.NewGuid(), title = "Approve Control Testing", status = "Pending", priority = "Normal", dueDate = DateTime.Now.AddDays(7) }
+                    new { id = Guid.NewGuid(), title = "Review Quarterly Compliance Report", status = "In Progress", priority = "High", dueDate = DateTime.UtcNow.AddDays(2) },
+                    new { id = Guid.NewGuid(), title = "Complete Risk Assessment", status = "Pending", priority = "High", dueDate = DateTime.UtcNow.AddDays(5) },
+                    new { id = Guid.NewGuid(), title = "Approve Control Testing", status = "Pending", priority = "Normal", dueDate = DateTime.UtcNow.AddDays(7) }
                 };
 
                 return Ok(ApiResponse<object[]>.SuccessResponse(tasks, "Tasks retrieved successfully"));
@@ -456,9 +466,9 @@ namespace GrcMvc.Controllers
             {
                 var plans = new[]
                 {
-                    new { id = Guid.NewGuid(), name = "Q1 Remediation Plan", status = "Active", dueDate = DateTime.Now.AddDays(30), owner = "Ahmed Al-Mansouri" },
-                    new { id = Guid.NewGuid(), name = "Control Enhancement Initiative", status = "In Progress", dueDate = DateTime.Now.AddDays(60), owner = "Sarah Johnson" },
-                    new { id = Guid.NewGuid(), name = "Policy Update Program", status = "Planning", dueDate = DateTime.Now.AddDays(90), owner = "Fatima Al-Dosari" }
+                    new { id = Guid.NewGuid(), name = "Q1 Remediation Plan", status = "Active", dueDate = DateTime.UtcNow.AddDays(30), owner = "Ahmed Al-Mansouri" },
+                    new { id = Guid.NewGuid(), name = "Control Enhancement Initiative", status = "In Progress", dueDate = DateTime.UtcNow.AddDays(60), owner = "Sarah Johnson" },
+                    new { id = Guid.NewGuid(), name = "Policy Update Program", status = "Planning", dueDate = DateTime.UtcNow.AddDays(90), owner = "Fatima Al-Dosari" }
                 };
 
                 return Ok(ApiResponse<object[]>.SuccessResponse(plans, "Plans retrieved successfully"));
@@ -525,9 +535,9 @@ namespace GrcMvc.Controllers
             {
                 var workflows = new[]
                 {
-                    new { id = Guid.NewGuid(), name = "Q1 Compliance Review", status = "In Progress", initiatedBy = "Ahmed Al-Mansouri", initiatedDate = DateTime.Now.AddDays(-10) },
-                    new { id = Guid.NewGuid(), name = "Annual Control Assessment", status = "Pending", initiatedBy = "Sarah Johnson", initiatedDate = DateTime.Now.AddDays(-5) },
-                    new { id = Guid.NewGuid(), name = "Risk Assessment Cycle", status = "Not Started", initiatedBy = "Fatima Al-Dosari", initiatedDate = DateTime.Now }
+                    new { id = Guid.NewGuid(), name = "Q1 Compliance Review", status = "In Progress", initiatedBy = "Ahmed Al-Mansouri", initiatedDate = DateTime.UtcNow.AddDays(-10) },
+                    new { id = Guid.NewGuid(), name = "Annual Control Assessment", status = "Pending", initiatedBy = "Sarah Johnson", initiatedDate = DateTime.UtcNow.AddDays(-5) },
+                    new { id = Guid.NewGuid(), name = "Risk Assessment Cycle", status = "Not Started", initiatedBy = "Fatima Al-Dosari", initiatedDate = DateTime.UtcNow }
                 };
 
                 return Ok(ApiResponse<object[]>.SuccessResponse(workflows, "Workflows retrieved successfully"));
@@ -587,7 +597,7 @@ namespace GrcMvc.Controllers
                     status = "Compliant",
                     riskLevel = "High",
                     owner = "Ahmed Al-Mansouri",
-                    lastAssessment = DateTime.Now.AddDays(-30),
+                    lastAssessment = DateTime.UtcNow.AddDays(-30),
                     frequency = "Quarterly"
                 };
 
@@ -643,8 +653,8 @@ namespace GrcMvc.Controllers
                     description = "Quarterly compliance assessment and reporting",
                     status = "In Progress",
                     initiatedBy = "Ahmed Al-Mansouri",
-                    initiatedDate = DateTime.Now.AddDays(-10),
-                    dueDate = DateTime.Now.AddDays(5),
+                    initiatedDate = DateTime.UtcNow.AddDays(-10),
+                    dueDate = DateTime.UtcNow.AddDays(5),
                     approvalChainLength = 3
                 };
 
@@ -752,8 +762,8 @@ namespace GrcMvc.Controllers
         {
             try
             {
-                var startDate = DateTime.Now.AddMonths(-3);
-                var endDate = DateTime.Now;
+                var startDate = DateTime.UtcNow.AddMonths(-3);
+                var endDate = DateTime.UtcNow;
                 var (reportId, filePath) = await _reportService.GenerateComplianceReportAsync(startDate, endDate);
                 
                 return Ok(ApiResponse<object>.SuccessResponse(new { reportId, filePath }, "Compliance report generated successfully"));
@@ -772,8 +782,8 @@ namespace GrcMvc.Controllers
         {
             try
             {
-                var startDate = DateTime.Now.AddMonths(-3);
-                var endDate = DateTime.Now;
+                var startDate = DateTime.UtcNow.AddMonths(-3);
+                var endDate = DateTime.UtcNow;
                 var (reportId, filePath) = await _reportService.GenerateRiskReportAsync(startDate, endDate);
                 
                 return Ok(ApiResponse<object>.SuccessResponse(new { reportId, filePath }, "Risk report generated successfully"));
@@ -830,7 +840,7 @@ namespace GrcMvc.Controllers
                 {
                     plan = "Enterprise",
                     status = "Active",
-                    renewalDate = DateTime.Now.AddMonths(11),
+                    renewalDate = DateTime.UtcNow.AddMonths(11),
                     maxUsers = 50,
                     currentUsers = 12,
                     features = new[] { "Workflows", "Approvals", "Reports", "Audit Logs" }
@@ -854,9 +864,9 @@ namespace GrcMvc.Controllers
             {
                 var logs = new[]
                 {
-                    new { id = Guid.NewGuid(), action = "Approval Submitted", user = "Ahmed Al-Mansouri", timestamp = DateTime.Now.AddDays(-1) },
-                    new { id = Guid.NewGuid(), action = "Workflow Created", user = "Sarah Johnson", timestamp = DateTime.Now.AddDays(-2) },
-                    new { id = Guid.NewGuid(), action = "Report Generated", user = "Fatima Al-Dosari", timestamp = DateTime.Now.AddDays(-3) }
+                    new { id = Guid.NewGuid(), action = "Approval Submitted", user = "Ahmed Al-Mansouri", timestamp = DateTime.UtcNow.AddDays(-1) },
+                    new { id = Guid.NewGuid(), action = "Workflow Created", user = "Sarah Johnson", timestamp = DateTime.UtcNow.AddDays(-2) },
+                    new { id = Guid.NewGuid(), action = "Report Generated", user = "Fatima Al-Dosari", timestamp = DateTime.UtcNow.AddDays(-3) }
                 };
 
                 return Ok(ApiResponse<object>.SuccessResponse(logs, "Audit logs retrieved successfully"));

@@ -195,7 +195,7 @@ namespace GrcMvc.Validators
 
             RuleFor(x => x.StartTime)
                 .NotEmpty().WithMessage("Start time is required")
-                .LessThanOrEqualTo(DateTime.Now).WithMessage("Start time cannot be in the future");
+                .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Start time cannot be in the future");
 
             RuleFor(x => x.EndTime)
                 .GreaterThan(x => x.StartTime).When(x => x.EndTime.HasValue)

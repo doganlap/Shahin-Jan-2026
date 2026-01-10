@@ -2,38 +2,27 @@
 
 import { motion } from "framer-motion"
 import { AlertTriangle, Clock, FileX, Users } from "lucide-react"
+import { useTranslations } from "next-intl"
 
-const problems = [
+const problemsConfig = [
   {
+    key: "dataScatter",
     icon: FileX,
-    title: "تشتت البيانات",
-    description: "معلومات الامتثال مبعثرة في ملفات Excel ورسائل البريد الإلكتروني والمجلدات المختلفة",
-    stat: "73%",
-    statLabel: "من المؤسسات تعاني من تشتت البيانات",
     color: "from-red-500 to-orange-500",
   },
   {
+    key: "timeWaste",
     icon: Clock,
-    title: "ضياع الوقت",
-    description: "ساعات طويلة تُهدر في جمع الأدلة يدوياً والبحث عن الوثائق للتدقيق",
-    stat: "40%",
-    statLabel: "من وقت الفريق يضيع في العمل اليدوي",
     color: "from-orange-500 to-amber-500",
   },
   {
+    key: "complianceRisks",
     icon: AlertTriangle,
-    title: "مخاطر عدم الامتثال",
-    description: "غرامات مالية كبيرة وأضرار بالسمعة نتيجة عدم متابعة المتطلبات التنظيمية",
-    stat: "5M+",
-    statLabel: "ريال متوسط غرامات عدم الامتثال",
     color: "from-amber-500 to-yellow-500",
   },
   {
+    key: "skillsGap",
     icon: Users,
-    title: "نقص الكفاءات",
-    description: "صعوبة إيجاد خبراء الامتثال المؤهلين وارتفاع تكلفة التدريب والاستقطاب",
-    stat: "68%",
-    statLabel: "من المؤسسات تواجه فجوة في المهارات",
     color: "from-purple-500 to-pink-500",
   },
 ]
@@ -52,6 +41,8 @@ const itemVariants = {
 }
 
 export function ProblemCards() {
+  const t = useTranslations("landing.problems")
+
   return (
     <section className="py-24 bg-white dark:bg-gray-950">
       <div className="container mx-auto px-6">
@@ -63,13 +54,13 @@ export function ProblemCards() {
           viewport={{ once: true }}
         >
           <span className="text-red-600 dark:text-red-400 font-semibold mb-4 block">
-            التحديات
+            {t("sectionLabel")}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            هل تواجه هذه التحديات؟
+            {t("title")}
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            معظم المؤسسات السعودية تعاني من نفس التحديات في إدارة الامتثال والمخاطر
+            {t("subtitle")}
           </p>
         </motion.div>
 
@@ -81,9 +72,9 @@ export function ProblemCards() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          {problems.map((problem) => (
+          {problemsConfig.map((problem) => (
             <motion.div
-              key={problem.title}
+              key={problem.key}
               className="group relative bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 border border-gray-200 dark:border-gray-800 hover:border-red-300 dark:hover:border-red-800 transition-all duration-300 hover:shadow-xl"
               variants={itemVariants}
             >
@@ -94,19 +85,19 @@ export function ProblemCards() {
 
               {/* Content */}
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                {problem.title}
+                {t(`${problem.key}.title`)}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6">
-                {problem.description}
+                {t(`${problem.key}.description`)}
               </p>
 
               {/* Stat */}
               <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
                 <div className={`text-3xl font-bold bg-gradient-to-r ${problem.color} bg-clip-text text-transparent`}>
-                  {problem.stat}
+                  {t(`${problem.key}.stat`)}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  {problem.statLabel}
+                  {t(`${problem.key}.statLabel`)}
                 </div>
               </div>
             </motion.div>
@@ -122,7 +113,9 @@ export function ProblemCards() {
           transition={{ delay: 0.5 }}
         >
           <p className="text-lg text-gray-700 dark:text-gray-300">
-            منصة <span className="font-bold text-emerald-600">شاهين</span> تحل كل هذه التحديات في منصة واحدة متكاملة
+            {t.rich("cta", {
+              appName: (chunks) => <span className="font-bold text-emerald-600">{chunks}</span>
+            })}
           </p>
         </motion.div>
       </div>

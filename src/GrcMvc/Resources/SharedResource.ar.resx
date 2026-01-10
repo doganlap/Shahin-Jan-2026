@@ -60,7 +60,7 @@
   </resheader>
 
   <!-- Common Actions -->
-  <data name="Close" xml:space="preserve">
+      <data name="Close" xml:space="preserve">
     <value>إغلاق</value>
   </data>
   <data name="Confirm" xml:space="preserve">
@@ -162,8 +162,6 @@
   <data name="Clear" xml:space="preserve">
     <value>مسح</value>
   </data>
-
-  <!-- Navigation Menu -->
   <data name="Nav_Home" xml:space="preserve">
     <value>الصفحة الرئيسية</value>
   </data>
@@ -242,8 +240,6 @@
   <data name="Nav_Workspaces" xml:space="preserve">
     <value>مساحات العمل</value>
   </data>
-
-  <!-- GRC Domain - Risks -->
   <data name="Risks" xml:space="preserve">
     <value>المخاطر</value>
   </data>
@@ -295,8 +291,6 @@
   <data name="RiskRegister" xml:space="preserve">
     <value>سجل المخاطر</value>
   </data>
-
-  <!-- GRC Domain - Controls -->
   <data name="Controls" xml:space="preserve">
     <value>الضوابط</value>
   </data>
@@ -330,8 +324,6 @@
   <data name="AssessControl" xml:space="preserve">
     <value>تقييم الضابط</value>
   </data>
-
-  <!-- GRC Domain - Policies -->
   <data name="Policies" xml:space="preserve">
     <value>السياسات</value>
   </data>
@@ -356,8 +348,6 @@
   <data name="CreatePolicy" xml:space="preserve">
     <value>إنشاء سياسة</value>
   </data>
-
-  <!-- GRC Domain - Audits -->
   <data name="Audits" xml:space="preserve">
     <value>التدقيقات</value>
   </data>
@@ -394,8 +384,6 @@
   <data name="Auditor" xml:space="preserve">
     <value>المدقق</value>
   </data>
-
-  <!-- GRC Domain - Assessments -->
   <data name="Assessments" xml:space="preserve">
     <value>التقييمات</value>
   </data>
@@ -414,8 +402,6 @@
   <data name="CreateAssessment" xml:space="preserve">
     <value>إنشاء تقييم</value>
   </data>
-
-  <!-- GRC Domain - Evidence -->
   <data name="Evidence" xml:space="preserve">
     <value>الأدلة</value>
   </data>
@@ -434,8 +420,6 @@
   <data name="TotalEvidence" xml:space="preserve">
     <value>إجمالي الأدلة</value>
   </data>
-
-  <!-- GRC Domain - Compliance -->
   <data name="ComplianceScore" xml:space="preserve">
     <value>درجة الامتثال</value>
   </data>
@@ -460,8 +444,6 @@
   <data name="Regulator" xml:space="preserve">
     <value>الجهة التنظيمية</value>
   </data>
-
-  <!-- GRC Domain - Reports -->
   <data name="Reports" xml:space="preserve">
     <value>التقارير</value>
   </data>
@@ -474,8 +456,6 @@
   <data name="ReportType" xml:space="preserve">
     <value>نوع التقرير</value>
   </data>
-
-  <!-- GRC Domain - Plans -->
   <data name="Plans" xml:space="preserve">
     <value>الخطط</value>
   </data>
@@ -488,8 +468,6 @@
   <data name="CreatePlan" xml:space="preserve">
     <value>إنشاء خطة</value>
   </data>
-
-  <!-- Status Values -->
   <data name="Status" xml:space="preserve">
     <value>الحالة</value>
   </data>
@@ -553,8 +531,6 @@
   <data name="Status_Critical" xml:space="preserve">
     <value>حرج</value>
   </data>
-
-  <!-- Error Messages -->
   <data name="Error_NotFound" xml:space="preserve">
     <value>المورد غير موجود</value>
   </data>
@@ -579,8 +555,6 @@
   <data name="Error_InvalidInput" xml:space="preserve">
     <value>إدخال غير صالح</value>
   </data>
-
-  <!-- Success Messages -->
   <data name="Success_Saved" xml:space="preserve">
     <value>تم الحفظ بنجاح</value>
   </data>
@@ -602,8 +576,6 @@
   <data name="Success_Rejected" xml:space="preserve">
     <value>تم الرفض</value>
   </data>
-
-  <!-- Common Labels -->
   <data name="Name" xml:space="preserve">
     <value>الاسم</value>
   </data>
@@ -697,8 +669,6 @@
   <data name="Permissions" xml:space="preserve">
     <value>الصلاحيات</value>
   </data>
-
-  <!-- Dashboard -->
   <data name="Dashboard" xml:space="preserve">
     <value>لوحة التحكم</value>
   </data>
@@ -729,8 +699,6 @@
   <data name="OverdueTasks" xml:space="preserve">
     <value>المهام المتأخرة</value>
   </data>
-
-  <!-- Table Headers -->
   <data name="Table_ID" xml:space="preserve">
     <value>المعرف</value>
   </data>
@@ -749,8 +717,6 @@
   <data name="Table_Entries" xml:space="preserve">
     <value>إدخالات</value>
   </data>
-
-  <!-- Form Labels -->
   <data name="Form_Required" xml:space="preserve">
     <value>مطلوب</value>
   </data>
@@ -769,8 +735,6 @@
   <data name="Form_EnterValue" xml:space="preserve">
     <value>أدخل القيمة</value>
   </data>
-
-  <!-- Authentication -->
   <data name="Auth_Username" xml:space="preserve">
     <value>اسم المستخدم</value>
   </data>
@@ -801,8 +765,6 @@
   <data name="Auth_LogoutConfirm" xml:space="preserve">
     <value>هل أنت متأكد من تسجيل الخروج؟</value>
   </data>
-
-  <!-- Language -->
   <data name="Language" xml:space="preserve">
     <value>اللغة</value>
   </data>
@@ -815,8 +777,6 @@
   <data name="SwitchLanguage" xml:space="preserve">
     <value>تغيير اللغة</value>
   </data>
-
-  <!-- Pagination -->
   <data name="Pagination_First" xml:space="preserve">
     <value>الأول</value>
   </data>
@@ -829,8 +789,6 @@
   <data name="Pagination_PerPage" xml:space="preserve">
     <value>لكل صفحة</value>
   </data>
-
-  <!-- Misc -->
   <data name="Yes" xml:space="preserve">
     <value>نعم</value>
   </data>
@@ -879,8 +837,6 @@
   <data name="Selected" xml:space="preserve">
     <value>محدد</value>
   </data>
-
-  <!-- Navigation & Menus - Additional Arabic -->
   <data name="Nav_StartFreeTrial" xml:space="preserve">
     <value>ابدأ التجربة المجانية</value>
   </data>
@@ -1001,8 +957,6 @@
   <data name="WebhookLogs" xml:space="preserve">
     <value>سجلات الويب هوك</value>
   </data>
-
-  <!-- App Name -->
   <data name="AppName" xml:space="preserve">
     <value>نظام الحوكمة والمخاطر والامتثال</value>
   </data>
@@ -1012,8 +966,6 @@
   <data name="Copyright" xml:space="preserve">
     <value>جميع الحقوق محفوظة</value>
   </data>
-
-  <!-- Error Pages -->
   <data name="Error_PageTitle" xml:space="preserve">
     <value>خطأ</value>
   </data>
@@ -1071,8 +1023,6 @@
   <data name="Error_StillNeedHelp" xml:space="preserve">
     <value>لا تزال بحاجة للمساعدة؟ تواصل معنا على</value>
   </data>
-
-  <!-- Toast Notifications -->
   <data name="Toast_Success" xml:space="preserve">
     <value>نجاح</value>
   </data>
@@ -1100,8 +1050,6 @@
   <data name="Toast_OperationFailed" xml:space="preserve">
     <value>فشلت العملية. يرجى المحاولة مرة أخرى.</value>
   </data>
-
-  <!-- Form Validation -->
   <data name="Validation_Required" xml:space="preserve">
     <value>هذا الحقل مطلوب</value>
   </data>
@@ -1123,8 +1071,6 @@
   <data name="Validation_InvalidFormat" xml:space="preserve">
     <value>تنسيق غير صحيح</value>
   </data>
-
-  <!-- Loading States (Processing, Saving, PleaseWait - Loading already defined above) -->
   <data name="Processing" xml:space="preserve">
     <value>جاري المعالجة...</value>
   </data>
@@ -1134,8 +1080,6 @@
   <data name="PleaseWait" xml:space="preserve">
     <value>يرجى الانتظار...</value>
   </data>
-
-  <!-- Dashboard Specific -->
   <data name="Dashboard_CommandCenter" xml:space="preserve">
     <value>مركز القيادة</value>
   </data>
@@ -1241,9 +1185,6 @@
   <data name="Dashboard_RecentActivity" xml:space="preserve">
     <value>النشاط الأخير</value>
   </data>
-  <data name="ViewAll" xml:space="preserve">
-    <value>عرض الكل</value>
-  </data>
   <data name="Dashboard_CriticalAlerts" xml:space="preserve">
     <value>التنبيهات الحرجة</value>
   </data>
@@ -1255,12 +1196,6 @@
   </data>
   <data name="Task" xml:space="preserve">
     <value>المهمة</value>
-  </data>
-  <data name="Priority" xml:space="preserve">
-    <value>الأولوية</value>
-  </data>
-  <data name="DueDate" xml:space="preserve">
-    <value>الموعد</value>
   </data>
   <data name="Priority_Urgent" xml:space="preserve">
     <value>عاجل</value>
@@ -1295,41 +1230,11 @@
   <data name="By" xml:space="preserve">
     <value>بواسطة</value>
   </data>
-  <data name="Department" xml:space="preserve">
-    <value>القسم</value>
-  </data>
-  <data name="ViewDetails" xml:space="preserve">
-    <value>عرض التفاصيل</value>
-  </data>
-  <data name="TotalRisks" xml:space="preserve">
-    <value>إجمالي المخاطر</value>
-  </data>
-  <data name="ActiveControls" xml:space="preserve">
-    <value>الضوابط النشطة</value>
-  </data>
-  <data name="PendingAudits" xml:space="preserve">
-    <value>التدقيقات المعلقة</value>
-  </data>
-  <data name="ComplianceScore" xml:space="preserve">
-    <value>درجة الامتثال</value>
-  </data>
-  <data name="RecentRisks" xml:space="preserve">
-    <value>المخاطر الأخيرة</value>
-  </data>
-  <data name="RecentActivity" xml:space="preserve">
-    <value>النشاط الأخير</value>
-  </data>
   <data name="NoDataAvailable" xml:space="preserve">
     <value>لا توجد بيانات متاحة</value>
   </data>
   <data name="LoadingData" xml:space="preserve">
     <value>جاري تحميل البيانات...</value>
-  </data>
-  <data name="UpcomingAudits" xml:space="preserve">
-    <value>التدقيقات القادمة</value>
-  </data>
-  <data name="QuickActions" xml:space="preserve">
-    <value>إجراءات سريعة</value>
   </data>
   <data name="NewRisk" xml:space="preserve">
     <value>مخاطرة جديدة</value>
@@ -1339,9 +1244,6 @@
   </data>
   <data name="NewAssessment" xml:space="preserve">
     <value>تقييم جديد</value>
-  </data>
-  <data name="GenerateReport" xml:space="preserve">
-    <value>إنشاء تقرير</value>
   </data>
   <data name="WelcomeToGrc" xml:space="preserve">
     <value>مرحباً بك في نظام إدارة الحوكمة والمخاطر والامتثال</value>
@@ -1379,17 +1281,11 @@
   <data name="DemoDescription" xml:space="preserve">
     <value>منظمة شاهين AI التجريبية المكونة مسبقاً</value>
   </data>
-  <data name="RiskName" xml:space="preserve">
-    <value>اسم المخاطرة</value>
-  </data>
   <data name="Level" xml:space="preserve">
     <value>المستوى</value>
   </data>
   <data name="AuditTitle" xml:space="preserve">
     <value>عنوان التدقيق</value>
-  </data>
-  <data name="AuditType" xml:space="preserve">
-    <value>النوع</value>
   </data>
   <data name="Internal" xml:space="preserve">
     <value>داخلي</value>
@@ -1403,9 +1299,6 @@
   <data name="RiskMatrix" xml:space="preserve">
     <value>مصفوفة المخاطر</value>
   </data>
-  <data name="Report" xml:space="preserve">
-    <value>تقرير</value>
-  </data>
   <data name="EvidenceManagement" xml:space="preserve">
     <value>إدارة الأدلة</value>
   </data>
@@ -1414,9 +1307,6 @@
   </data>
   <data name="ExpiringSoon" xml:space="preserve">
     <value>تنتهي قريباً</value>
-  </data>
-  <data name="Statistics" xml:space="preserve">
-    <value>الإحصائيات</value>
   </data>
   <data name="Probability" xml:space="preserve">
     <value>الاحتمالية</value>
@@ -1435,9 +1325,6 @@
   </data>
   <data name="Classification" xml:space="preserve">
     <value>التصنيف</value>
-  </data>
-  <data name="Download" xml:space="preserve">
-    <value>تحميل</value>
   </data>
   <data name="NoRecordsFound" xml:space="preserve">
     <value>لا توجد سجلات</value>
@@ -1498,9 +1385,6 @@
   </data>
   <data name="AI_Confidence" xml:space="preserve">
     <value>ثقة التحليل</value>
-  </data>
-  <data name="Priority" xml:space="preserve">
-    <value>أولوية</value>
   </data>
   <data name="High" xml:space="preserve">
     <value>عالية</value>
@@ -2396,7 +2280,6 @@
   <data name="Risk_CriticalRisk" xml:space="preserve">
     <value>مخاطرة حرجة</value>
   </data>
-  <!-- Risk Appetite Settings -->
   <data name="RiskAppetite_Title" xml:space="preserve">
     <value>إعدادات الرغبة في المخاطر</value>
   </data>
@@ -2619,13 +2502,6 @@
   <data name="Landing_Index_CTA_Feature4" xml:space="preserve">
     <value>إلغاء في أي وقت</value>
   </data>
-  <!-- ========================================= -->
-  <!-- API LOCALIZATION RESOURCES - ARABIC -->
-  <!-- تمت الإضافة: 2026-01-10 -->
-  <!-- الإجمالي: 336 مفتاح موارد API جديد -->
-  <!-- ========================================= -->
-
-  <!-- الفئة 1: أخطاء عدم العثور (38 مفتاحًا) -->
   <data name="Api_Error_AgentNotFound" xml:space="preserve">
     <value>الوكيل غير موجود</value>
   </data>
@@ -2740,8 +2616,6 @@
   <data name="Api_Error_NoOwnerAssigned" xml:space="preserve">
     <value>لم يتم تعيين مالك</value>
   </data>
-
-  <!-- الفئة 2: أخطاء التحقق من الصحة (27 مفتاحًا) -->
   <data name="Api_Error_ActionRequired" xml:space="preserve">
     <value>الإجراء مطلوب</value>
   </data>
@@ -2823,8 +2697,6 @@
   <data name="Api_Error_ControlSelectionRequired" xml:space="preserve">
     <value>تقارير الضوابط تتطلب تحديد ضابط محدد</value>
   </data>
-
-  <!-- الفئة 3: أخطاء الخادم / فشل العمليات (83 مفتاحًا) -->
   <data name="Api_Error_FailedToAddMember" xml:space="preserve">
     <value>فشل في إضافة العضو</value>
   </data>
@@ -3080,8 +2952,6 @@
   <data name="Api_Error_FailedToDeliverReport" xml:space="preserve">
     <value>فشل في تسليم التقرير</value>
   </data>
-
-  <!-- الفئة 4: أخطاء العمليات (42 مفتاحًا) -->
   <data name="Api_Error_AnalysisFailed" xml:space="preserve">
     <value>فشل التحليل</value>
   </data>
@@ -3220,8 +3090,6 @@
   <data name="Api_Error_ValidatingGap" xml:space="preserve">
     <value>خطأ في التحقق من الفجوة</value>
   </data>
-
-  <!-- الفئة 5: أخطاء التحميل العامة (16 مفتاحًا) -->
   <data name="Api_Error_Generic" xml:space="preserve">
     <value>حدث خطأ</value>
   </data>
@@ -3270,8 +3138,6 @@
   <data name="Api_Error_UploadingEvidence" xml:space="preserve">
     <value>حدث خطأ أثناء رفع الدليل</value>
   </data>
-
-  <!-- الفئة 6: أخطاء الصلاحيات / التفويض (6 مفاتيح) -->
   <data name="Api_Error_CannotDeleteOwnerAdmin" xml:space="preserve">
     <value>لا يمكن حذف هذا المسؤول (قد يكون بمستوى المالك)</value>
   </data>
@@ -3290,8 +3156,6 @@
   <data name="Api_Error_MailboxNoGraphUserId" xml:space="preserve">
     <value>صندوق البريد ليس لديه معرف مستخدم Graph</value>
   </data>
-
-  <!-- الفئة 7: أخطاء التكوين / النظام (10 مفاتيح) -->
   <data name="Api_Error_CachingServiceNotConfigured" xml:space="preserve">
     <value>خدمة التخزين المؤقت غير مكونة</value>
   </data>
@@ -3322,8 +3186,6 @@
   <data name="Api_Error_ReportFileNotFound" xml:space="preserve">
     <value>ملف التقرير غير موجود</value>
   </data>
-
-  <!-- الفئة 8: رسائل النجاح (76 مفتاحًا) -->
   <data name="Api_Success_CacheOperational" xml:space="preserve">
     <value>التخزين المؤقت يعمل بشكل صحيح</value>
   </data>
@@ -3528,8 +3390,6 @@
   <data name="Api_Success_ImportedAssets" xml:space="preserve">
     <value>تم استيراد {0} من الأصول بنجاح</value>
   </data>
-
-  <!-- الفئة 9: رسائل التهيئة / البذر (16 مفتاحًا) -->
   <data name="Api_Success_RegulatorsSeeded" xml:space="preserve">
     <value>تم إنشاء 92 جهة تنظيمية بنجاح (62 سعودية، 20 دولية، 10 إقليمية)</value>
   </data>
@@ -3578,8 +3438,6 @@
   <data name="Api_Success_WorkflowDefinitionsSeeded" xml:space="preserve">
     <value>تم إنشاء تعريفات سير العمل بنجاح</value>
   </data>
-
-  <!-- الفئة 10: رسائل التحليلات / العمليات (18 مفتاحًا) -->
   <data name="Api_Success_AnalyticsRefreshCompleted" xml:space="preserve">
     <value>تم إكمال تحديث التحليلات</value>
   </data>

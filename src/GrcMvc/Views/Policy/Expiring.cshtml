@@ -53,7 +53,7 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                                var daysLeft = (item.ExpirationDate.GetValueOrDefault() - DateTime.Now).Days;
+                                var daysLeft = (item.ExpirationDate.GetValueOrDefault() - DateTime.UtcNow).Days;
                                 var urgencyClass = daysLeft < 7 ? "text-danger fw-bold" : "text-warning";
 
                                 <tr>

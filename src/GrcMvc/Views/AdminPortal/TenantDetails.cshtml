@@ -488,7 +488,7 @@
                         <span class="info-value">
                             @Model.TrialEndsAt.Value.ToString("yyyy-MM-dd")
                             @{
-                                var daysLeft = (Model.TrialEndsAt.Value - DateTime.Now).Days;
+                                var daysLeft = (Model.TrialEndsAt.Value - DateTime.UtcNow).Days;
                             }
                             @if (daysLeft <= 0)
                             {

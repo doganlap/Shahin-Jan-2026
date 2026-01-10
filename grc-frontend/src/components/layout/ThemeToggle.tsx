@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { Sun, Moon } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export function ThemeToggle() {
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [mounted, setMounted] = useState(false)
+  const t = useTranslations("theme")
 
   useEffect(() => {
     setMounted(true)
@@ -40,7 +42,7 @@ export function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center transition-colors"
-      title={theme === "light" ? "التبديل للوضع الداكن" : "التبديل للوضع الفاتح"}
+      title={theme === "light" ? t("dark") : t("light")}
     >
       {theme === "light" ? (
         <Moon className="w-5 h-5 text-gray-600 dark:text-gray-400" />

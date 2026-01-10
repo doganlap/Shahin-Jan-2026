@@ -128,7 +128,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="fw-bold">@L["Evidence_ExpirationDate"]</label>
-                        <p class="@(Model.ExpirationDate < DateTime.Now ? "text-danger fw-bold" : "")">
+                        <p class="@(Model.ExpirationDate < DateTime.UtcNow ? "text-danger fw-bold" : "")">
                             @(Model.ExpirationDate?.ToShortDateString() ?? "-")
                         </p>
                     </div>

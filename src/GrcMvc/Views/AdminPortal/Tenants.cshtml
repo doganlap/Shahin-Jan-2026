@@ -436,7 +436,7 @@
                                         <span class="badge badge-warning" style="margin-right: 0.5rem;">تجريبي</span>
                                         @if (tenant.TrialEndsAt.HasValue)
                                         {
-                                            var daysLeft = (tenant.TrialEndsAt.Value - DateTime.Now).Days;
+                                            var daysLeft = (tenant.TrialEndsAt.Value - DateTime.UtcNow).Days;
                                             if (daysLeft <= 3)
                                             {
                                                 <small class="text-danger">(@daysLeft يوم متبقي)</small>

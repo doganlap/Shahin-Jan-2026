@@ -38,10 +38,12 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<DashboardSnapshotDto?> GetLatestSnapshotAsync(Guid tenantId)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.dashboard_snapshots
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                 ORDER BY snapshot_hour DESC
                 LIMIT 1
                 FORMAT JSONEachRow";
@@ -52,10 +54,12 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<DashboardSnapshotDto>> GetSnapshotHistoryAsync(Guid tenantId, DateTime from, DateTime to)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.dashboard_snapshots
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                   AND snapshot_date >= '{from:yyyy-MM-dd}'
                   AND snapshot_date <= '{to:yyyy-MM-dd}'
                 ORDER BY snapshot_hour ASC
@@ -66,6 +70,8 @@ namespace GrcMvc.Services.Analytics
 
         public async Task UpsertSnapshotAsync(DashboardSnapshotDto snapshot)
         {
+            // SECURITY: Validate tenantId and numeric values before use in SQL
+            var safeTenantId = EscapeGuid(snapshot.TenantId);
             var query = $@"
                 INSERT INTO {_settings.Database}.dashboard_snapshots
                 (tenant_id, snapshot_date, snapshot_hour,
@@ -77,13 +83,13 @@ namespace GrcMvc.Services.Analytics
                  total_plans, active_plans, completed_plans, overall_plan_progress,
                  created_at, updated_at)
                 VALUES (
-                    '{snapshot.TenantId}', '{snapshot.SnapshotDate:yyyy-MM-dd}', '{snapshot.SnapshotHour:yyyy-MM-dd HH:mm:ss}',
-                    {snapshot.TotalControls}, {snapshot.CompliantControls}, {snapshot.PartialControls}, {snapshot.NonCompliantControls}, {snapshot.NotStartedControls}, {snapshot.ComplianceScore},
-                    {snapshot.TotalRisks}, {snapshot.CriticalRisks}, {snapshot.HighRisks}, {snapshot.MediumRisks}, {snapshot.LowRisks}, {snapshot.OpenRisks}, {snapshot.MitigatedRisks}, {snapshot.RiskScoreAvg},
-                    {snapshot.TotalTasks}, {snapshot.PendingTasks}, {snapshot.InProgressTasks}, {snapshot.CompletedTasks}, {snapshot.OverdueTasks}, {snapshot.DueThisWeek},
-                    {snapshot.TotalEvidence}, {snapshot.EvidenceSubmitted}, {snapshot.EvidenceApproved}, {snapshot.EvidenceRejected}, {snapshot.EvidencePending},
-                    {snapshot.TotalAssessments}, {snapshot.ActiveAssessments}, {snapshot.CompletedAssessments},
-                    {snapshot.TotalPlans}, {snapshot.ActivePlans}, {snapshot.CompletedPlans}, {snapshot.OverallPlanProgress},
+                    '{safeTenantId}', '{snapshot.SnapshotDate:yyyy-MM-dd}', '{snapshot.SnapshotHour:yyyy-MM-dd HH:mm:ss}',
+                    {ValidateNumeric(snapshot.TotalControls)}, {ValidateNumeric(snapshot.CompliantControls)}, {ValidateNumeric(snapshot.PartialControls)}, {ValidateNumeric(snapshot.NonCompliantControls)}, {ValidateNumeric(snapshot.NotStartedControls)}, {ValidateNumeric(snapshot.ComplianceScore)},
+                    {ValidateNumeric(snapshot.TotalRisks)}, {ValidateNumeric(snapshot.CriticalRisks)}, {ValidateNumeric(snapshot.HighRisks)}, {ValidateNumeric(snapshot.MediumRisks)}, {ValidateNumeric(snapshot.LowRisks)}, {ValidateNumeric(snapshot.OpenRisks)}, {ValidateNumeric(snapshot.MitigatedRisks)}, {ValidateNumeric(snapshot.RiskScoreAvg)},
+                    {ValidateNumeric(snapshot.TotalTasks)}, {ValidateNumeric(snapshot.PendingTasks)}, {ValidateNumeric(snapshot.InProgressTasks)}, {ValidateNumeric(snapshot.CompletedTasks)}, {ValidateNumeric(snapshot.OverdueTasks)}, {ValidateNumeric(snapshot.DueThisWeek)},
+                    {ValidateNumeric(snapshot.TotalEvidence)}, {ValidateNumeric(snapshot.EvidenceSubmitted)}, {ValidateNumeric(snapshot.EvidenceApproved)}, {ValidateNumeric(snapshot.EvidenceRejected)}, {ValidateNumeric(snapshot.EvidencePending)},
+                    {ValidateNumeric(snapshot.TotalAssessments)}, {ValidateNumeric(snapshot.ActiveAssessments)}, {ValidateNumeric(snapshot.CompletedAssessments)},
+                    {ValidateNumeric(snapshot.TotalPlans)}, {ValidateNumeric(snapshot.ActivePlans)}, {ValidateNumeric(snapshot.CompletedPlans)}, {ValidateNumeric(snapshot.OverallPlanProgress)},
                     now(), now()
                 )";
 
@@ -96,6 +102,8 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<ComplianceTrendDto>> GetComplianceTrendsAsync(Guid tenantId, int months = 12)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var fromDate = DateTime.UtcNow.AddMonths(-months);
             var query = $@"
                 SELECT
@@ -103,7 +111,7 @@ namespace GrcMvc.Services.Analytics
                     compliance_score, total_controls, compliant_controls, partial_controls, non_compliant_controls,
                     delta_from_previous
                 FROM {_settings.Database}.compliance_trends
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                   AND measure_date >= '{fromDate:yyyy-MM-dd}'
                 ORDER BY measure_date ASC
                 FORMAT JSONEachRow";
@@ -113,12 +121,14 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<ComplianceTrendDto>> GetComplianceTrendsByFrameworkAsync(Guid tenantId, string frameworkCode, int months = 12)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var fromDate = DateTime.UtcNow.AddMonths(-months);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.compliance_trends
-                WHERE tenant_id = '{tenantId}'
-                  AND framework_code = '{frameworkCode}'
+                WHERE tenant_id = '{safeTenantId}'
+                  AND framework_code = '{EscapeString(frameworkCode)}'
                   AND measure_date >= '{fromDate:yyyy-MM-dd}'
                 ORDER BY measure_date ASC
                 FORMAT JSONEachRow";
@@ -128,16 +138,18 @@ namespace GrcMvc.Services.Analytics
 
         public async Task UpsertComplianceTrendAsync(ComplianceTrendDto trend)
         {
+            // SECURITY: Validate tenantId and numeric values before use in SQL
+            var safeTenantId = EscapeGuid(trend.TenantId);
             var query = $@"
                 INSERT INTO {_settings.Database}.compliance_trends
                 (tenant_id, framework_code, baseline_code, measure_date, measure_hour,
                  compliance_score, total_controls, compliant_controls, partial_controls, non_compliant_controls,
                  delta_from_previous, created_at)
                 VALUES (
-                    '{trend.TenantId}', '{trend.FrameworkCode}', '{trend.BaselineCode}',
+                    '{safeTenantId}', '{EscapeString(trend.FrameworkCode ?? string.Empty)}', '{EscapeString(trend.BaselineCode ?? string.Empty)}',
                     '{trend.MeasureDate:yyyy-MM-dd}', '{trend.MeasureHour:yyyy-MM-dd HH:mm:ss}',
-                    {trend.ComplianceScore}, {trend.TotalControls}, {trend.CompliantControls},
-                    {trend.PartialControls}, {trend.NonCompliantControls}, {trend.DeltaFromPrevious}, now()
+                    {ValidateNumeric(trend.ComplianceScore)}, {ValidateNumeric(trend.TotalControls)}, {ValidateNumeric(trend.CompliantControls)},
+                    {ValidateNumeric(trend.PartialControls)}, {ValidateNumeric(trend.NonCompliantControls)}, {ValidateNumeric(trend.DeltaFromPrevious)}, now()
                 )";
 
             await ExecuteNonQueryAsync(query);
@@ -149,10 +161,12 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<RiskHeatmapCell>> GetRiskHeatmapAsync(Guid tenantId)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var query = $@"
                 SELECT likelihood, impact, sum(risk_count) as risk_count
                 FROM {_settings.Database}.risk_heatmap
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                   AND snapshot_date = today()
                 GROUP BY likelihood, impact
                 ORDER BY likelihood, impact
@@ -165,14 +179,15 @@ namespace GrcMvc.Services.Analytics
         {
             foreach (var cell in cells)
             {
+                // SECURITY: Escape all Guid values in array to prevent SQL injection
                 var riskIdsArray = cell.RiskIds.Any()
-                    ? $"[{string.Join(",", cell.RiskIds.Select(r => $"'{r}'"))}]"
+                    ? $"[{string.Join(",", cell.RiskIds.Select(r => $"'{EscapeGuid(r)}'"))}]"
                     : "[]";
 
                 var query = $@"
                     INSERT INTO {_settings.Database}.risk_heatmap
                     (tenant_id, snapshot_date, likelihood, impact, risk_count, risk_ids, created_at)
-                    VALUES ('{tenantId}', today(), {cell.Likelihood}, {cell.Impact}, {cell.RiskCount}, {riskIdsArray}, now())";
+                    VALUES ('{EscapeGuid(tenantId)}', today(), {ValidateNumeric(cell.Likelihood)}, {ValidateNumeric(cell.Impact)}, {ValidateNumeric(cell.RiskCount)}, {riskIdsArray}, now())";
 
                 await ExecuteNonQueryAsync(query);
             }
@@ -184,10 +199,12 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<FrameworkComparisonDto>> GetFrameworkComparisonAsync(Guid tenantId)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.framework_comparison
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                   AND snapshot_date = today()
                 ORDER BY compliance_score DESC
                 FORMAT JSONEachRow";
@@ -197,17 +214,19 @@ namespace GrcMvc.Services.Analytics
 
         public async Task UpsertFrameworkComparisonAsync(FrameworkComparisonDto comparison)
         {
+            // SECURITY: Validate tenantId and numeric values before use in SQL
+            var safeTenantId = EscapeGuid(comparison.TenantId);
             var query = $@"
                 INSERT INTO {_settings.Database}.framework_comparison
                 (tenant_id, snapshot_date, framework_code, framework_name,
                  total_requirements, compliant_count, partial_count, non_compliant_count, not_assessed_count,
                  compliance_score, maturity_level, trend_7d, trend_30d, created_at)
                 VALUES (
-                    '{comparison.TenantId}', '{comparison.SnapshotDate:yyyy-MM-dd}',
-                    '{comparison.FrameworkCode}', '{comparison.FrameworkName}',
-                    {comparison.TotalRequirements}, {comparison.CompliantCount}, {comparison.PartialCount},
-                    {comparison.NonCompliantCount}, {comparison.NotAssessedCount},
-                    {comparison.ComplianceScore}, {comparison.MaturityLevel}, {comparison.Trend7d}, {comparison.Trend30d}, now()
+                    '{safeTenantId}', '{comparison.SnapshotDate:yyyy-MM-dd}',
+                    '{EscapeString(comparison.FrameworkCode ?? string.Empty)}', '{EscapeString(comparison.FrameworkName ?? string.Empty)}',
+                    {ValidateNumeric(comparison.TotalRequirements)}, {ValidateNumeric(comparison.CompliantCount)}, {ValidateNumeric(comparison.PartialCount)},
+                    {ValidateNumeric(comparison.NonCompliantCount)}, {ValidateNumeric(comparison.NotAssessedCount)},
+                    {ValidateNumeric(comparison.ComplianceScore)}, {ValidateNumeric(comparison.MaturityLevel)}, {ValidateNumeric(comparison.Trend7d)}, {ValidateNumeric(comparison.Trend30d)}, now()
                 )";
 
             await ExecuteNonQueryAsync(query);
@@ -219,10 +238,12 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<TaskMetricsByRoleDto>> GetTaskMetricsByRoleAsync(Guid tenantId)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.task_metrics_by_role
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                   AND snapshot_date = today()
                 ORDER BY total_tasks DESC
                 FORMAT JSONEachRow";
@@ -232,16 +253,19 @@ namespace GrcMvc.Services.Analytics
 
         public async Task UpsertTaskMetricsByRoleAsync(TaskMetricsByRoleDto metrics)
         {
+            // SECURITY: Validate tenantId, teamId, and numeric values before use in SQL
+            var safeTenantId = EscapeGuid(metrics.TenantId);
+            var safeTeamId = EscapeGuid(metrics.TeamId);
             var query = $@"
                 INSERT INTO {_settings.Database}.task_metrics_by_role
                 (tenant_id, snapshot_date, role_code, team_id,
                  total_tasks, pending_tasks, in_progress_tasks, completed_tasks, overdue_tasks,
                  avg_completion_days, sla_compliance_rate, created_at)
                 VALUES (
-                    '{metrics.TenantId}', '{metrics.SnapshotDate:yyyy-MM-dd}', '{metrics.RoleCode}', '{metrics.TeamId}',
-                    {metrics.TotalTasks}, {metrics.PendingTasks}, {metrics.InProgressTasks},
-                    {metrics.CompletedTasks}, {metrics.OverdueTasks},
-                    {metrics.AvgCompletionDays}, {metrics.SlaComplianceRate}, now()
+                    '{safeTenantId}', '{metrics.SnapshotDate:yyyy-MM-dd}', '{EscapeString(metrics.RoleCode ?? string.Empty)}', '{safeTeamId}',
+                    {ValidateNumeric(metrics.TotalTasks)}, {ValidateNumeric(metrics.PendingTasks)}, {ValidateNumeric(metrics.InProgressTasks)},
+                    {ValidateNumeric(metrics.CompletedTasks)}, {ValidateNumeric(metrics.OverdueTasks)},
+                    {ValidateNumeric(metrics.AvgCompletionDays)}, {ValidateNumeric(metrics.SlaComplianceRate)}, now()
                 )";
 
             await ExecuteNonQueryAsync(query);
@@ -253,10 +277,12 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<EvidenceMetricsDto>> GetEvidenceMetricsAsync(Guid tenantId)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.evidence_metrics
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                   AND snapshot_date = today()
                 ORDER BY evidence_type
                 FORMAT JSONEachRow";
@@ -266,17 +292,19 @@ namespace GrcMvc.Services.Analytics
 
         public async Task UpsertEvidenceMetricsAsync(EvidenceMetricsDto metrics)
         {
+            // SECURITY: Validate tenantId and numeric values before use in SQL
+            var safeTenantId = EscapeGuid(metrics.TenantId);
             var query = $@"
                 INSERT INTO {_settings.Database}.evidence_metrics
                 (tenant_id, snapshot_date, evidence_type, control_domain,
                  total_required, total_collected, total_approved, total_rejected, total_expired,
                  collection_rate, approval_rate, avg_review_days, created_at)
                 VALUES (
-                    '{metrics.TenantId}', '{metrics.SnapshotDate:yyyy-MM-dd}',
-                    '{metrics.EvidenceType}', '{metrics.ControlDomain}',
-                    {metrics.TotalRequired}, {metrics.TotalCollected}, {metrics.TotalApproved},
-                    {metrics.TotalRejected}, {metrics.TotalExpired},
-                    {metrics.CollectionRate}, {metrics.ApprovalRate}, {metrics.AvgReviewDays}, now()
+                    '{safeTenantId}', '{metrics.SnapshotDate:yyyy-MM-dd}',
+                    '{EscapeString(metrics.EvidenceType ?? string.Empty)}', '{EscapeString(metrics.ControlDomain ?? string.Empty)}',
+                    {ValidateNumeric(metrics.TotalRequired)}, {ValidateNumeric(metrics.TotalCollected)}, {ValidateNumeric(metrics.TotalApproved)},
+                    {ValidateNumeric(metrics.TotalRejected)}, {ValidateNumeric(metrics.TotalExpired)},
+                    {ValidateNumeric(metrics.CollectionRate)}, {ValidateNumeric(metrics.ApprovalRate)}, {ValidateNumeric(metrics.AvgReviewDays)}, now()
                 )";
 
             await ExecuteNonQueryAsync(query);
@@ -288,13 +316,16 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<TopActionDto>> GetTopActionsAsync(Guid tenantId, int limit = 10)
         {
+            // SECURITY: Validate tenantId and limit before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
+            var safeLimit = ValidateNumeric(limit);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.top_actions
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                   AND snapshot_date = today()
                 ORDER BY action_rank ASC
-                LIMIT {limit}
+                LIMIT {safeLimit}
                 FORMAT JSONEachRow";
 
             return await ExecuteQueryAsync<TopActionDto>(query);
@@ -302,10 +333,12 @@ namespace GrcMvc.Services.Analytics
 
         public async Task UpsertTopActionsAsync(Guid tenantId, List<TopActionDto> actions)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             // Clear existing actions for today
             await ExecuteNonQueryAsync($@"
                 ALTER TABLE {_settings.Database}.top_actions
-                DELETE WHERE tenant_id = '{tenantId}' AND snapshot_date = today()");
+                DELETE WHERE tenant_id = '{safeTenantId}' AND snapshot_date = today()");
 
             foreach (var action in actions)
             {
@@ -313,15 +346,17 @@ namespace GrcMvc.Services.Analytics
                     ? $"'{action.DueDate.Value:yyyy-MM-dd HH:mm:ss}'"
                     : "NULL";
 
+                // SECURITY: Validate EntityId and numeric values before use in SQL
+                var safeEntityId = EscapeGuid(action.EntityId);
                 var query = $@"
                     INSERT INTO {_settings.Database}.top_actions
                     (tenant_id, snapshot_date, action_rank, action_type, action_title, action_description,
                      entity_type, entity_id, urgency, due_date, assigned_to, created_at)
                     VALUES (
-                        '{tenantId}', today(), {action.ActionRank}, '{action.ActionType}',
-                        '{EscapeString(action.ActionTitle)}', '{EscapeString(action.ActionDescription)}',
-                        '{action.EntityType}', '{action.EntityId}', '{action.Urgency}',
-                        {dueDateStr}, '{action.AssignedTo}', now()
+                        '{safeTenantId}', today(), {ValidateNumeric(action.ActionRank)}, '{EscapeString(action.ActionType ?? string.Empty)}',
+                        '{EscapeString(action.ActionTitle ?? string.Empty)}', '{EscapeString(action.ActionDescription ?? string.Empty)}',
+                        '{EscapeString(action.EntityType ?? string.Empty)}', '{safeEntityId}', '{EscapeString(action.Urgency ?? string.Empty)}',
+                        {dueDateStr}, '{EscapeString(action.AssignedTo ?? string.Empty)}', now()
                     )";
 
                 await ExecuteNonQueryAsync(query);
@@ -334,10 +369,12 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<UserActivityDto>> GetUserActivityAsync(Guid tenantId, DateTime from, DateTime to)
         {
+            // SECURITY: Validate tenantId before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.user_activity
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                   AND activity_date >= '{from:yyyy-MM-dd}'
                   AND activity_date <= '{to:yyyy-MM-dd}'
                 ORDER BY activity_date DESC, user_id
@@ -348,16 +385,20 @@ namespace GrcMvc.Services.Analytics
 
         public async Task UpsertUserActivityAsync(UserActivityDto activity)
         {
+            // SECURITY: Validate tenantId (Guid), userId (string), and numeric values before use in SQL
+            var safeTenantId = EscapeGuid(activity.TenantId);
+            // UserId is string, not Guid, so use EscapeString
+            var safeUserId = EscapeString(activity.UserId ?? string.Empty);
             var query = $@"
                 INSERT INTO {_settings.Database}.user_activity
                 (tenant_id, user_id, activity_date,
                  login_count, tasks_completed, evidence_submitted, assessments_worked, approvals_given,
                  session_minutes, last_activity, created_at)
                 VALUES (
-                    '{activity.TenantId}', '{activity.UserId}', '{activity.ActivityDate:yyyy-MM-dd}',
-                    {activity.LoginCount}, {activity.TasksCompleted}, {activity.EvidenceSubmitted},
-                    {activity.AssessmentsWorked}, {activity.ApprovalsGiven},
-                    {activity.SessionMinutes}, '{activity.LastActivity:yyyy-MM-dd HH:mm:ss}', now()
+                    '{safeTenantId}', '{safeUserId}', '{activity.ActivityDate:yyyy-MM-dd}',
+                    {ValidateNumeric(activity.LoginCount)}, {ValidateNumeric(activity.TasksCompleted)}, {ValidateNumeric(activity.EvidenceSubmitted)},
+                    {ValidateNumeric(activity.AssessmentsWorked)}, {ValidateNumeric(activity.ApprovalsGiven)},
+                    {ValidateNumeric(activity.SessionMinutes)}, '{activity.LastActivity:yyyy-MM-dd HH:mm:ss}', now()
                 )";
 
             await ExecuteNonQueryAsync(query);
@@ -369,13 +410,18 @@ namespace GrcMvc.Services.Analytics
 
         public async Task InsertEventAsync(AnalyticsEventDto analyticsEvent)
         {
+            // SECURITY: Validate EventId, TenantId (Guid), and EntityId (string) before use in SQL
+            var safeEventId = EscapeGuid(analyticsEvent.EventId);
+            var safeTenantId = EscapeGuid(analyticsEvent.TenantId);
+            // EntityId is string, not Guid, so use EscapeString
+            var safeEntityId = EscapeString(analyticsEvent.EntityId ?? string.Empty);
             var query = $@"
                 INSERT INTO {_settings.Database}.events_raw
                 (event_id, tenant_id, event_type, entity_type, entity_id, action, actor, payload, event_timestamp, ingested_at)
                 VALUES (
-                    '{analyticsEvent.EventId}', '{analyticsEvent.TenantId}', '{analyticsEvent.EventType}',
-                    '{analyticsEvent.EntityType}', '{analyticsEvent.EntityId}', '{analyticsEvent.Action}',
-                    '{analyticsEvent.Actor}', '{EscapeString(analyticsEvent.Payload)}',
+                    '{safeEventId}', '{safeTenantId}', '{EscapeString(analyticsEvent.EventType ?? string.Empty)}',
+                    '{EscapeString(analyticsEvent.EntityType ?? string.Empty)}', '{safeEntityId}', '{EscapeString(analyticsEvent.Action ?? string.Empty)}',
+                    '{EscapeString(analyticsEvent.Actor ?? string.Empty)}', '{EscapeString(analyticsEvent.Payload ?? string.Empty)}',
                     '{analyticsEvent.EventTimestamp:yyyy-MM-dd HH:mm:ss}', now()
                 )";
 
@@ -384,12 +430,15 @@ namespace GrcMvc.Services.Analytics
 
         public async Task<List<AnalyticsEventDto>> GetRecentEventsAsync(Guid tenantId, int limit = 100)
         {
+            // SECURITY: Validate tenantId and limit before use in SQL
+            var safeTenantId = EscapeGuid(tenantId);
+            var safeLimit = ValidateNumeric(limit);
             var query = $@"
                 SELECT *
                 FROM {_settings.Database}.events_raw
-                WHERE tenant_id = '{tenantId}'
+                WHERE tenant_id = '{safeTenantId}'
                 ORDER BY event_timestamp DESC
-                LIMIT {limit}
+                LIMIT {safeLimit}
                 FORMAT JSONEachRow";
 
             return await ExecuteQueryAsync<AnalyticsEventDto>(query);
@@ -475,9 +524,70 @@ namespace GrcMvc.Services.Analytics
             }
         }
 
-        private static string EscapeString(string value)
+        /// <summary>
+        /// Escapes ClickHouse string values to prevent SQL injection
+        /// Escapes single quotes and backslashes
+        /// </summary>
+        private static string EscapeString(string? value)
         {
-            return value?.Replace("'", "\\'").Replace("\\", "\\\\") ?? string.Empty;
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
+            
+            // SECURITY: Escape special characters to prevent SQL injection
+            // Replace backslash first, then single quote (order matters)
+            return value
+                .Replace("\\", "\\\\")  // Escape backslashes first
+                .Replace("'", "\\'");   // Then escape single quotes
+        }
+
+        /// <summary>
+        /// Validates and escapes Guid values to prevent SQL injection
+        /// SECURITY: Ensures Guid is valid before using in SQL
+        /// </summary>
+        private static string EscapeGuid(Guid value)
+        {
+            // SECURITY: Validate Guid format before use
+            if (value == Guid.Empty)
+                throw new ArgumentException("Guid cannot be empty", nameof(value));
+            
+            return value.ToString();
+        }
+
+        /// <summary>
+        /// Validates numeric values to prevent SQL injection
+        /// SECURITY: Ensures numeric values are safe for SQL
+        /// </summary>
+        private static int ValidateNumeric(int value)
+        {
+            // SECURITY: Basic validation - numeric values are generally safe, but validate range
+            if (value < 0)
+                throw new ArgumentException("Numeric value cannot be negative", nameof(value));
+            
+            return value;
+        }
+
+        /// <summary>
+        /// Validates numeric values to prevent SQL injection
+        /// SECURITY: Ensures numeric values are safe for SQL
+        /// </summary>
+        private static double ValidateNumeric(double value)
+        {
+            // SECURITY: Basic validation - numeric values are generally safe, but validate range
+            if (double.IsNaN(value) || double.IsInfinity(value))
+                throw new ArgumentException("Numeric value must be a valid number", nameof(value));
+            
+            return value;
+        }
+
+        /// <summary>
+        /// Validates decimal values to prevent SQL injection
+        /// SECURITY: Ensures decimal values are safe for SQL
+        /// </summary>
+        private static decimal ValidateNumeric(decimal value)
+        {
+            // SECURITY: Basic validation - decimal values are generally safe for SQL
+            // No need for range validation as decimal is always valid (unlike double)
+            return value;
         }
 
         #endregion

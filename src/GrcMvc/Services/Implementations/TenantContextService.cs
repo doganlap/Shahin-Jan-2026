@@ -118,19 +118,27 @@ namespace GrcMvc.Services.Implementations
             if (skipSubdomains.Contains(subdomain))
                 return Guid.Empty;
 
-            // Lookup tenant by slug (subdomain matches TenantSlug)
-            var tenant = _context.Tenants
-                .AsNoTracking()
-                .FirstOrDefault(t => t.TenantSlug.ToLower() == subdomain && t.IsActive && !t.IsDeleted);
-
-            if (tenant != null)
+            try
             {
-                _logger?.LogDebug("Resolved tenant {TenantId} from domain {Domain}", tenant.Id, host);
-                return tenant.Id;
-            }
+                // Lookup tenant by slug (subdomain matches TenantSlug)
+                var tenant = _context.Tenants
+                    .AsNoTracking()
+                    .FirstOrDefault(t => t.TenantSlug.ToLower() == subdomain && t.IsActive && !t.IsDeleted);
 
-            _logger?.LogDebug("No tenant found for subdomain {Subdomain}", subdomain);
-            return Guid.Empty;
+                if (tenant != null)
+                {
+                    _logger?.LogDebug("Resolved tenant {TenantId} from domain {Domain}", tenant.Id, host);
+                    return tenant.Id;
+                }
+
+                _logger?.LogDebug("No tenant found for subdomain {Subdomain}", subdomain);
+                return Guid.Empty;
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogWarning(ex, "Tenant resolution from domain failed for host {Host}. Returning no-tenant context.", host);
+                return Guid.Empty;
+            }
         }
 
         private Guid ResolveFromClaims()

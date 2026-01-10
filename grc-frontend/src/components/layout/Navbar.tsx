@@ -5,31 +5,7 @@ import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, ChevronDown, Globe, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-const navigation = [
-  { 
-    name: "المنتج", 
-    href: "#",
-    children: [
-      { name: "المميزات", href: "/#features" },
-      { name: "الأطر التنظيمية", href: "/#regulators" },
-      { name: "كيف تعمل المنصة", href: "/#how-it-works" },
-    ]
-  },
-  { 
-    name: "الحلول", 
-    href: "#",
-    children: [
-      { name: "للشركات الكبيرة", href: "/enterprise" },
-      { name: "للشركات المتوسطة", href: "/business" },
-      { name: "للقطاع المالي", href: "/financial" },
-      { name: "للقطاع الصحي", href: "/healthcare" },
-    ]
-  },
-  { name: "الأسعار", href: "/pricing" },
-  { name: "عن شاهين", href: "/about" },
-  { name: "تواصل معنا", href: "/contact" },
-]
+import { useTranslations } from "next-intl"
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -39,11 +15,40 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false)
   const [currentLocale, setCurrentLocale] = useState<"ar" | "en">("ar")
 
+  const t = useTranslations("nav")
+  const tTheme = useTranslations("theme")
+  const tCommon = useTranslations("common")
+
+  const navigation = [
+    {
+      name: t("product"),
+      href: "#",
+      children: [
+        { name: t("features"), href: "/#features" },
+        { name: t("regulators"), href: "/#regulators" },
+        { name: t("howItWorks"), href: "/#how-it-works" },
+      ]
+    },
+    {
+      name: t("solutions"),
+      href: "#",
+      children: [
+        { name: t("enterprise"), href: "/enterprise" },
+        { name: t("business"), href: "/business" },
+        { name: t("financial"), href: "/financial" },
+        { name: t("healthcare"), href: "/healthcare" },
+      ]
+    },
+    { name: t("pricing"), href: "/pricing" },
+    { name: t("about"), href: "/about" },
+    { name: t("contact"), href: "/contact" },
+  ]
+
   useEffect(() => {
     setMounted(true)
     const handleScroll = () => setIsScrolled(window.scrollY > 20)
     window.addEventListener("scroll", handleScroll)
-    
+
     // Load saved theme
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -54,7 +59,7 @@ export function Navbar() {
       setTheme("dark")
       document.documentElement.classList.add("dark")
     }
-    
+
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
@@ -73,10 +78,10 @@ export function Navbar() {
   }
 
   return (
-    <header 
+    <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-sm border-b border-gray-200/50 dark:border-gray-800/50" 
+        isScrolled
+          ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-lg shadow-sm border-b border-gray-200/50 dark:border-gray-800/50"
           : "bg-transparent"
       }`}
     >
@@ -88,14 +93,14 @@ export function Navbar() {
               <span className="text-white font-bold text-xl">ش</span>
             </div>
             <span className="text-xl font-bold text-gray-900 dark:text-white">
-              شاهين
+              {tCommon("appName")}
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
             {navigation.map((item) => (
-              <div 
+              <div
                 key={item.name}
                 className="relative"
                 onMouseEnter={() => setActiveDropdown(item.name)}
@@ -104,8 +109,8 @@ export function Navbar() {
                 <Link
                   href={item.href}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
-                    ${isScrolled 
-                      ? "text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400" 
+                    ${isScrolled
+                      ? "text-gray-700 hover:text-emerald-600 dark:text-gray-300 dark:hover:text-emerald-400"
                       : "text-gray-700 dark:text-gray-300 hover:text-emerald-600"
                     }
                     flex items-center gap-1`}
@@ -142,23 +147,23 @@ export function Navbar() {
           {/* Right Actions */}
           <div className="hidden lg:flex items-center gap-3">
             {/* Language Toggle */}
-            <button 
+            <button
               onClick={toggleLocale}
               className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              title={currentLocale === "ar" ? "Switch to English" : "التحويل للعربية"}
+              title={currentLocale === "ar" ? tTheme("switchToEnglish") : tTheme("switchToArabic")}
             >
               <Globe className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                {currentLocale === "ar" ? "EN" : "عربي"}
+                {currentLocale === "ar" ? tTheme("enLabel") : tTheme("arLabel")}
               </span>
             </button>
 
             {/* Theme Toggle */}
             {mounted && (
-              <button 
+              <button
                 className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={toggleTheme}
-                title={theme === "light" ? "التبديل للوضع الداكن" : "التبديل للوضع الفاتح"}
+                title={theme === "light" ? tTheme("dark") : tTheme("light")}
               >
                 {theme === "dark" ? (
                   <Sun className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -171,12 +176,12 @@ export function Navbar() {
             {/* Auth Buttons */}
             <Link href="/login">
               <Button variant="ghost" size="sm">
-                تسجيل الدخول
+                {t("login")}
               </Button>
             </Link>
             <Link href="/trial">
               <Button variant="gradient" size="sm">
-                ابدأ مجاناً
+                {t("startFreeTrial")}
               </Button>
             </Link>
           </div>
@@ -229,20 +234,20 @@ export function Navbar() {
                     )}
                   </div>
                 ))}
-                
+
                 {/* Mobile Language & Theme */}
                 <div className="px-4 py-2 flex items-center gap-4 border-t border-gray-200 dark:border-gray-700 mt-4 pt-4">
-                  <button 
+                  <button
                     onClick={toggleLocale}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800"
                   >
                     <Globe className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                     <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      {currentLocale === "ar" ? "EN" : "عربي"}
+                      {currentLocale === "ar" ? tTheme("enLabel") : tTheme("arLabel")}
                     </span>
                   </button>
                   {mounted && (
-                    <button 
+                    <button
                       onClick={toggleTheme}
                       className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800"
                     >
@@ -254,16 +259,16 @@ export function Navbar() {
                     </button>
                   )}
                 </div>
-                
+
                 <div className="pt-4 px-4 flex flex-col gap-2">
                   <Link href="/login">
                     <Button variant="outline" className="w-full">
-                      تسجيل الدخول
+                      {t("login")}
                     </Button>
                   </Link>
                   <Link href="/trial">
                     <Button variant="gradient" className="w-full">
-                      ابدأ مجاناً
+                      {t("startFreeTrial")}
                     </Button>
                   </Link>
                 </div>

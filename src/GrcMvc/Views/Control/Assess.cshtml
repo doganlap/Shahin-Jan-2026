@@ -67,7 +67,7 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Assessment Date</label>
-                            <input type="date" name="AssessmentDate" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" required />
+                            <input type="date" name="AssessmentDate" class="form-control" value="@DateTime.UtcNow.ToString("yyyy-MM-dd")" required />
                         </div>
 
                         <div class="mb-3">

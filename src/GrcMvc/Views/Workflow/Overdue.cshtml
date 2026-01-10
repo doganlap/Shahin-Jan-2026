@@ -43,7 +43,7 @@
                         <tbody>
                             @foreach (var item in Model)
                             {
-                                var daysOverdue = (DateTime.Now - item.DueDate.GetValueOrDefault()).Days;
+                                var daysOverdue = (DateTime.UtcNow - item.DueDate.GetValueOrDefault()).Days;
                                 <tr>
                                     <td class="text-danger fw-bold">@item.DueDate?.ToShortDateString()</td>
                                     <td>

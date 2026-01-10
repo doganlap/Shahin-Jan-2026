@@ -97,7 +97,7 @@
                             @if (Model.DueDate.HasValue)
                             {
                                 @Model.DueDate.Value.ToString("MMMM dd, yyyy")
-                                @if (Model.DueDate.Value < DateTime.Now)
+                                @if (Model.DueDate.Value < DateTime.UtcNow)
                                 {
                                     <span class="badge bg-danger ms-2">@L["Risk_Overdue"]</span>
                                 }

@@ -3,51 +3,55 @@
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { Mail, Phone, MapPin, Linkedin, Twitter } from "lucide-react"
-
-const footerLinks = {
-  product: {
-    title: "المنتج",
-    links: [
-      { name: "المميزات", href: "/features" },
-      { name: "الأسعار", href: "/pricing" },
-      { name: "التكاملات", href: "/integrations" },
-      { name: "الأمان", href: "/security" },
-      { name: "خارطة الطريق", href: "/roadmap" },
-    ],
-  },
-  solutions: {
-    title: "الحلول",
-    links: [
-      { name: "للشركات الكبيرة", href: "/enterprise" },
-      { name: "للشركات المتوسطة", href: "/business" },
-      { name: "للقطاع المالي", href: "/financial" },
-      { name: "للقطاع الصحي", href: "/healthcare" },
-      { name: "للقطاع الحكومي", href: "/government" },
-    ],
-  },
-  resources: {
-    title: "الموارد",
-    links: [
-      { name: "المدونة", href: "/blog" },
-      { name: "مركز المساعدة", href: "/help" },
-      { name: "الوثائق", href: "/docs" },
-      { name: "الندوات", href: "/webinars" },
-      { name: "دراسات الحالة", href: "/case-studies" },
-    ],
-  },
-  company: {
-    title: "الشركة",
-    links: [
-      { name: "عن شاهين", href: "/about" },
-      { name: "الوظائف", href: "/careers" },
-      { name: "تواصل معنا", href: "/contact" },
-      { name: "الشركاء", href: "/partners" },
-      { name: "الأخبار", href: "/news" },
-    ],
-  },
-}
+import { useTranslations } from "next-intl"
 
 export function Footer() {
+  const t = useTranslations("footer")
+  const tCommon = useTranslations("common")
+
+  const footerSections = [
+    {
+      key: "product",
+      links: [
+        { key: "features", href: "/features" },
+        { key: "pricing", href: "/pricing" },
+        { key: "integrations", href: "/integrations" },
+        { key: "security", href: "/security" },
+        { key: "roadmap", href: "/roadmap" },
+      ],
+    },
+    {
+      key: "solutions",
+      links: [
+        { key: "enterprise", href: "/enterprise" },
+        { key: "business", href: "/business" },
+        { key: "financial", href: "/financial" },
+        { key: "healthcare", href: "/healthcare" },
+        { key: "government", href: "/government" },
+      ],
+    },
+    {
+      key: "resources",
+      links: [
+        { key: "blog", href: "/blog" },
+        { key: "help", href: "/help" },
+        { key: "docs", href: "/docs" },
+        { key: "webinars", href: "/webinars" },
+        { key: "caseStudies", href: "/case-studies" },
+      ],
+    },
+    {
+      key: "company",
+      links: [
+        { key: "about", href: "/about" },
+        { key: "careers", href: "/careers" },
+        { key: "contact", href: "/contact" },
+        { key: "partners", href: "/partners" },
+        { key: "news", href: "/news" },
+      ],
+    },
+  ]
+
   return (
     <footer className="bg-gray-900 text-white">
       {/* Main Footer */}
@@ -60,14 +64,14 @@ export function Footer() {
                 <span className="text-white font-bold text-2xl">ش</span>
               </div>
               <div>
-                <span className="text-2xl font-bold block">شاهين</span>
-                <span className="text-sm text-gray-400">Shahin GRC</span>
+                <span className="text-2xl font-bold block">{tCommon("appName")}</span>
+                <span className="text-sm text-gray-400">{tCommon("appNameFull")}</span>
               </div>
             </Link>
             <p className="text-gray-400 mb-6 max-w-sm">
-              منصة متكاملة لإدارة الحوكمة والمخاطر والامتثال. مصممة خصيصاً للمؤسسات السعودية.
+              {t("description")}
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-3">
               <a href="mailto:info@shahin-ai.com" className="flex items-center gap-3 text-gray-400 hover:text-emerald-400 transition-colors">
@@ -80,7 +84,7 @@ export function Footer() {
               </a>
               <div className="flex items-center gap-3 text-gray-400">
                 <MapPin className="w-5 h-5" />
-                <span>الرياض، المملكة العربية السعودية</span>
+                <span>{t("location")}</span>
               </div>
             </div>
 
@@ -96,17 +100,17 @@ export function Footer() {
           </div>
 
           {/* Links Columns */}
-          {Object.entries(footerLinks).map(([key, section]) => (
-            <div key={key}>
-              <h4 className="font-semibold text-white mb-4">{section.title}</h4>
+          {footerSections.map((section) => (
+            <div key={section.key}>
+              <h4 className="font-semibold text-white mb-4">{t(`${section.key}.title`)}</h4>
               <ul className="space-y-3">
                 {section.links.map((link) => (
-                  <li key={link.name}>
-                    <Link 
+                  <li key={link.key}>
+                    <Link
                       href={link.href}
                       className="text-gray-400 hover:text-emerald-400 transition-colors text-sm"
                     >
-                      {link.name}
+                      {t(`${section.key}.${link.key}`)}
                     </Link>
                   </li>
                 ))}
@@ -121,17 +125,17 @@ export function Footer() {
         <div className="container mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-sm text-gray-400">
-              © 2024 شاهين. جميع الحقوق محفوظة.
+              {t("copyright", { appName: tCommon("appName") })}
             </div>
             <div className="flex gap-6 text-sm">
               <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
-                سياسة الخصوصية
+                {t("legal.privacy")}
               </Link>
               <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                الشروط والأحكام
+                {t("legal.terms")}
               </Link>
               <Link href="/cookies" className="text-gray-400 hover:text-white transition-colors">
-                سياسة ملفات تعريف الارتباط
+                {t("legal.cookies")}
               </Link>
             </div>
           </div>

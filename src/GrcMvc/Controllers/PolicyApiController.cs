@@ -221,9 +221,9 @@ namespace GrcMvc.Controllers
                 {
                     policyId = id,
                     status = "Approved",
-                    approvedDate = DateTime.Now,
+                    approvedDate = DateTime.UtcNow,
                     approvedBy = approvalData?.approvedBy ?? "System",
-                    enforcementDate = DateTime.Now.AddDays(7),
+                    enforcementDate = DateTime.UtcNow.AddDays(7),
                     message = "Policy approved successfully and scheduled for enforcement"
                 };
 
@@ -257,21 +257,21 @@ namespace GrcMvc.Controllers
                     new {
                         versionNumber = 3,
                         status = "Active",
-                        createdDate = DateTime.Now,
+                        createdDate = DateTime.UtcNow,
                         createdBy = "John Smith",
                         description = "Current version - Security and access controls enhanced"
                     },
                     new {
                         versionNumber = 2,
                         status = "Superseded",
-                        createdDate = DateTime.Now.AddMonths(-3),
+                        createdDate = DateTime.UtcNow.AddMonths(-3),
                         createdBy = "Sarah Johnson",
                         description = "Previous version - Initial compliance requirements"
                     },
                     new {
                         versionNumber = 1,
                         status = "Archived",
-                        createdDate = DateTime.Now.AddMonths(-6),
+                        createdDate = DateTime.UtcNow.AddMonths(-6),
                         createdBy = "Ahmed Al-Mansouri",
                         description = "Original version - Basic policy framework"
                     }
@@ -314,7 +314,7 @@ namespace GrcMvc.Controllers
                         category = (string?)patchData.category,
                         effectiveDate = (DateTime?)patchData.effectiveDate
                     },
-                    patchedDate = DateTime.Now,
+                    patchedDate = DateTime.UtcNow,
                     message = "Policy partially updated successfully"
                 };
 

@@ -1,59 +1,48 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { 
-  Bot, 
-  Radar, 
-  ShieldCheck, 
-  FileSearch, 
-  Code2, 
+import {
+  Bot,
+  Radar,
+  ShieldCheck,
+  FileSearch,
+  Code2,
   Package,
   ArrowLeft
 } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useTranslations } from "next-intl"
 
-const differentiators = [
+const differentiatorsConfig = [
   {
+    key: "aiAgents",
     icon: Bot,
-    title: "وكلاء ذكاء اصطناعي متخصصين",
-    description: "9 وكلاء ذكاء اصطناعي متخصصين في الامتثال والمخاطر والتدقيق يعملون على مدار الساعة",
-    highlight: "9 AI Agents",
     gradient: "from-violet-500 to-purple-600",
   },
   {
+    key: "regIntel",
     icon: Radar,
-    title: "استخبارات تنظيمية مباشرة",
-    description: "تحديثات فورية من أكثر من 120 جهة تنظيمية حول العالم مع تنبيهات استباقية",
-    highlight: "120+ Regulators",
     gradient: "from-blue-500 to-cyan-600",
   },
   {
+    key: "monitoring",
     icon: ShieldCheck,
-    title: "مراقبة مستمرة للضوابط",
-    description: "مراقبة آلية ومستمرة لجميع الضوابط مع كشف الانحرافات والتنبيه الفوري",
-    highlight: "24/7 Monitoring",
     gradient: "from-emerald-500 to-teal-600",
   },
   {
+    key: "evidenceFirst",
     icon: FileSearch,
-    title: "نهج الأدلة أولاً",
-    description: "جمع وتنظيم وربط الأدلة تلقائياً مع الضوابط لتسهيل عمليات التدقيق",
-    highlight: "Evidence-First",
     gradient: "from-orange-500 to-red-600",
   },
   {
+    key: "complianceAsCode",
     icon: Code2,
-    title: "الامتثال كرمز",
-    description: "تعريف متطلبات الامتثال كرمز برمجي قابل للتتبع والإصدار والأتمتة",
-    highlight: "Compliance as Code",
     gradient: "from-pink-500 to-rose-600",
   },
   {
+    key: "industryPacks",
     icon: Package,
-    title: "حزم صناعية جاهزة",
-    description: "حزم امتثال مسبقة التكوين للقطاعات المالية والصحية والحكومية والطاقة",
-    highlight: "Industry Packs",
     gradient: "from-amber-500 to-orange-600",
   },
 ]
@@ -72,6 +61,9 @@ const itemVariants = {
 }
 
 export function Differentiators() {
+  const t = useTranslations("landing.differentiators")
+  const tCommon = useTranslations("common")
+
   return (
     <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
       <div className="container mx-auto px-6">
@@ -83,13 +75,13 @@ export function Differentiators() {
           viewport={{ once: true }}
         >
           <span className="text-emerald-600 dark:text-emerald-400 font-semibold mb-4 block">
-            لماذا شاهين؟
+            {t("sectionLabel")}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            ما يميزنا عن غيرنا
+            {t("title")}
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            منصة شاهين مصممة خصيصاً للسوق السعودي مع تقنيات متقدمة لا تجدها في أي منصة أخرى
+            {t("subtitle")}
           </p>
         </motion.div>
 
@@ -101,18 +93,18 @@ export function Differentiators() {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          {differentiators.map((item) => (
+          {differentiatorsConfig.map((item) => (
             <motion.div
-              key={item.title}
+              key={item.key}
               className="group relative bg-white dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800 hover:shadow-2xl transition-all duration-500 overflow-hidden"
               variants={itemVariants}
             >
               {/* Background Gradient on Hover */}
               <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-              
+
               {/* Highlight Badge */}
               <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${item.gradient}`}>
-                {item.highlight}
+                {t(`${item.key}.highlight`)}
               </div>
 
               {/* Icon */}
@@ -122,15 +114,15 @@ export function Differentiators() {
 
               {/* Content */}
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-                {item.title}
+                {t(`${item.key}.title`)}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                {item.description}
+                {t(`${item.key}.description`)}
               </p>
 
               {/* Hover Arrow */}
               <div className="mt-6 flex items-center text-emerald-600 dark:text-emerald-400 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
-                <span className="text-sm font-medium">اكتشف المزيد</span>
+                <span className="text-sm font-medium">{t("learnMore")}</span>
                 <ArrowLeft className="w-4 h-4 mr-2" />
               </div>
             </motion.div>
@@ -147,7 +139,7 @@ export function Differentiators() {
         >
           <Link href="/trial">
             <Button variant="gradient" size="xl" className="group">
-              جرب شاهين مجاناً
+              {t("cta")}
               <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             </Button>
           </Link>

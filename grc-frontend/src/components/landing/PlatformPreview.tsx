@@ -2,31 +2,30 @@
 
 import { motion } from "framer-motion"
 import { Play, Monitor, Shield, BarChart3, FileCheck } from "lucide-react"
+import { useTranslations } from "next-intl"
 
-const features = [
+const featuresConfig = [
   {
+    key: "complianceDashboard",
     icon: Shield,
-    title: "لوحة تحكم الامتثال",
-    description: "نظرة شاملة على حالة الامتثال مع جميع الأطر التنظيمية",
   },
   {
+    key: "riskHeatmap",
     icon: BarChart3,
-    title: "خريطة المخاطر الحرارية",
-    description: "تصور بصري للمخاطر حسب الأثر والاحتمالية",
   },
   {
+    key: "evidenceManagement",
     icon: FileCheck,
-    title: "إدارة الأدلة الذكية",
-    description: "ربط تلقائي للأدلة مع الضوابط وتتبع الصلاحية",
   },
   {
+    key: "interactiveReports",
     icon: Monitor,
-    title: "تقارير تفاعلية",
-    description: "تقارير ديناميكية قابلة للتخصيص والتصدير",
   },
 ]
 
 export function PlatformPreview() {
+  const t = useTranslations("landing.platformPreview")
+
   return (
     <section className="py-24 bg-gradient-to-b from-gray-900 to-gray-950 overflow-hidden">
       <div className="container mx-auto px-6">
@@ -38,13 +37,13 @@ export function PlatformPreview() {
           viewport={{ once: true }}
         >
           <span className="text-emerald-400 font-semibold mb-4 block">
-            نظرة على المنصة
+            {t("sectionLabel")}
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            شاهد المنصة أثناء العمل
+            {t("title")}
           </h2>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            واجهة عربية بالكامل مصممة لتسهيل إدارة الامتثال والمخاطر
+            {t("subtitle")}
           </p>
         </motion.div>
 
@@ -59,7 +58,7 @@ export function PlatformPreview() {
           >
             {/* Glow Effect */}
             <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 rounded-3xl blur-2xl" />
-            
+
             {/* Browser Window */}
             <div className="relative bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden shadow-2xl">
               {/* Browser Top Bar */}
@@ -101,7 +100,7 @@ export function PlatformPreview() {
                 {/* Video Coming Soon Text */}
                 <div className="absolute bottom-6 left-0 right-0 text-center">
                   <span className="text-gray-500 text-sm">
-                    العرض التوضيحي قريباً
+                    {t("videoComingSoon")}
                   </span>
                 </div>
               </div>
@@ -116,9 +115,9 @@ export function PlatformPreview() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            {features.map((feature, index) => (
+            {featuresConfig.map((feature, index) => (
               <motion.div
-                key={feature.title}
+                key={feature.key}
                 className="flex gap-4 p-4 rounded-xl bg-gray-800/50 border border-gray-700 hover:border-emerald-700 transition-colors"
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -130,10 +129,10 @@ export function PlatformPreview() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-1">
-                    {feature.title}
+                    {t(`${feature.key}.title`)}
                   </h3>
                   <p className="text-gray-400 text-sm">
-                    {feature.description}
+                    {t(`${feature.key}.description`)}
                   </p>
                 </div>
               </motion.div>
@@ -151,7 +150,7 @@ export function PlatformPreview() {
                 href="/trial"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg shadow-emerald-500/25"
               >
-                جرب المنصة الآن
+                {t("cta")}
                 <span className="text-lg">←</span>
               </a>
             </motion.div>

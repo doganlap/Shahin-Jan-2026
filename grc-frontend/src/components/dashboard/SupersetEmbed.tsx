@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { BarChart3, RefreshCw, Maximize2, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useTranslations } from "next-intl"
 
 interface SupersetEmbedProps {
   dashboardId: string
@@ -16,7 +17,7 @@ interface SupersetEmbedProps {
 
 export function SupersetEmbed({
   dashboardId,
-  title = "لوحة تحليلات",
+  title,
   height = "600px",
   showToolbar = true,
   filters = {},
@@ -24,9 +25,11 @@ export function SupersetEmbed({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const t = useTranslations("dashboard")
 
+  const displayTitle = title || t("analyticsBoard")
   const supersetUrl = process.env.NEXT_PUBLIC_SUPERSET_URL || "http://localhost:8088"
-  
+
   // Build embed URL with filters
   const buildEmbedUrl = () => {
     const params = new URLSearchParams({
@@ -69,7 +72,7 @@ export function SupersetEmbed({
         <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b">
           <CardTitle className="text-lg font-semibold flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-emerald-500" />
-            {title}
+            {displayTitle}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Button
@@ -77,7 +80,7 @@ export function SupersetEmbed({
               size="sm"
               onClick={handleRefresh}
               className="h-8 w-8 p-0"
-              title="تحديث"
+              title={t("refresh")}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`} />
             </Button>
@@ -86,7 +89,7 @@ export function SupersetEmbed({
               size="sm"
               onClick={handleFullscreen}
               className="h-8 w-8 p-0"
-              title="ملء الشاشة"
+              title={t("fullscreen")}
             >
               <Maximize2 className="w-4 h-4" />
             </Button>
@@ -95,7 +98,7 @@ export function SupersetEmbed({
               size="sm"
               onClick={handleOpenExternal}
               className="h-8 w-8 p-0"
-              title="فتح في نافذة جديدة"
+              title={t("openNewWindow")}
             >
               <ExternalLink className="w-4 h-4" />
             </Button>
@@ -111,7 +114,7 @@ export function SupersetEmbed({
           >
             <div className="flex flex-col items-center gap-3">
               <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-              <span className="text-sm text-gray-500">جاري تحميل لوحة التحليلات...</span>
+              <span className="text-sm text-gray-500">{t("loadingAnalytics")}</span>
             </div>
           </motion.div>
         )}
@@ -123,7 +126,7 @@ export function SupersetEmbed({
           frameBorder="0"
           onLoad={() => setIsLoading(false)}
           className="w-full"
-          title={title}
+          title={displayTitle}
           allow="fullscreen"
         />
       </CardContent>
@@ -145,13 +148,15 @@ interface GrafanaEmbedProps {
 export function GrafanaEmbed({
   dashboardUid,
   panelId,
-  title = "مراقبة النظام",
+  title,
   height = "400px",
   from = "now-24h",
   to = "now",
   refresh = "30s",
 }: GrafanaEmbedProps) {
   const [isLoading, setIsLoading] = useState(true)
+  const t = useTranslations("dashboard")
+  const displayTitle = title || t("systemMonitoring")
   const grafanaUrl = process.env.NEXT_PUBLIC_GRAFANA_URL || "http://localhost:3030"
 
   const buildEmbedUrl = () => {
@@ -174,7 +179,7 @@ export function GrafanaEmbed({
       <CardHeader className="py-3 px-4 border-b">
         <CardTitle className="text-lg font-semibold flex items-center gap-2">
           <BarChart3 className="w-5 h-5 text-blue-500" />
-          {title}
+          {displayTitle}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 relative">
@@ -190,7 +195,7 @@ export function GrafanaEmbed({
           frameBorder="0"
           onLoad={() => setIsLoading(false)}
           className="w-full"
-          title={title}
+          title={displayTitle}
         />
       </CardContent>
     </Card>
@@ -208,10 +213,12 @@ interface MetabaseEmbedProps {
 export function MetabaseEmbed({
   questionId,
   dashboardId,
-  title = "تقرير تحليلي",
+  title,
   height = "500px",
 }: MetabaseEmbedProps) {
   const [isLoading, setIsLoading] = useState(true)
+  const t = useTranslations("dashboard")
+  const displayTitle = title || t("analyticalReport")
   const metabaseUrl = process.env.NEXT_PUBLIC_METABASE_URL || "http://localhost:3033"
 
   const buildEmbedUrl = () => {
@@ -227,7 +234,7 @@ export function MetabaseEmbed({
   return (
     <Card className="overflow-hidden">
       <CardHeader className="py-3 px-4 border-b">
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+        <CardTitle className="text-lg font-semibold">{displayTitle}</CardTitle>
       </CardHeader>
       <CardContent className="p-0 relative">
         {isLoading && (
@@ -242,7 +249,7 @@ export function MetabaseEmbed({
           frameBorder="0"
           onLoad={() => setIsLoading(false)}
           className="w-full"
-          title={title}
+          title={displayTitle}
         />
       </CardContent>
     </Card>

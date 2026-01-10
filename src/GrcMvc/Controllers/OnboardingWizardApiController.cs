@@ -18,6 +18,7 @@ namespace GrcMvc.Controllers
     [Route("api/onboarding/wizard")]
     [Consumes("application/json")]
     [Produces("application/json")]
+    [IgnoreAntiforgeryToken] // API endpoints don't require CSRF tokens
     public class OnboardingWizardApiController : ControllerBase
     {
         private readonly IOnboardingWizardService _wizardService;
@@ -409,6 +410,46 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error completing wizard for tenant {TenantId}", tenantId);
+                return BadRequest(new { error = "An error occurred processing your request." });
+            }
+        }
+
+        /// <summary>
+        /// Get coverage validation for a specific section
+        /// </summary>
+        [HttpGet("tenants/{tenantId:guid}/coverage/{sectionId}")]
+        public async Task<IActionResult> GetSectionCoverage(Guid tenantId, string sectionId)
+        {
+            try
+            {
+                var coverageResult = await _wizardService.ValidateSectionCoverageAsync(tenantId, sectionId);
+                if (coverageResult == null)
+                {
+                    return NotFound(new { error = $"Coverage validation not found for section {sectionId}" });
+                }
+                return Ok(coverageResult);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting section coverage for tenant {TenantId}, section {SectionId}", tenantId, sectionId);
+                return BadRequest(new { error = "An error occurred processing your request." });
+            }
+        }
+
+        /// <summary>
+        /// Get coverage validation for all sections
+        /// </summary>
+        [HttpGet("tenants/{tenantId:guid}/coverage")]
+        public async Task<IActionResult> GetAllSectionsCoverage(Guid tenantId)
+        {
+            try
+            {
+                var allCoverage = await _wizardService.GetAllSectionsCoverageAsync(tenantId);
+                return Ok(allCoverage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all sections coverage for tenant {TenantId}", tenantId);
                 return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
