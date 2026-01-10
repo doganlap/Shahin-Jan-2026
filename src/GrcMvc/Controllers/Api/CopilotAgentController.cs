@@ -76,7 +76,7 @@ public class CopilotAgentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Copilot chat failed");
-            return StatusCode(500, new { error = "Failed to process request", details = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -297,7 +297,7 @@ public class CopilotAgentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "GRC question failed");
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -342,7 +342,7 @@ public class CopilotAgentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Action execution failed: {Action}", request.Action);
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 

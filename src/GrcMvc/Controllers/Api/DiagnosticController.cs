@@ -51,7 +51,7 @@ public class DiagnosticController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing errors");
-            return StatusCode(500, new { error = "Failed to analyze errors", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -83,7 +83,7 @@ public class DiagnosticController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error diagnosing error {ErrorId}", request.ErrorId);
-            return StatusCode(500, new { error = "Failed to diagnose error", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -104,7 +104,7 @@ public class DiagnosticController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing health");
-            return StatusCode(500, new { error = "Failed to analyze health", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -126,7 +126,7 @@ public class DiagnosticController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error detecting patterns");
-            return StatusCode(500, new { error = "Failed to detect patterns", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -156,7 +156,7 @@ public class DiagnosticController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing root cause");
-            return StatusCode(500, new { error = "Failed to analyze root cause", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -177,7 +177,7 @@ public class DiagnosticController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting recommendations");
-            return StatusCode(500, new { error = "Failed to get recommendations", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -198,7 +198,7 @@ public class DiagnosticController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error monitoring conditions");
-            return StatusCode(500, new { error = "Failed to monitor conditions", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 }

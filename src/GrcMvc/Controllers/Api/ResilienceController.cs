@@ -60,7 +60,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating resilience assessment");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -79,12 +79,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { success = false, error = ex.Message });
+                return NotFound(new { success = false, error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting resilience assessment {Id}", id);
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -110,7 +110,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting resilience assessments");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -134,12 +134,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { success = false, error = ex.Message });
+                return NotFound(new { success = false, error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating resilience assessment {Id}", id);
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -162,7 +162,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting resilience assessment {Id}", id);
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -186,12 +186,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { success = false, error = ex.Message });
+                return NotFound(new { success = false, error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error starting resilience assessment {Id}", id);
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -218,7 +218,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating risk resilience assessment");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -237,12 +237,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { success = false, error = ex.Message });
+                return NotFound(new { success = false, error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting risk resilience assessment {Id}", id);
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -268,7 +268,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting risk resilience assessments");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -292,12 +292,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { success = false, error = ex.Message });
+                return NotFound(new { success = false, error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error starting risk resilience assessment {Id}", id);
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 

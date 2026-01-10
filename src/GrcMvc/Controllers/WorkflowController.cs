@@ -82,7 +82,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation creating workflow");
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint))
                     {
                         ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
@@ -158,7 +158,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation updating workflow {WorkflowId}", id);
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint))
                     {
                         ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
@@ -213,7 +213,7 @@ namespace GrcMvc.Controllers
             catch (PolicyViolationException pex)
             {
                 _logger.LogWarning(pex, "Policy violation deleting workflow {WorkflowId}", id);
-                TempData["Error"] = $"Policy Violation: {pex.Message}. {pex.RemediationHint}";
+                TempData["Error"] = "A policy violation occurred. Please review the requirements.";
                 return RedirectToAction(nameof(Delete), new { id });
             }
             catch (Exception ex)
@@ -340,7 +340,7 @@ namespace GrcMvc.Controllers
             catch (PolicyViolationException pex)
             {
                 _logger.LogWarning(pex, "Policy violation executing workflow {WorkflowId}", id);
-                TempData["Error"] = $"Policy Violation: {pex.Message}. {pex.RemediationHint}";
+                TempData["Error"] = "A policy violation occurred. Please review the requirements.";
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)

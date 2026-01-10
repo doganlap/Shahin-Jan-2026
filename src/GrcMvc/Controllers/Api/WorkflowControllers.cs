@@ -45,7 +45,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error initiating workflow");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -186,7 +186,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error submitting for approval");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 

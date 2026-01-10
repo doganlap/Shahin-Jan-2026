@@ -775,4 +775,170 @@ public class CertificationService : ICertificationService
     }
 
     #endregion
+    
+    #region Readiness & Portfolio
+    
+    public async Task<TenantCertificationReadinessDto> GetReadinessAsync(Guid tenantId)
+    {
+        var certifications = await _context.Set<Certification>()
+            .Where(c => c.TenantId == tenantId)
+            .ToListAsync();
+        
+        var expiringSoon = certifications.Where(c => 
+            c.ExpiryDate.HasValue && 
+            c.ExpiryDate.Value > DateTime.UtcNow && 
+            c.ExpiryDate.Value <= DateTime.UtcNow.AddDays(90)).ToList();
+        
+        var overallScore = certifications.Any() 
+            ? (int)((certifications.Count(c => c.Status == "Certified") * 100.0) / certifications.Count)
+            : 0;
+        
+        return new TenantCertificationReadinessDto
+        {
+            TenantId = tenantId,
+            OverallReadinessScore = overallScore,
+            ReadinessLevel = overallScore switch
+            {
+                >= 80 => "Ready",
+                >= 60 => "High",
+                >= 40 => "Medium",
+                _ => "Low"
+            },
+            UpcomingCertifications = expiringSoon.Select(MapToDto).ToList(),
+            Gaps = new List<ReadinessGapDto>(),
+            Recommendations = GenerateReadinessRecommendations(certifications)
+        };
+    }
+    
+    private static List<string> GenerateReadinessRecommendations(List<Certification> certifications)
+    {
+        var recommendations = new List<string>();
+        
+        if (certifications.Any(c => c.Status == "Expired"))
+            recommendations.Add("Renew expired certifications immediately");
+        
+        if (certifications.Any(c => c.ExpiryDate.HasValue && c.ExpiryDate.Value <= DateTime.UtcNow.AddDays(30)))
+            recommendations.Add("Review certifications expiring within 30 days");
+        
+        if (!certifications.Any())
+            recommendations.Add("Start building your certification portfolio");
+        
+        return recommendations;
+    }
+    
+    public async Task<CertificationPreparationPlanDto> GetPreparationPlanAsync(Guid tenantId, Guid certificationId)
+    {
+        var certification = await _context.Set<Certification>()
+            .FirstOrDefaultAsync(c => c.Id == certificationId && c.TenantId == tenantId);
+        
+        return new CertificationPreparationPlanDto
+        {
+            TenantId = tenantId,
+            CertificationId = certificationId,
+            CertificationName = certification?.Name ?? "Unknown",
+            TotalDuration = 90,
+            TargetDate = DateTime.UtcNow.AddDays(90),
+            Phases = GetDefaultPreparationPhases()
+        };
+    }
+    
+    public Task<CertificationPreparationPlanDto> GetDefaultPreparationPlanAsync(Guid tenantId)
+    {
+        return Task.FromResult(new CertificationPreparationPlanDto
+        {
+            TenantId = tenantId,
+            CertificationName = "Default Preparation Plan",
+            TotalDuration = 90,
+            TargetDate = DateTime.UtcNow.AddDays(90),
+            Phases = GetDefaultPreparationPhases()
+        });
+    }
+    
+    private static List<PreparationPhaseDto> GetDefaultPreparationPhases()
+    {
+        return new List<PreparationPhaseDto>
+        {
+            new PreparationPhaseDto
+            {
+                Name = "Gap Analysis",
+                Order = 1,
+                Duration = 14,
+                Tasks = new List<string> { "Review current controls", "Identify gaps", "Document findings" },
+                Status = "NotStarted"
+            },
+            new PreparationPhaseDto
+            {
+                Name = "Remediation",
+                Order = 2,
+                Duration = 45,
+                Tasks = new List<string> { "Implement controls", "Update policies", "Train staff" },
+                Status = "NotStarted"
+            },
+            new PreparationPhaseDto
+            {
+                Name = "Internal Audit",
+                Order = 3,
+                Duration = 14,
+                Tasks = new List<string> { "Conduct internal audit", "Address findings", "Document evidence" },
+                Status = "NotStarted"
+            },
+            new PreparationPhaseDto
+            {
+                Name = "Certification Audit",
+                Order = 4,
+                Duration = 17,
+                Tasks = new List<string> { "Schedule external audit", "Prepare documentation", "Host auditors" },
+                Status = "NotStarted"
+            }
+        };
+    }
+    
+    public async Task<List<CertificationAuditDto>> GetAuditsForCertificationAsync(Guid tenantId, Guid certificationId)
+    {
+        var certification = await _context.Set<Certification>()
+            .Include(c => c.Audits)
+            .FirstOrDefaultAsync(c => c.Id == certificationId && c.TenantId == tenantId);
+        
+        if (certification == null)
+            return new List<CertificationAuditDto>();
+        
+        return certification.Audits.Select(a => MapToAuditDto(a, certification.Name)).ToList();
+    }
+    
+    public async Task<List<CertificationAuditDto>> GetAllAuditsAsync(Guid tenantId)
+    {
+        var certifications = await _context.Set<Certification>()
+            .Include(c => c.Audits)
+            .Where(c => c.TenantId == tenantId)
+            .ToListAsync();
+        
+        return certifications
+            .SelectMany(c => c.Audits.Select(a => MapToAuditDto(a, c.Name)))
+            .OrderByDescending(a => a.AuditDate)
+            .ToList();
+    }
+    
+    public async Task<CertificationPortfolioDto> GetPortfolioAsync(Guid tenantId)
+    {
+        var certifications = await _context.Set<Certification>()
+            .Where(c => c.TenantId == tenantId)
+            .ToListAsync();
+        
+        return new CertificationPortfolioDto
+        {
+            TenantId = tenantId,
+            TotalCertifications = certifications.Count,
+            ActiveCertifications = certifications.Count(c => c.Status == "Certified"),
+            ExpiringSoonCount = certifications.Count(c => 
+                c.ExpiryDate.HasValue && 
+                c.ExpiryDate.Value > DateTime.UtcNow && 
+                c.ExpiryDate.Value <= DateTime.UtcNow.AddDays(90)),
+            ExpiredCount = certifications.Count(c => c.Status == "Expired"),
+            ByCategory = certifications.GroupBy(c => c.Category).ToDictionary(g => g.Key, g => g.Count()),
+            ByStatus = certifications.GroupBy(c => c.Status).ToDictionary(g => g.Key, g => g.Count()),
+            Certifications = certifications.Select(MapToDto).ToList()
+        };
+    }
+    
+    #endregion
 }

@@ -265,6 +265,31 @@ public static class GrcPermissions
         public const string Generate = Default + ".Generate";
     }
 
+    // Certifications
+    public static class Certification
+    {
+        public const string Default = GroupName + ".Certification";
+        public const string View = Default + ".View";
+        public const string Create = Default + ".Create";
+        public const string Edit = Default + ".Edit";
+        public const string Delete = Default + ".Delete";
+        public const string Manage = Default + ".Manage";
+        public const string Readiness = Default + ".Readiness";
+    }
+
+    // Maturity Assessment
+    public static class Maturity
+    {
+        public const string Default = GroupName + ".Maturity";
+        public const string View = Default + ".View";
+        public const string Create = Default + ".Create";
+        public const string Edit = Default + ".Edit";
+        public const string Delete = Default + ".Delete";
+        public const string Assess = Default + ".Assess";
+        public const string Baseline = Default + ".Baseline";
+        public const string Roadmap = Default + ".Roadmap";
+    }
+
     // Integrations
     public static class Integrations
     {

@@ -54,7 +54,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error starting wizard for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -77,7 +77,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting wizard state for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -95,7 +95,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting wizard progress for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -117,7 +117,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section A for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -137,7 +137,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section B for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -157,7 +157,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section C for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -177,7 +177,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section D for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -197,7 +197,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section E for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -217,7 +217,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section F for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -237,7 +237,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section G for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -257,7 +257,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section H for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -277,7 +277,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section I for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -297,7 +297,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section J for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -317,7 +317,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section K for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -337,7 +337,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving Section L for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -361,7 +361,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving minimal onboarding for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -383,7 +383,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating wizard for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -409,7 +409,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error completing wizard for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -427,7 +427,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting derived scope for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 

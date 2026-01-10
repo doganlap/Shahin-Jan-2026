@@ -211,6 +211,13 @@ public class GrcMaturityScoreDto
     public MaturityDimensionScore Operations { get; set; } = new();
     public MaturityDimensionScore Technology { get; set; } = new();
     
+    // Legacy properties for view compatibility
+    public int CultureMaturity => (Governance.Level + Operations.Level) / 2;
+    public int ProcessMaturity => Operations.Level;
+    public int PeopleMaturity => (Governance.Level + RiskManagement.Level) / 2;
+    public int TechnologyMaturity => Technology.Level;
+    public int GovernanceMaturity => Governance.Level;
+    
     // Recommendations
     public List<MaturityRecommendation> Recommendations { get; set; } = new();
 }

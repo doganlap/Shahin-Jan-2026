@@ -291,7 +291,7 @@ public class DiagnosticsController : ControllerBase
             return Ok(new
             {
                 success = false,
-                error = ex.Message,
+                error = "An error occurred.",
                 innerError = ex.InnerException?.Message,
                 hint = "تأكد من إضافة صلاحية Mail.Send في Azure Portal وتفعيل Grant admin consent",
                 timestamp = DateTime.UtcNow

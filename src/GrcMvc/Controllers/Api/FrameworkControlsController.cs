@@ -58,7 +58,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error importing controls");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -87,7 +87,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error importing controls from path");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -106,7 +106,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting statistics");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -139,7 +139,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting controls by framework");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -175,7 +175,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error searching controls");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -198,7 +198,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting control by ID");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -230,7 +230,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error listing frameworks");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
     }

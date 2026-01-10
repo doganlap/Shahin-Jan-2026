@@ -54,7 +54,7 @@ public class CodeQualityController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error analyzing code");
-            return StatusCode(500, new { error = "Analysis failed", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -76,7 +76,7 @@ public class CodeQualityController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during full scan");
-            return StatusCode(500, new { error = "Scan failed", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -95,7 +95,7 @@ public class CodeQualityController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting metrics");
-            return StatusCode(500, new { error = "Failed to get metrics", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -117,7 +117,7 @@ public class CodeQualityController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting alerts");
-            return StatusCode(500, new { error = "Failed to get alerts", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -147,7 +147,7 @@ public class CodeQualityController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating alert config");
-            return StatusCode(500, new { error = "Failed to update configuration", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -178,7 +178,7 @@ public class CodeQualityController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending test alert");
-            return StatusCode(500, new { error = "Failed to send test alert", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -197,7 +197,7 @@ public class CodeQualityController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error triggering scan");
-            return StatusCode(500, new { error = "Failed to trigger scan", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -216,7 +216,7 @@ public class CodeQualityController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error triggering security audit");
-            return StatusCode(500, new { error = "Failed to trigger audit", message = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 

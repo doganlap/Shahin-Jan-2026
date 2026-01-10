@@ -53,7 +53,7 @@ public class SupportApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error starting support conversation");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "An error occurred processing your request." });
         }
     }
 
@@ -91,7 +91,7 @@ public class SupportApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending support message");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "An error occurred processing your request." });
         }
     }
 
@@ -115,7 +115,7 @@ public class SupportApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting messages");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "An error occurred processing your request." });
         }
     }
 
@@ -141,7 +141,7 @@ public class SupportApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error escalating conversation");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "An error occurred processing your request." });
         }
     }
 
@@ -159,7 +159,7 @@ public class SupportApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting quick help");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "An error occurred processing your request." });
         }
     }
 
@@ -191,7 +191,7 @@ public class SupportApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting legal document");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "An error occurred processing your request." });
         }
     }
 
@@ -226,7 +226,7 @@ public class SupportApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error recording consent");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "An error occurred processing your request." });
         }
     }
 
@@ -256,7 +256,7 @@ public class SupportApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error checking consents");
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = "An error occurred processing your request." });
         }
     }
 }

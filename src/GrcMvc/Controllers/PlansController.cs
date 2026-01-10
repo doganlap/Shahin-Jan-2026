@@ -57,7 +57,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating plan");
-                return BadRequest(ex.Message);
+                return BadRequest("An error occurred processing your request.");
             }
         }
 
@@ -80,7 +80,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting plan");
-                return BadRequest(ex.Message);
+                return BadRequest("An error occurred processing your request.");
             }
         }
 
@@ -99,7 +99,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting tenant plans");
-                return BadRequest(ex.Message);
+                return BadRequest("An error occurred processing your request.");
             }
         }
 
@@ -129,7 +129,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating plan status");
-                return BadRequest(ex.Message);
+                return BadRequest("An error occurred processing your request.");
             }
         }
 
@@ -148,7 +148,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting plan phases");
-                return BadRequest(ex.Message);
+                return BadRequest("An error occurred processing your request.");
             }
         }
 
@@ -174,7 +174,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating phase");
-                return BadRequest(ex.Message);
+                return BadRequest("An error occurred processing your request.");
             }
         }
     }

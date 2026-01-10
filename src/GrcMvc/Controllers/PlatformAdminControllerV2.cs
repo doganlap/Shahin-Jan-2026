@@ -51,7 +51,7 @@ public class PlatformAdminControllerV2 : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting user {UserId}", id);
-            return Json(new { success = false, error = ex.Message });
+            return Json(new { success = false, error = "An error occurred processing your request." });
         }
     }
     
@@ -86,7 +86,7 @@ public class PlatformAdminControllerV2 : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error resetting password for user {UserId}", id);
-            TempData["Error"] = $"Error: {ex.Message}";
+            TempData["Error"] = "An error occurred. Please try again.";
             return RedirectToAction("GetUser", new { id });
         }
     }
@@ -106,7 +106,7 @@ public class PlatformAdminControllerV2 : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error listing users");
-            TempData["Error"] = $"Error: {ex.Message}";
+            TempData["Error"] = "An error occurred. Please try again.";
             return View("~/Views/PlatformAdmin/UsersV2.cshtml", new List<UserDto>());
         }
     }

@@ -47,7 +47,7 @@ public class ControlTestController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error executing test for control {ControlId}", controlId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -101,7 +101,7 @@ public class ControlTestController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error submitting test {TestId} for review", testId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -119,7 +119,7 @@ public class ControlTestController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error approving test {TestId}", testId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -137,7 +137,7 @@ public class ControlTestController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error rejecting test {TestId}", testId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -192,7 +192,7 @@ public class ControlTestController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error scheduling test for control {ControlId}", controlId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -214,7 +214,7 @@ public class ControlTestController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error calculating effectiveness for control {ControlId}", controlId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -257,7 +257,7 @@ public class ControlTestController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error assigning owner to control {ControlId}", controlId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -296,7 +296,7 @@ public class ControlTestController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error transferring ownership of control {ControlId}", controlId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 

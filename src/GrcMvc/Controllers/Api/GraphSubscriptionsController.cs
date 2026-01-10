@@ -110,7 +110,7 @@ public class GraphSubscriptionsController : ControllerBase
                 {
                     mailbox = mailbox.EmailAddress,
                     status = "failed",
-                    error = ex.Message
+                    error = "An error occurred.",
                 });
             }
         }
@@ -177,7 +177,7 @@ public class GraphSubscriptionsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to create subscription for {Mailbox}", mailbox.EmailAddress);
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -212,7 +212,7 @@ public class GraphSubscriptionsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to delete subscription for {Mailbox}", mailbox.EmailAddress);
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -284,7 +284,7 @@ public class GraphSubscriptionsController : ControllerBase
                 {
                     mailbox = mailbox.EmailAddress,
                     status = "failed",
-                    error = ex.Message
+                    error = "An error occurred.",
                 });
             }
         }
@@ -352,7 +352,7 @@ public class GraphSubscriptionsController : ControllerBase
                 {
                     mailbox = mailbox.EmailAddress,
                     status = "failed",
-                    error = ex.Message
+                    error = "An error occurred.",
                 });
             }
         }

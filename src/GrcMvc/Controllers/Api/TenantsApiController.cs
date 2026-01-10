@@ -82,7 +82,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating tenant");
-                return StatusCode(500, new { error = "Failed to create tenant", details = ex.Message });
+                return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
             }
         }
 

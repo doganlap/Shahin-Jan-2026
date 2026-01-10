@@ -169,7 +169,7 @@ public class ComplianceGapController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return NotFound(new { success = false, error = ex.Message });
+            return NotFound(new { success = false, error = "The requested resource was not found." });
         }
         catch (Exception ex)
         {
@@ -196,7 +196,7 @@ public class ComplianceGapController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return NotFound(new { success = false, error = ex.Message });
+            return NotFound(new { success = false, error = "The requested resource was not found." });
         }
         catch (Exception ex)
         {
@@ -224,7 +224,7 @@ public class ComplianceGapController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return NotFound(new { success = false, error = ex.Message });
+            return NotFound(new { success = false, error = "The requested resource was not found." });
         }
         catch (Exception ex)
         {
@@ -247,7 +247,7 @@ public class ComplianceGapController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
         catch (Exception ex)
         {
@@ -273,7 +273,7 @@ public class ComplianceGapController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return NotFound(new { success = false, error = ex.Message });
+            return NotFound(new { success = false, error = "The requested resource was not found." });
         }
         catch (Exception ex)
         {

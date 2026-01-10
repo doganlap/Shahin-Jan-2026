@@ -72,7 +72,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation creating action plan");
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint)) ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
                 }
                 catch (Exception ex)
@@ -131,7 +131,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation updating action plan {ActionPlanId}", id);
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint)) ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
                 }
                 catch (Exception ex)
@@ -169,7 +169,7 @@ namespace GrcMvc.Controllers
             catch (PolicyViolationException pex)
             {
                 _logger.LogWarning(pex, "Policy violation deleting action plan {ActionPlanId}", id);
-                TempData["Error"] = $"Policy Violation: {pex.Message}. {pex.RemediationHint}";
+                TempData["Error"] = "A policy violation occurred. Please review the requirements.";
                 return RedirectToAction(nameof(Delete), new { id });
             }
             catch (Exception ex)
@@ -194,7 +194,7 @@ namespace GrcMvc.Controllers
             catch (PolicyViolationException pex)
             {
                 _logger.LogWarning(pex, "Policy violation closing action plan {ActionPlanId}", id);
-                TempData["Error"] = $"Policy Violation: {pex.Message}. {pex.RemediationHint}";
+                TempData["Error"] = "A policy violation occurred. Please review the requirements.";
             }
             catch (Exception ex)
             {

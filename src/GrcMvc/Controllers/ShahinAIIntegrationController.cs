@@ -106,7 +106,7 @@ public class ShahinAIIntegrationController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during smart onboarding");
-            TempData["Error"] = "Error during onboarding: " + ex.Message;
+            TempData["Error"] = "An error occurred. Please try again.";
         }
 
         return RedirectToAction("Index");

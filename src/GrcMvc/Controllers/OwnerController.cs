@@ -138,7 +138,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating tenant");
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError("", "An error occurred processing your request.");
                 return View(dto);
             }
         }
@@ -226,7 +226,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error generating admin account for tenant {TenantId}", id);
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError("", "An error occurred processing your request.");
                 var tenant = await _context.Tenants.FindAsync(id);
                 ViewBag.Tenant = tenant;
                 return View(dto);
@@ -289,7 +289,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error resending credentials for tenant {TenantId}", id);
-                TempData["Error"] = "Error resending credentials: " + ex.Message;
+                TempData["Error"] = "An error occurred. Please try again.";
                 return RedirectToAction("Details", new { id });
             }
         }
@@ -321,7 +321,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error extending expiration for tenant {TenantId}", id);
-                TempData["Error"] = "Error extending expiration: " + ex.Message;
+                TempData["Error"] = "An error occurred. Please try again.";
             }
 
             return RedirectToAction("Details", new { id });
@@ -373,7 +373,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error downloading credentials for tenant {TenantId}", id);
-                TempData["Error"] = "Error downloading credentials: " + ex.Message;
+                TempData["Error"] = "An error occurred. Please try again.";
                 return RedirectToAction("Details", new { id });
             }
         }

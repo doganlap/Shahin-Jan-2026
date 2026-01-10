@@ -25,6 +25,10 @@ public class HostRoutingMiddleware
         var host = context.Request.Host.Host.ToLowerInvariant();
         var path = context.Request.Path.Value?.ToLowerInvariant() ?? "/";
 
+        // #region agent log
+        try { await System.IO.File.AppendAllTextAsync("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "B", location = "HostRoutingMiddleware.cs:26", message = "HostRoutingMiddleware entry", data = new { host = host, path = path, method = context.Request.Method, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+        // #endregion
+
         // login.shahin-ai.com → Redirect to Admin Portal
         if (host == "login.shahin-ai.com")
         {
@@ -72,6 +76,10 @@ public class HostRoutingMiddleware
                 return;
             }
         }
+
+        // #region agent log
+        try { await System.IO.File.AppendAllTextAsync("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "B", location = "HostRoutingMiddleware.cs:76", message = "HostRoutingMiddleware continuing", data = new { path = path, host = host, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+        // #endregion
 
         await _next(context);
     }

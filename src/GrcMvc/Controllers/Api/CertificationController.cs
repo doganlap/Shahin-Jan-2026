@@ -49,7 +49,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating certification");
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -89,7 +89,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating certification {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -107,7 +107,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting certification {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -162,7 +162,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error starting certification {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -180,7 +180,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking certification {Id} as issued", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -198,7 +198,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error renewing certification {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -216,7 +216,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error suspending certification {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -234,7 +234,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error reinstating certification {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -252,7 +252,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking certification {Id} as expired", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -274,7 +274,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error scheduling audit for certification {Id}", certificationId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -292,7 +292,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error recording audit result for {AuditId}", auditId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -331,7 +331,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error completing corrective actions for audit {AuditId}", auditId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -397,7 +397,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating surveillance date for certification {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -468,7 +468,7 @@ public class CertificationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error assigning owner to certification {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 

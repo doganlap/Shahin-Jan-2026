@@ -311,7 +311,7 @@ namespace GrcMvc.Controllers.Api
                 return StatusCode(503, new
                 {
                     status = "unhealthy",
-                    error = ex.Message,
+                    error = "An error occurred.",
                     errorType = ex.GetType().Name
                 });
             }

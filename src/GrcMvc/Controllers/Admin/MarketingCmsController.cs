@@ -432,7 +432,7 @@ public class MarketingCmsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error seeding marketing data");
-            return StatusCode(500, new { success = false, message = ex.Message });
+            return StatusCode(500, new { success = false, message = "An internal error occurred." });
         }
     }
 

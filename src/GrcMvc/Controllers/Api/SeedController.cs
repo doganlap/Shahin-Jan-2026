@@ -81,7 +81,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding catalogs");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -99,7 +99,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding workflow definitions");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -152,7 +152,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding all data");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -171,7 +171,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding regulators");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -197,7 +197,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding KSA frameworks");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -244,7 +244,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error importing controls");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -283,7 +283,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error importing controls from path");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -302,7 +302,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting control statistics");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -326,7 +326,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting controls for framework {Framework}", frameworkCode);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -354,7 +354,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error searching controls");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -400,7 +400,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error checking duplicate controls");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -455,7 +455,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deduplicating controls");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -492,7 +492,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding derivation rules");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -526,7 +526,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding evidence scoring");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
         
@@ -579,7 +579,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting GOSI sector mappings");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -628,7 +628,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting regulators");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
         
@@ -679,7 +679,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting frameworks");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
         
@@ -739,7 +739,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting controls");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -771,7 +771,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting sector frameworks for {Sector}", sectorCode);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -820,7 +820,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error provisioning evidence for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -841,7 +841,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting evidence summary for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -876,7 +876,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting evidence scoring criteria");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -911,7 +911,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding POC organization");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -978,7 +978,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating user");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -1051,7 +1051,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating platform admin");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -1283,7 +1283,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error fixing admin password for: {Email}", request?.Email);
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
             }
         }
 

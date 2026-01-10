@@ -392,7 +392,7 @@ public class EmailOperationsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to sync mailbox {Id}", id);
-            TempData["Error"] = $"فشل في المزامنة: {ex.Message}";
+            TempData["Error"] = "An error occurred. Please try again.";
         }
 
         return RedirectToAction(nameof(Mailboxes));

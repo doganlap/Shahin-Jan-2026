@@ -69,7 +69,7 @@ public class EmailOperationsApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to discover user for {Email}", email);
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 
@@ -220,7 +220,7 @@ public class EmailOperationsApiController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to seed mailboxes");
-            return StatusCode(500, new { error = ex.Message });
+            return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
         }
     }
 

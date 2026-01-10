@@ -73,7 +73,7 @@ namespace GrcMvc.Controllers.Api
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "Unauthorized workspace switch attempt");
-                return Forbid(ex.Message);
+                return Forbid("Access denied.");
             }
             catch (Exception ex)
             {
@@ -220,12 +220,12 @@ namespace GrcMvc.Controllers.Api
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Workspace creation failed: duplicate code");
-                return Conflict(new { error = ex.Message });
+                return Conflict(new { error = "A conflict occurred with the current state." });
             }
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Workspace creation failed: validation");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -336,7 +336,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
@@ -368,7 +368,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {

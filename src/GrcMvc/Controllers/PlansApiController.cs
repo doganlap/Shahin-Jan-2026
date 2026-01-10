@@ -46,7 +46,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
 
@@ -71,7 +71,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
 
@@ -93,7 +93,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
 
@@ -115,7 +115,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
 
@@ -137,7 +137,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
 
@@ -160,7 +160,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
 
@@ -184,7 +184,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
 
@@ -214,7 +214,7 @@ namespace GrcMvc.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ApiResponse<object>.ErrorResponse(ex.Message));
+                return BadRequest(ApiResponse<object>.ErrorResponse("An error occurred processing your request."));
             }
         }
     }

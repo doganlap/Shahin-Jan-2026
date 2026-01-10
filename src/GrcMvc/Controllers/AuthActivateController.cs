@@ -83,7 +83,7 @@ namespace GrcMvc.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError("", "An error occurred processing your request.");
                 _logger.LogWarning("Activation failed - invalid state: {Message}", ex.Message);
             }
             catch (Exception ex)

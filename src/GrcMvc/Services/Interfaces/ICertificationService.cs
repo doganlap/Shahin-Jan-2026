@@ -189,6 +189,40 @@ public interface ICertificationService
     Task<List<CertificationDto>> GetByDepartmentAsync(Guid tenantId, string department);
     
     #endregion
+    
+    #region Readiness & Portfolio
+    
+    /// <summary>
+    /// Get certification readiness assessment for tenant
+    /// </summary>
+    Task<TenantCertificationReadinessDto> GetReadinessAsync(Guid tenantId);
+    
+    /// <summary>
+    /// Get preparation plan for specific certification
+    /// </summary>
+    Task<CertificationPreparationPlanDto> GetPreparationPlanAsync(Guid tenantId, Guid certificationId);
+    
+    /// <summary>
+    /// Get default preparation plan template
+    /// </summary>
+    Task<CertificationPreparationPlanDto> GetDefaultPreparationPlanAsync(Guid tenantId);
+    
+    /// <summary>
+    /// Get audits for specific certification
+    /// </summary>
+    Task<List<CertificationAuditDto>> GetAuditsForCertificationAsync(Guid tenantId, Guid certificationId);
+    
+    /// <summary>
+    /// Get all certification audits for tenant
+    /// </summary>
+    Task<List<CertificationAuditDto>> GetAllAuditsAsync(Guid tenantId);
+    
+    /// <summary>
+    /// Get certification portfolio view
+    /// </summary>
+    Task<CertificationPortfolioDto> GetPortfolioAsync(Guid tenantId);
+    
+    #endregion
 }
 
 #region DTOs
@@ -264,6 +298,10 @@ public class CertificationDto
     public int DaysUntilExpiry { get; set; }
     public bool IsExpiringSoon { get; set; }
     public DateTime CreatedDate { get; set; }
+    
+    // Additional properties for view compatibility
+    public string Standard => Name; // Standard is alias for Name
+    public int? ReadinessScore { get; set; } = null; // Nullable readiness score
 }
 
 /// <summary>
@@ -467,4 +505,69 @@ public class CertificationCostSummaryDto
 /// </summary>
 public record CostByMonthDto(int Month, decimal CertificationCost, decimal AuditCost);
 
+/// <summary>
+/// Tenant-level certification readiness assessment
+/// </summary>
+public class TenantCertificationReadinessDto
+{
+    public Guid TenantId { get; set; }
+    public int OverallReadinessScore { get; set; }
+    public string ReadinessLevel { get; set; } = "Low"; // Low, Medium, High, Ready
+    public List<CertificationDto> UpcomingCertifications { get; set; } = new();
+    public List<ReadinessGapDto> Gaps { get; set; } = new();
+    public List<string> Recommendations { get; set; } = new();
+}
+
+/// <summary>
+/// Readiness gap
+/// </summary>
+public class ReadinessGapDto
+{
+    public string Area { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Priority { get; set; } = "Medium";
+    public string SuggestedAction { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// Certification preparation plan
+/// </summary>
+public class CertificationPreparationPlanDto
+{
+    public Guid TenantId { get; set; }
+    public Guid? CertificationId { get; set; }
+    public string CertificationName { get; set; } = string.Empty;
+    public List<PreparationPhaseDto> Phases { get; set; } = new();
+    public int TotalDuration { get; set; } // in days
+    public DateTime? TargetDate { get; set; }
+}
+
+/// <summary>
+/// Preparation phase
+/// </summary>
+public class PreparationPhaseDto
+{
+    public string Name { get; set; } = string.Empty;
+    public int Order { get; set; }
+    public int Duration { get; set; } // in days
+    public List<string> Tasks { get; set; } = new();
+    public string Status { get; set; } = "NotStarted";
+}
+
+/// <summary>
+/// Certification portfolio view
+/// </summary>
+public class CertificationPortfolioDto
+{
+    public Guid TenantId { get; set; }
+    public int TotalCertifications { get; set; }
+    public int ActiveCertifications { get; set; }
+    public int ExpiringSoonCount { get; set; }
+    public int ExpiredCount { get; set; }
+    public Dictionary<string, int> ByCategory { get; set; } = new();
+    public Dictionary<string, int> ByStatus { get; set; } = new();
+    public List<CertificationDto> Certifications { get; set; } = new();
+}
+
 #endregion
+

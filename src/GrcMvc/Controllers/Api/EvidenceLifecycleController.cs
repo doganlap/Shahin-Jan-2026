@@ -64,7 +64,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -209,7 +209,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -240,7 +240,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -271,7 +271,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -302,7 +302,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -346,11 +346,11 @@ namespace GrcMvc.Controllers.Api
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -455,7 +455,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -489,7 +489,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {

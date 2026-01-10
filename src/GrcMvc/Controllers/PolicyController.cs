@@ -61,7 +61,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation creating policy");
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint)) ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
                 }
                 catch (Exception ex)
@@ -116,7 +116,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation updating policy {PolicyId}", id);
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint)) ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
                 }
                 catch (Exception ex)
@@ -142,7 +142,7 @@ namespace GrcMvc.Controllers
             catch (PolicyViolationException pex)
             {
                 _logger.LogWarning(pex, "Policy violation approving policy {PolicyId}", id);
-                TempData["Error"] = $"Policy Violation: {pex.Message}. {pex.RemediationHint}";
+                TempData["Error"] = "A policy violation occurred. Please review the requirements.";
             }
             catch (Exception ex)
             {
@@ -166,7 +166,7 @@ namespace GrcMvc.Controllers
             catch (PolicyViolationException pex)
             {
                 _logger.LogWarning(pex, "Policy violation publishing policy {PolicyId}", id);
-                TempData["Error"] = $"Policy Violation: {pex.Message}. {pex.RemediationHint}";
+                TempData["Error"] = "A policy violation occurred. Please review the requirements.";
             }
             catch (Exception ex)
             {

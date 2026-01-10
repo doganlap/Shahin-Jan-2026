@@ -95,7 +95,7 @@ namespace GrcMvc.Controllers
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Validation error creating tenant");
-                return BadRequest(new { error = "GRC:VALIDATION_ERROR", message = ex.Message });
+                return BadRequest(new { error = "GRC:ERROR", message = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -134,7 +134,7 @@ namespace GrcMvc.Controllers
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Validation error activating tenant");
-                return BadRequest(new { error = "GRC:VALIDATION_ERROR", message = ex.Message });
+                return BadRequest(new { error = "GRC:ERROR", message = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -222,7 +222,7 @@ namespace GrcMvc.Controllers
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Validation error in smart onboarding for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = "GRC:VALIDATION_ERROR", message = ex.Message });
+                return BadRequest(new { error = "GRC:ERROR", message = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -252,7 +252,7 @@ namespace GrcMvc.Controllers
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Validation error in full smart onboarding for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = "GRC:VALIDATION_ERROR", message = ex.Message });
+                return BadRequest(new { error = "GRC:ERROR", message = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
@@ -375,7 +375,7 @@ namespace GrcMvc.Controllers
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Tenant not found: {TenantId}", tenantId);
-                return NotFound(new { error = "GRC:NOT_FOUND", message = ex.Message });
+                return NotFound(new { error = "GRC:NOT_FOUND", message = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
@@ -628,7 +628,7 @@ namespace GrcMvc.Controllers
             catch (InvalidOperationException ex)
             {
                 // Handle duplicate slug or other validation errors
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError("", "An error occurred processing your request.");
                 _logger.LogWarning(ex, "Failed to create tenant: {Message}", ex.Message);
                 return View(model);
             }

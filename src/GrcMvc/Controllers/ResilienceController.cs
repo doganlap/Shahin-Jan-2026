@@ -234,7 +234,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation creating resilience initiative");
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint))
                         ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
                 }
@@ -338,7 +338,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation updating resilience {ResilienceId}", id);
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint))
                         ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
                 }
@@ -384,7 +384,7 @@ namespace GrcMvc.Controllers
             catch (PolicyViolationException pex)
             {
                 _logger.LogWarning(pex, "Policy violation deleting resilience {ResilienceId}", id);
-                TempData["ErrorMessage"] = $"Policy Violation: {pex.Message}";
+                TempData["ErrorMessage"] = "A policy violation occurred. Please review the requirements.";
                 return RedirectToAction(nameof(Details), new { id });
             }
             catch (Exception ex)

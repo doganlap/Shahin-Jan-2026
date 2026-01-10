@@ -96,7 +96,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error getting workflows: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -151,7 +151,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error getting workflow: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -208,12 +208,12 @@ namespace GrcMvc.Controllers.Api
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning($"⚠️ Workflow start failed: {ex.Message}");
-                return BadRequest(new { success = false, error = ex.Message });
+                return BadRequest(new { success = false, error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"❌ Error starting workflow");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -265,7 +265,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error creating workflow: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -320,7 +320,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error approving workflow: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -374,7 +374,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error rejecting workflow: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -427,7 +427,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"❌ Error completing task {taskId}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -472,7 +472,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error getting workflow status: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -505,7 +505,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error getting workflow history: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -536,7 +536,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error getting workflow definitions: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 
@@ -565,7 +565,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError($"❌ Error getting workflow stats: {ex.Message}");
-                return StatusCode(500, new { success = false, error = ex.Message });
+                return StatusCode(500, new { success = false, error = "An internal error occurred." });
             }
         }
 

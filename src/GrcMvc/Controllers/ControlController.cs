@@ -75,7 +75,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation creating control");
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint)) ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
                 }
                 catch (Exception ex)
@@ -131,7 +131,7 @@ namespace GrcMvc.Controllers
                 catch (PolicyViolationException pex)
                 {
                     _logger.LogWarning(pex, "Policy violation updating control {ControlId}", id);
-                    ModelState.AddModelError("", $"Policy Violation: {pex.Message}");
+                    ModelState.AddModelError("", "A policy violation occurred. Please review the requirements.");
                     if (!string.IsNullOrEmpty(pex.RemediationHint)) ModelState.AddModelError("", $"Remediation: {pex.RemediationHint}");
                 }
                 catch (Exception ex)
@@ -178,7 +178,7 @@ namespace GrcMvc.Controllers
             catch (PolicyViolationException pex)
             {
                 _logger.LogWarning(pex, "Policy violation deleting control {ControlId}", id);
-                TempData["ErrorMessage"] = $"Policy Violation: {pex.Message}. {pex.RemediationHint}";
+                TempData["ErrorMessage"] = "A policy violation occurred. Please review the requirements.";
                 return RedirectToAction(nameof(Delete), new { id });
             }
             catch (Exception ex)

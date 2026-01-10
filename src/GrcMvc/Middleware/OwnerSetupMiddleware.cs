@@ -28,12 +28,29 @@ namespace GrcMvc.Middleware
         {
             var path = context.Request.Path.Value?.ToLower() ?? "";
 
+            // #region agent log
+            try { await System.IO.File.AppendAllTextAsync("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "A", location = "OwnerSetupMiddleware.cs:29", message = "OwnerSetupMiddleware entry", data = new { path = path, method = context.Request.Method, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+            // #endregion
+
             // Skip middleware for:
             // - OwnerSetup controller (to avoid redirect loop) - case insensitive
+            // - Landing page routes (public marketing pages) - should be accessible without owner
             // - Static files
             // - API endpoints
             // - Health checks
             if (path.StartsWith("/ownersetup", StringComparison.OrdinalIgnoreCase) ||
+                path.Equals("/", StringComparison.OrdinalIgnoreCase) ||
+                path.Equals("/home", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/landing/", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/pricing", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/features", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/about", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/contact", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/case-studies", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/grc-free-trial", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/best-grc-software", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/why-our-grc", StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith("/grc-for-", StringComparison.OrdinalIgnoreCase) ||
                 path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) ||
                 path.StartsWith("/_") ||
                 path.StartsWith("/css/") ||
@@ -43,6 +60,9 @@ namespace GrcMvc.Middleware
                 path.StartsWith("/health", StringComparison.OrdinalIgnoreCase) ||
                 path.Equals("/favicon.ico", StringComparison.OrdinalIgnoreCase))
             {
+                // #region agent log
+                try { await System.IO.File.AppendAllTextAsync("/home/Shahin-ai/.cursor/debug.log", System.Text.Json.JsonSerializer.Serialize(new { sessionId = "debug-session", runId = "run1", hypothesisId = "A", location = "OwnerSetupMiddleware.cs:58", message = "OwnerSetupMiddleware skipping", data = new { path = path, skipped = true, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }, timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() }) + "\n"); } catch { }
+                // #endregion
                 await _next(context);
                 return;
             }

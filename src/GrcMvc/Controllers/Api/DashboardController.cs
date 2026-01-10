@@ -290,7 +290,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
@@ -314,7 +314,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
@@ -338,7 +338,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
@@ -368,7 +368,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
@@ -402,7 +402,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {

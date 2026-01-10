@@ -343,18 +343,34 @@ builder.Services.AddScoped<ITenantDatabaseResolver, TenantDatabaseResolver>();
 builder.Services.AddScoped<IDbContextFactory<GrcDbContext>, TenantAwareDbContextFactory>();
 
 // Add Health Checks
+// ══════════════════════════════════════════════════════════════
+// Enhanced Health Checks Configuration
+// ══════════════════════════════════════════════════════════════
 builder.Services.AddHealthChecks()
     .AddNpgSql(
         connectionString ?? throw new InvalidOperationException("Connection string not configured"),
         name: "master-database",
         failureStatus: HealthStatus.Unhealthy,
-        tags: new[] { "db", "postgresql", "master" })
+        tags: new[] { "db", "postgresql", "master", "critical" },
+        timeout: TimeSpan.FromSeconds(5))
     .AddCheck<GrcMvc.HealthChecks.TenantDatabaseHealthCheck>(
         name: "tenant-database",
         failureStatus: HealthStatus.Unhealthy,
-        tags: new[] { "db", "postgresql", "tenant" })
+        tags: new[] { "db", "postgresql", "tenant", "critical" },
+        timeout: TimeSpan.FromSeconds(5))
+    .AddHangfire(
+        options =>
+        {
+            options.MinimumAvailableServers = 1;
+        },
+        name: "hangfire",
+        failureStatus: HealthStatus.Degraded,
+        tags: new[] { "jobs", "hangfire" },
+        timeout: TimeSpan.FromSeconds(3))
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Application is running"),
-        tags: new[] { "api" });
+        tags: new[] { "api", "self" });
+
+Console.WriteLine("[HEALTH] Enhanced health checks configured (Database, Hangfire, Self)");
 
 // Configure Data Protection
 builder.Services.AddDataProtection()
@@ -894,7 +910,18 @@ if (redisEnabled)
         options.Configuration = redisConnectionString;
         options.InstanceName = builder.Configuration.GetValue<string>("Redis:InstanceName") ?? "GrcCache_";
     });
+
+    // Add Redis health check
+    builder.Services.AddHealthChecks()
+        .AddRedis(
+            redisConnectionString,
+            name: "redis-cache",
+            failureStatus: HealthStatus.Degraded,
+            tags: new[] { "cache", "redis" },
+            timeout: TimeSpan.FromSeconds(3));
+
     Console.WriteLine($"✅ Redis caching enabled: {redisConnectionString}");
+    Console.WriteLine("[HEALTH] Redis health check configured");
 }
 else
 {
@@ -1536,7 +1563,12 @@ app.MapControllerRoute(
 // Enable attribute routing for API and custom-routed controllers
 app.MapControllers();
 
+// #region agent log - Route registration tracking
+app.Logger.LogInformation("Registering routes: MapControllers, Landing route, Default route");
+// #endregion
+
 // Landing page route (shahin-ai.com homepage)
+// NOTE: This must be after MapControllers() so attribute routes have priority
 app.MapControllerRoute(
     name: "landing",
     pattern: "",

@@ -93,12 +93,12 @@ namespace GrcMvc.Controllers
             catch (InvalidOperationException ex)
             {
                 _logger.LogWarning(ex, "Scope refresh precondition failed for tenant {TenantId}", tenantId);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error refreshing scope for tenant {TenantId}", tenantId);
-                return StatusCode(500, new { error = "Internal error refreshing scope", details = ex.Message });
+                return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
             }
         }
 
@@ -162,7 +162,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting scope status for tenant {TenantId}", tenantId);
-                return StatusCode(500, new { error = "Internal error", details = ex.Message });
+                return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
             }
         }
 
@@ -208,7 +208,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error provisioning tenant {TenantId}", tenantId);
-                return StatusCode(500, new { error = "Internal error", details = ex.Message });
+                return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
             }
         }
 
@@ -252,7 +252,7 @@ namespace GrcMvc.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting provisioning status for tenant {TenantId}", tenantId);
-                return StatusCode(500, new { error = "Internal error", details = ex.Message });
+                return StatusCode(500, new { error = "An internal error occurred. Please try again later." });
             }
         }
     }

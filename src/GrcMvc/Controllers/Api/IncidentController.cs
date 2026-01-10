@@ -49,7 +49,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating incident");
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -89,7 +89,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -133,7 +133,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error starting investigation for incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -151,7 +151,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking incident {Id} as contained", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -169,7 +169,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking incident {Id} as eradicated", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -187,7 +187,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking incident {Id} as recovered", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -205,7 +205,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error closing incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -223,7 +223,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error reopening incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -241,7 +241,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking incident {Id} as false positive", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -259,7 +259,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error escalating incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -281,7 +281,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error assigning handler to incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -324,7 +324,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error adding timeline entry to incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -352,7 +352,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error adding note to incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -374,7 +374,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error checking notification requirements for incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -392,7 +392,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking notification sent for incident {Id}", id);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -425,7 +425,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error linking incident {Id} to risk {RiskId}", id, riskId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 
@@ -443,7 +443,7 @@ public class IncidentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error linking incident {Id} to control {ControlId}", id, controlId);
-            return BadRequest(new { success = false, error = ex.Message });
+            return BadRequest(new { success = false, error = "An error occurred processing your request." });
         }
     }
 

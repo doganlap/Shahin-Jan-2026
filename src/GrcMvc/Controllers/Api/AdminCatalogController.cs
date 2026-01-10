@@ -44,7 +44,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating regulator");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -58,12 +58,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating regulator");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -103,7 +103,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating framework");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -117,12 +117,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating framework");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -143,12 +143,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error publishing new version");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -174,7 +174,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating control");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -188,12 +188,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating control");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -215,7 +215,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error bulk importing controls");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -241,7 +241,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating role");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -255,12 +255,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating role");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -293,7 +293,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating title");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -307,12 +307,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating title");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -345,7 +345,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating baseline");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -359,12 +359,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating baseline");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -397,7 +397,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating package");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -411,12 +411,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating package");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -449,7 +449,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating template");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -463,12 +463,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating template");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -501,7 +501,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating evidence type");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -515,12 +515,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating evidence type");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -552,7 +552,7 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
         }
 
@@ -567,7 +567,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating ruleset");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -581,12 +581,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating ruleset");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -614,12 +614,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error cloning ruleset");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -645,7 +645,7 @@ namespace GrcMvc.Controllers.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating rule");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 
@@ -659,12 +659,12 @@ namespace GrcMvc.Controllers.Api
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(new { error = ex.Message });
+                return NotFound(new { error = "The requested resource was not found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating rule");
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "An error occurred processing your request." });
             }
         }
 

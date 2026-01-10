@@ -65,7 +65,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Invalid Request",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -101,7 +101,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Invalid Request",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -142,7 +142,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Invalid Serial Code",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -204,7 +204,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Invalid Serial Code",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -255,7 +255,7 @@ public class SerialCodeApiController : ControllerBase
             return NotFound(new ProblemDetails
             {
                 Title = "Not Found",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 404
             });
         }
@@ -264,7 +264,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Operation Failed",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -288,7 +288,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Invalid Serial Code",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -373,7 +373,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Invalid Request",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -398,7 +398,7 @@ public class SerialCodeApiController : ControllerBase
             return NotFound(new ProblemDetails
             {
                 Title = "Not Found",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 404
             });
         }
@@ -407,7 +407,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Operation Failed",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -432,7 +432,7 @@ public class SerialCodeApiController : ControllerBase
             return NotFound(new ProblemDetails
             {
                 Title = "Not Found",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 404
             });
         }
@@ -441,7 +441,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Operation Failed",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -470,7 +470,7 @@ public class SerialCodeApiController : ControllerBase
             return NotFound(new ProblemDetails
             {
                 Title = "Not Found",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 404
             });
         }
@@ -479,7 +479,7 @@ public class SerialCodeApiController : ControllerBase
             return BadRequest(new ProblemDetails
             {
                 Title = "Operation Failed",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 400
             });
         }
@@ -503,7 +503,7 @@ public class SerialCodeApiController : ControllerBase
             return NotFound(new ProblemDetails
             {
                 Title = "Not Found",
-                Detail = ex.Message,
+                Detail = "An error occurred processing your request.",
                 Status = 404
             });
         }
