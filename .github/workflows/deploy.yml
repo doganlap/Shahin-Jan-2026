@@ -1,0 +1,54 @@
+name: Build & Deploy Shahin AI GRC
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  DOCKERHUB_USERNAME: shahinai
+  IMAGE_NAME: shahinai/grc
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/GrcMvc/GrcMvc.csproj
+
+      - name: Build
+        run: dotnet build src/GrcMvc/GrcMvc.csproj -c Release --no-restore
+
+      - name: Log in to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./src/GrcMvc
+          file: ./src/GrcMvc/Dockerfile.production
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Deploy notification
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        run: |
+          echo "🚀 Deployed: ${{ env.IMAGE_NAME }}:latest"
+          echo "Pull: docker pull ${{ env.IMAGE_NAME }}:latest"
