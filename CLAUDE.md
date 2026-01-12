@@ -8,12 +8,14 @@
 
 ## Technology Stack
 
-- **Framework**: ASP.NET Core 8.0 MVC
+- **Framework**: ASP.NET Core 8.0 MVC + ABP Framework 8.3.6
 - **UI**: Razor Views (337 .cshtml files)
 - **Backend**: .NET 8.0 / C# 12
 - **Database**: PostgreSQL 15 (Docker containerized)
 - **ORM**: Entity Framework Core 8.0.8 (Npgsql provider)
-- **Authentication**: ASP.NET Core Identity + JWT Bearer
+- **Multi-tenancy**: ABP Framework Tenant Management
+- **Permissions**: ABP Framework Permission Management
+- **Authentication**: ASP.NET Core Identity + ABP Identity + JWT Bearer
 - **AI**: Anthropic Claude Sonnet 4.5 (12 specialized agents)
 - **Caching**: Redis 7 (optional)
 - **Message Queue**: Kafka + RabbitMQ (MassTransit)
@@ -232,7 +234,7 @@ source ~/.bashrc
 dotnet --version   # Should show 8.0.x
 ```
 
-**Note**: No ABP CLI required (this is NOT an ABP Framework project).
+**Note**: This project now uses **ABP Framework 8.3.6** for tenant management, identity, and permission management. The ABP modules are integrated with the existing ASP.NET Core MVC architecture.
 
 ## Critical Configuration (BEFORE FIRST RUN)
 

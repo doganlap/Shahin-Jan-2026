@@ -9,14 +9,22 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.PermissionManagement.EntityFrameworkCore;
+using Volo.Abp.SettingManagement.EntityFrameworkCore;
+using Volo.Abp.AuditLogging.EntityFrameworkCore;
+using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.FeatureManagement.EntityFrameworkCore;
+using Volo.Abp.TenantManagement.EntityFrameworkCore;
 
 namespace GrcMvc.Data
 {
     /// <summary>
     /// Main application DbContext for GRC data.
     /// Identity/Auth data is in GrcAuthDbContext (separate database).
+    /// Now inherits from AbpDbContext for ABP Framework integration.
     /// </summary>
-    public partial class GrcDbContext : DbContext
+    public partial class GrcDbContext : AbpDbContext<GrcDbContext>
     {
         private ITenantContextService? _tenantContextService;
         private IWorkspaceContextService? _workspaceContextService;
@@ -405,6 +413,17 @@ namespace GrcMvc.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // ═══════════════════════════════════════════════
+            // ABP FRAMEWORK MODULE CONFIGURATIONS
+            // ═══════════════════════════════════════════════
+            // Configure ABP modules to create their required tables
+            modelBuilder.ConfigurePermissionManagement();
+            modelBuilder.ConfigureSettingManagement();
+            modelBuilder.ConfigureAuditLogging();
+            modelBuilder.ConfigureIdentity();
+            modelBuilder.ConfigureFeatureManagement();
+            modelBuilder.ConfigureTenantManagement();  // ← REQUIRED for tenants
 
             // Apply global query filters for multi-tenant isolation
             ApplyGlobalQueryFilters(modelBuilder);

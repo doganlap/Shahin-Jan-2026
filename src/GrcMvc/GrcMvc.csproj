@@ -89,6 +89,29 @@
     <!-- API Documentation -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="YamlDotNet" Version="15.1.4" />
+
+    <!-- ABP Framework - Tenant Management -->
+    <PackageReference Include="Volo.Abp.TenantManagement.Application" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.TenantManagement.Web" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.TenantManagement.EntityFrameworkCore" Version="8.3.6" />
+
+    <!-- ABP Framework - Identity -->
+    <PackageReference Include="Volo.Abp.Identity.Application" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.Identity.AspNetCore" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.Identity.EntityFrameworkCore" Version="8.3.6" />
+
+    <!-- ABP Framework - Account -->
+    <PackageReference Include="Volo.Abp.Account.Web" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.Account.Application" Version="8.3.6" />
+
+    <!-- ABP Framework - Core Dependencies -->
+    <PackageReference Include="Volo.Abp.AspNetCore.Mvc" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore.PostgreSql" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.PermissionManagement.EntityFrameworkCore" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.SettingManagement.EntityFrameworkCore" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.AuditLogging.EntityFrameworkCore" Version="8.3.6" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.EntityFrameworkCore" Version="8.3.6" />
   </ItemGroup>
 
   <!-- Localization Resources -->
