@@ -1408,6 +1408,9 @@ app.UseResponseCaching();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Onboarding Enforcement - Redirect users to onboarding wizard if not completed
+app.UseOnboardingEnforcement();
+
 // =============================================================================
 // 12. HANGFIRE DASHBOARD
 // =============================================================================

@@ -10,6 +10,8 @@ using GrcMvc.Services.Interfaces;
 using System.Text.Json;
 using System.ComponentModel.DataAnnotations;
 using GrcMvc.Constants;
+using Volo.Abp.TenantManagement;
+using Volo.Abp.Domain.Repositories;
 
 namespace GrcMvc.Controllers
 {
@@ -26,6 +28,7 @@ namespace GrcMvc.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ILogger<TrialController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly ITenantManager? _abpTenantManager; // ABP tenant management
 
         public TrialController(
             GrcDbContext context,
@@ -33,7 +36,8 @@ namespace GrcMvc.Controllers
             SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             ILogger<TrialController> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ITenantManager? abpTenantManager = null) // Optional: graceful if ABP not fully initialized
         {
             _context = context;
             _userManager = userManager;
@@ -41,6 +45,7 @@ namespace GrcMvc.Controllers
             _roleManager = roleManager;
             _logger = logger;
             _configuration = configuration;
+            _abpTenantManager = abpTenantManager;
         }
 
         /// <summary>
@@ -111,9 +116,28 @@ namespace GrcMvc.Controllers
                     CreatedBy = "TrialRegistration"
                 };
                 _context.Tenants.Add(tenant);
-                
+
                 // Save tenant first so FK constraints can be satisfied
                 await _context.SaveChangesAsync();
+
+                // 2.5. Create ABP Tenant (for ABP Framework integration)
+                if (_abpTenantManager != null)
+                {
+                    try
+                    {
+                        var abpTenant = await _abpTenantManager.CreateAsync(
+                            name: tenantSlug, // Tenant name (must be unique)
+                            id: tenantId      // Use same GUID as custom Tenant
+                        );
+
+                        _logger.LogInformation("ABP Tenant created: {TenantId} - {TenantName}", tenantId, tenantSlug);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to create ABP tenant (non-critical): {TenantId}", tenantId);
+                        // Non-critical: Custom tenant already exists, continue with flow
+                    }
+                }
 
                 // 3. Create User Account using Identity (saves immediately within transaction)
                 var user = new ApplicationUser
@@ -185,11 +209,23 @@ namespace GrcMvc.Controllers
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                // Sign in the new user
+                // Sign in the new user with TenantId claim
                 await _signInManager.SignInAsync(user, isPersistent: true);
 
-                _logger.LogInformation("Trial registered: TenantId={TenantId}, Email={Email}", tenantId, model.Email);
+                // Add TenantId claim for ABP tenant resolution (immediate)
+                var claimsPrincipal = await _signInManager.CreateUserPrincipalAsync(user);
+                var identity = claimsPrincipal.Identity as System.Security.Claims.ClaimsIdentity;
+                if (identity != null && !identity.HasClaim(c => c.Type == "TenantId"))
+                {
+                    identity.AddClaim(new System.Security.Claims.Claim("TenantId", tenantId.ToString()));
+                    await HttpContext.SignInAsync(
+                        Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme,
+                        claimsPrincipal);
+                }
 
+                _logger.LogInformation("Trial registered: TenantId={TenantId}, Email={Email}, redirecting to onboarding wizard", tenantId, model.Email);
+
+                // IMPORTANT: All trial users MUST complete onboarding wizard before accessing workspace
                 // Redirect to onboarding with tenant context
                 return RedirectToAction("Start", "Onboarding", new { tenantSlug = tenantSlug });
             }
