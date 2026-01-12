@@ -1,0 +1,266 @@
+@page
+@model GrcMvc.Pages.SignupNew.IndexModel
+@{
+    ViewData["Title"] = "Start Your Free Trial";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-vh-100 d-flex align-items-center bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5">
+                        <!-- Logo/Header -->
+                        <div class="text-center mb-4">
+                            <h1 class="h3 fw-bold text-primary mb-2">Shahin AI GRC</h1>
+                            <p class="text-muted">Start your 7-day free trial</p>
+                        </div>
+
+                        <!-- Error Message -->
+                        @if (Model.ShowError)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                @Model.ErrorMessage
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        @if (!ModelState.IsValid && ModelState.ErrorCount > 0)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <ul class="mb-0 ps-3">
+                                    @foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        }
+
+                        <!-- Registration Form -->
+                        <form method="post" id="trialForm">
+                            @Html.AntiForgeryToken()
+
+                            <!-- Company Name -->
+                            <div class="mb-3">
+                                <label asp-for="Input.CompanyName" class="form-label fw-semibold">
+                                    <i class="bi bi-building me-1"></i> Company Name
+                                </label>
+                                <input asp-for="Input.CompanyName"
+                                       class="form-control form-control-lg"
+                                       placeholder="Acme Corporation"
+                                       autocomplete="organization"
+                                       required />
+                                <span asp-validation-for="Input.CompanyName" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Full Name (Optional) -->
+                            <div class="mb-3">
+                                <label asp-for="Input.FullName" class="form-label fw-semibold">
+                                    <i class="bi bi-person me-1"></i> Full Name <span class="text-muted">(Optional)</span>
+                                </label>
+                                <input asp-for="Input.FullName"
+                                       class="form-control form-control-lg"
+                                       placeholder="John Doe"
+                                       autocomplete="name" />
+                                <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label asp-for="Input.Email" class="form-label fw-semibold">
+                                    <i class="bi bi-envelope me-1"></i> Work Email
+                                </label>
+                                <input asp-for="Input.Email"
+                                       class="form-control form-control-lg"
+                                       placeholder="john@example.com"
+                                       autocomplete="email"
+                                       type="email"
+                                       required />
+                                <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label asp-for="Input.Password" class="form-label fw-semibold">
+                                    <i class="bi bi-lock me-1"></i> Password
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="Input.Password"
+                                           class="form-control form-control-lg"
+                                           placeholder="Min. 12 characters"
+                                           type="password"
+                                           id="passwordInput"
+                                           autocomplete="new-password"
+                                           required />
+                                    <button class="btn btn-outline-secondary"
+                                            type="button"
+                                            id="togglePassword"
+                                            aria-label="Toggle password visibility">
+                                        <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                                <div class="form-text small">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Minimum 12 characters
+                                </div>
+                            </div>
+
+                            <!-- Terms and Conditions -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input asp-for="Input.AcceptTerms"
+                                           class="form-check-input"
+                                           type="checkbox"
+                                           id="acceptTerms"
+                                           required />
+                                    <label class="form-check-label small" for="acceptTerms">
+                                        I accept the <a href="/terms" target="_blank" class="text-decoration-none">Terms and Conditions</a>
+                                        and <a href="/privacy" target="_blank" class="text-decoration-none">Privacy Policy</a>
+                                    </label>
+                                    <span asp-validation-for="Input.AcceptTerms" class="text-danger small d-block"></span>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid">
+                                <button type="submit"
+                                        class="btn btn-primary btn-lg fw-semibold"
+                                        id="submitBtn">
+                                    <span id="submitText">
+                                        <i class="bi bi-rocket-takeoff me-2"></i>
+                                        Start Free Trial
+                                    </span>
+                                    <span id="loadingSpinner" class="d-none">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Creating your account...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Already have account -->
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <p class="text-muted mb-0">
+                                Already have an account?
+                                <a href="/Account/Login" class="text-decoration-none fw-semibold">Sign in</a>
+                            </p>
+                        </div>
+
+                        <!-- Trial Info -->
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <h6 class="fw-semibold mb-2">
+                                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                What's included:
+                            </h6>
+                            <ul class="small mb-0 ps-4">
+                                <li>7-day free trial</li>
+                                <li>No credit card required</li>
+                                <li>Full access to all features</li>
+                                <li>Cancel anytime</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Powered by -->
+                <div class="text-center mt-3">
+                    <p class="text-muted small mb-0">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Powered by ABP Framework • Secure & Compliant
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('passwordInput');
+            const icon = document.getElementById('togglePasswordIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+
+        // Form submission loading state
+        document.getElementById('trialForm').addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitText.classList.add('d-none');
+            loadingSpinner.classList.remove('d-none');
+        });
+
+        // Auto-focus on first input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('input[name="Input.CompanyName"]').focus();
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        /* Custom styles for trial page */
+        .card {
+            border-radius: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .form-control-lg {
+            border-radius: 0.5rem;
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.2s;
+        }
+
+        .form-control-lg:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+        }
+
+        .btn-lg {
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+        }
+
+        .bg-light {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+        }
+
+        /* Loading state */
+        #submitBtn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+    </style>
+}
