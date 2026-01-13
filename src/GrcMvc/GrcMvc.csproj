@@ -118,6 +118,11 @@
     <!-- 4. LDAP Integration - Active Directory ⭐⭐⭐ FREE -->
     <PackageReference Include="Volo.Abp.Ldap" Version="8.3.5" />
 
+    <!-- 5. Tenant Management - Multi-Tenancy CRUD ⭐⭐⭐⭐⭐ FREE -->
+    <PackageReference Include="Volo.Abp.TenantManagement.Domain" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.TenantManagement.EntityFrameworkCore" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.TenantManagement.Application" Version="8.3.5" />
+
     <!-- Stripe Payment SDK - Direct Integration (FREE Alternative to Volo.Payment.Stripe) -->
     <PackageReference Include="Stripe.net" Version="44.13.0" />
   </ItemGroup>

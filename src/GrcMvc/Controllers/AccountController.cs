@@ -31,6 +31,7 @@ namespace GrcMvc.Controllers
         private readonly IGrcEmailService _grcEmailService;
         private readonly ILogger<AccountController> _logger;
         private readonly ITenantService _tenantService;
+        private readonly ITenantRegistrationService _tenantRegistrationService;
         private readonly GrcDbContext _context;
         private readonly IAuditEventService? _auditEventService; // MEDIUM FIX: Audit logging for authentication events
         private readonly IAuthenticationAuditService? _authAuditService; // CRITICAL: Comprehensive authentication audit logging
@@ -48,6 +49,7 @@ namespace GrcMvc.Controllers
             IGrcEmailService grcEmailService,
             ILogger<AccountController> logger,
             ITenantService tenantService,
+            ITenantRegistrationService tenantRegistrationService,
             GrcDbContext context,
             IAuditEventService? auditEventService = null, // Optional for backward compatibility
             IAuthenticationAuditService? authAuditService = null, // CRITICAL: Authentication audit service
@@ -64,6 +66,7 @@ namespace GrcMvc.Controllers
             _grcEmailService = grcEmailService;
             _logger = logger;
             _tenantService = tenantService;
+            _tenantRegistrationService = tenantRegistrationService;
             _context = context;
             _auditEventService = auditEventService;
             _authAuditService = authAuditService;
@@ -539,6 +542,13 @@ namespace GrcMvc.Controllers
         [EnableRateLimiting("auth")] // SECURITY: Rate limiting to prevent registration abuse
         public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = null)
         {
+            // ═══════════════════════════════════════════════════════════
+            // TENANT SELF-REGISTRATION FLOW (ABP Pattern #7077/#8116)
+            // ═══════════════════════════════════════════════════════════
+            // Creates: Tenant + Admin User + TenantUser + Workspace + Owner Role
+            // Then: Auto-sign in → Redirect to Onboarding wizard
+            // ═══════════════════════════════════════════════════════════
+
             // Check if public registration is enabled
             var allowPublicRegistration = _configuration.GetValue<bool>("Security:AllowPublicRegistration", false);
             if (!allowPublicRegistration)
@@ -551,63 +561,77 @@ namespace GrcMvc.Controllers
 
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
+                try
                 {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FirstName = model.FirstName ?? string.Empty,
-                    LastName = model.LastName ?? string.Empty,
-                    Department = model.Department ?? string.Empty,
-                    // HIGH PRIORITY SECURITY FIX: Only auto-confirm email in development environment
-                    EmailConfirmed = !HttpContext.RequestServices.GetRequiredService<IWebHostEnvironment>().IsProduction()
-                };
+                    _logger.LogInformation("🚀 Starting tenant self-registration for {CompanyName} ({Email})",
+                        model.CompanyName, model.Email);
 
-                var result = await _userManager.CreateAsync(user, model.Password);
+                    // ═══════════════════════════════════════════════════════════
+                    // STEP 1: Generate tenant slug from company name
+                    // ═══════════════════════════════════════════════════════════
+                    var tenantSlug = _tenantRegistrationService.GenerateTenantSlug(model.CompanyName);
 
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User {Email} created a new account.", model.Email);
-
-                    // Assign default role
-                    var defaultRole = "User";
-                    if (!await _roleManager.RoleExistsAsync(defaultRole))
+                    // Ensure uniqueness by appending number if slug exists
+                    var originalSlug = tenantSlug;
+                    var counter = 1;
+                    while (await _context.Tenants.AnyAsync(t => t.TenantSlug == tenantSlug))
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(defaultRole));
-                    }
-                    await _userManager.AddToRoleAsync(user, defaultRole);
-
-                    // Send welcome email
-                    try
-                    {
-                        var loginUrl = Url.Action("Login", "Account", null, Request.Scheme);
-                        var userName = $"{model.FirstName} {model.LastName}".Trim();
-                        if (string.IsNullOrEmpty(userName)) userName = model.Email.Split('@')[0];
-                        
-                        await _grcEmailService.SendWelcomeEmailAsync(
-                            model.Email,
-                            userName,
-                            loginUrl ?? "https://portal.shahin-ai.com",
-                            "Shahin AI GRC",
-                            isArabic: true);
-                        _logger.LogInformation("Welcome email sent to {Email}", model.Email);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Failed to send welcome email to {Email}", model.Email);
+                        tenantSlug = $"{originalSlug}-{counter}";
+                        counter++;
                     }
 
-                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    _logger.LogInformation("Generated tenant slug: {TenantSlug}", tenantSlug);
 
-                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                    {
-                        return Redirect(returnUrl);
-                    }
-                    return RedirectToAction(nameof(HomeController.Index), "Home");
+                    // ═══════════════════════════════════════════════════════════
+                    // STEP 2: Create Tenant + Admin User atomically
+                    // ═══════════════════════════════════════════════════════════
+                    var (tenant, adminUser) = await _tenantRegistrationService.CreateTenantWithAdminAsync(
+                        companyName: model.CompanyName,
+                        tenantSlug: tenantSlug,
+                        adminEmail: model.Email,
+                        adminPassword: model.Password,
+                        adminFirstName: model.FirstName,
+                        adminLastName: model.LastName,
+                        edition: "Trial" // Default to 14-day trial
+                    );
+
+                    _logger.LogInformation("✅ Tenant created: {TenantId} ({TenantSlug})", tenant.Id, tenant.TenantSlug);
+                    _logger.LogInformation("✅ Admin user created: {UserId} ({Email})", adminUser.Id, adminUser.Email);
+
+                    // ═══════════════════════════════════════════════════════════
+                    // STEP 3: Auto-sign in the admin user
+                    // ═══════════════════════════════════════════════════════════
+                    await _signInManager.SignInAsync(adminUser, isPersistent: false);
+
+                    _logger.LogInformation("✅ Admin user auto-signed in: {UserId}", adminUser.Id);
+
+                    // ═══════════════════════════════════════════════════════════
+                    // STEP 4: Show success message
+                    // ═══════════════════════════════════════════════════════════
+                    TempData["SuccessMessage"] = $"Welcome to Shahin AI GRC! Your organization '{model.CompanyName}' has been successfully created. " +
+                        $"You have a 14-day free trial. Let's complete your onboarding to get started.";
+
+                    // ═══════════════════════════════════════════════════════════
+                    // STEP 5: Redirect to Onboarding wizard
+                    // ═══════════════════════════════════════════════════════════
+                    _logger.LogInformation("🎯 Redirecting to onboarding wizard for tenant {TenantId}", tenant.Id);
+
+                    // Redirect to onboarding wizard (12-step wizard)
+                    return RedirectToAction("Index", "Onboarding");
                 }
-
-                foreach (var error in result.Errors)
+                catch (InvalidOperationException ex)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    // Handle duplicate tenant/email errors
+                    _logger.LogWarning(ex, "Registration failed: {Message}", ex.Message);
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    // Handle unexpected errors
+                    _logger.LogError(ex, "❌ Tenant self-registration failed for {CompanyName} ({Email})",
+                        model.CompanyName, model.Email);
+                    ModelState.AddModelError(string.Empty,
+                        "An error occurred during registration. Please try again or contact support.");
                 }
             }
 

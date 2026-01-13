@@ -37,6 +37,11 @@ namespace GrcMvc.Models.ViewModels
         public string ConfirmPassword { get; set; } = string.Empty;
 
         [Required]
+        [Display(Name = "Company Name")]
+        [StringLength(100, ErrorMessage = "Company name must be between {2} and {1} characters.", MinimumLength = 2)]
+        public string CompanyName { get; set; } = string.Empty;
+
+        [Required]
         [Display(Name = "First Name")]
         [StringLength(50)]
         public string FirstName { get; set; } = string.Empty;

@@ -4,6 +4,7 @@ using Volo.Abp.FeatureManagement;
 using Volo.Abp.AuditLogging;
 using Volo.Abp.OpenIddict;
 using Volo.Abp.Ldap;
+using Volo.Abp.TenantManagement;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.Autofac;
@@ -12,7 +13,7 @@ namespace GrcMvc;
 
 /// <summary>
 /// ABP Framework module configuration for Shahin AI GRC System.
-/// Integrates 4 FREE ABP modules (MIT License).
+/// Integrates 5 FREE ABP modules (MIT License).
 /// Commercial modules (Volo.Saas, Volo.Abp.Gdpr, Volo.Payment, Volo.Abp.LanguageManagement)
 /// have been replaced with custom implementations to avoid $2,999/year license cost.
 /// </summary>
@@ -36,7 +37,12 @@ namespace GrcMvc;
     typeof(AbpOpenIddictEntityFrameworkCoreModule),
 
     // 4. LDAP Integration - Active Directory ⭐⭐⭐
-    typeof(AbpLdapModule)
+    typeof(AbpLdapModule),
+
+    // 5. Tenant Management - Multi-Tenancy ⭐⭐⭐⭐⭐
+    typeof(AbpTenantManagementDomainModule),
+    typeof(AbpTenantManagementEntityFrameworkCoreModule),
+    typeof(AbpTenantManagementApplicationModule)
 )]
 public class GrcMvcAbpModule : AbpModule
 {
@@ -78,6 +84,15 @@ public class GrcMvcAbpModule : AbpModule
             options.Domain = configuration["Ldap:Domain"] ?? "";
             options.UserName = configuration["Ldap:UserName"] ?? "";
             options.Password = configuration["Ldap:Password"] ?? "";
+        });
+
+        // ✅ Configure Tenant Management (FREE)
+        // Using existing Tenant table + custom Edition field (Free/Trial/Pro/Enterprise)
+        // No need for commercial Volo.Saas module ($2,999/year)
+        Configure<AbpTenantManagementOptions>(options =>
+        {
+            // Tenant isolation enabled at database level via query filters
+            options.IsMultiTenant = true;
         });
 
         // ❌ Commercial module configurations removed (SaaS, GDPR, Payment)

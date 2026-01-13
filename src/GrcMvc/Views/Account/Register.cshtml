@@ -15,6 +15,18 @@
             <form asp-action="Register" method="post">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
+                <div class="mb-3">
+                    <label asp-for="CompanyName" class="form-label"></label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-building"></i></span>
+                        <input asp-for="CompanyName" class="form-control" placeholder="Enter your company or organization name" />
+                    </div>
+                    <span asp-validation-for="CompanyName" class="text-danger"></span>
+                    <small class="form-text text-muted">
+                        This will be used to create your organization's workspace
+                    </small>
+                </div>
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="FirstName" class="form-label"></label>

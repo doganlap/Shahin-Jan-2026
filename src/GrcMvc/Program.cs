@@ -657,6 +657,7 @@ builder.Services.AddScoped<ISerialCodeService, SerialCodeService>();
 
 // Register new STAGE 1 services
 builder.Services.AddScoped<ITenantService, TenantService>();
+builder.Services.AddScoped<ITenantRegistrationService, TenantRegistrationService>();
 builder.Services.AddScoped<IOnboardingService, OnboardingService>();
 builder.Services.AddScoped<IOnboardingWizardService, OnboardingWizardService>();
 builder.Services.AddScoped<IAuditEventService, AuditEventService>();
