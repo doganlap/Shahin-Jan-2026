@@ -89,6 +89,37 @@
     <!-- API Documentation -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="YamlDotNet" Version="15.1.4" />
+
+    <!-- ABP Framework Modules (FREE ONLY - MIT License) -->
+
+    <!-- ❌ COMMERCIAL PACKAGES REMOVED (Require $2,999/year ABP Commercial License):
+         - Volo.Saas.* (Edition management) → Build manually using existing TenantService
+         - Volo.Abp.Gdpr (GDPR helpers) → Build GdprService manually (simple data export/delete)
+         - Volo.Payment.Stripe (Payment wrapper) → Use Stripe.net SDK directly (FREE)
+         - Volo.Abp.LanguageManagement.* (Translation UI) → Build simple CRUD UI manually
+
+         See docs/ABP_PACKAGES_LICENSING.md for alternatives and implementation guides.
+    -->
+
+    <!-- ✅ FREE ABP Modules (4 modules, 8 packages) -->
+
+    <!-- 1. Feature Management - Feature Toggles per Tenant ⭐⭐⭐⭐ FREE -->
+    <PackageReference Include="Volo.Abp.FeatureManagement.Domain" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.EntityFrameworkCore" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.Web" Version="8.3.5" />
+
+    <!-- 2. Audit Log UI - Browse Audit Logs ⭐⭐⭐ FREE -->
+    <PackageReference Include="Volo.Abp.AuditLogging.Web" Version="8.3.5" />
+
+    <!-- 3. OpenID Connect - SSO/OAuth2 Provider ⭐⭐⭐ FREE -->
+    <PackageReference Include="Volo.Abp.OpenIddict.Domain" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.OpenIddict.EntityFrameworkCore" Version="8.3.5" />
+
+    <!-- 4. LDAP Integration - Active Directory ⭐⭐⭐ FREE -->
+    <PackageReference Include="Volo.Abp.Ldap" Version="8.3.5" />
+
+    <!-- Stripe Payment SDK - Direct Integration (FREE Alternative to Volo.Payment.Stripe) -->
+    <PackageReference Include="Stripe.net" Version="44.13.0" />
   </ItemGroup>
 
   <!-- Localization Resources -->
