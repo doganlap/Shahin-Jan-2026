@@ -509,7 +509,7 @@ namespace GrcMvc.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        // GET: Account/Register
+        // GET: Account/Register (also accessible via /Account/Signup)
         [AllowAnonymous]
         public IActionResult Register(string? returnUrl = null)
         {
@@ -523,6 +523,13 @@ namespace GrcMvc.Controllers
 
             ViewData["ReturnUrl"] = returnUrl;
             return View();
+        }
+
+        // GET: Account/Signup (alias for Register)
+        [AllowAnonymous]
+        public IActionResult Signup(string? returnUrl = null)
+        {
+            return Register(returnUrl);
         }
 
         // POST: Account/Register
@@ -605,6 +612,16 @@ namespace GrcMvc.Controllers
             }
 
             return View(model);
+        }
+
+        // POST: Account/Signup (alias for Register)
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
+        public async Task<IActionResult> Signup(RegisterViewModel model, string? returnUrl = null)
+        {
+            return await Register(model, returnUrl);
         }
 
         // POST: Account/Logout
