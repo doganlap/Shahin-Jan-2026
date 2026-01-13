@@ -128,6 +128,28 @@ if (string.IsNullOrWhiteSpace(jwtSecret))
     throw new InvalidOperationException("JWT_SECRET environment variable is required. Set it before starting the application.");
 }
 builder.Configuration["JwtSettings:Secret"] = jwtSecret;
+
+// Production Environment Variable Validation
+if (builder.Environment.IsProduction())
+{
+    var missingVars = new List<string>();
+
+    // Critical variables for production
+    if (string.IsNullOrWhiteSpace(connectionString))
+        missingVars.Add("CONNECTION_STRING or DB_PASSWORD");
+
+    if (missingVars.Count > 0)
+    {
+        throw new InvalidOperationException(
+            $"The following critical environment variables are missing in Production: {string.Join(", ", missingVars)}. " +
+            "Set them before starting the application.");
+    }
+
+    // Log warnings for optional but recommended variables
+    var logger = LoggerFactory.Create(logging => logging.AddConsole()).CreateLogger("Startup");
+    if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("CLAUDE_API_KEY")))
+        logger.LogWarning("CLAUDE_API_KEY not set - AI features will be disabled");
+}
 builder.Configuration["ClaudeAgents:ApiKey"] = Environment.GetEnvironmentVariable("CLAUDE_API_KEY") ?? "";
 builder.Configuration["ClaudeAgents:Model"] = Environment.GetEnvironmentVariable("CLAUDE_MODEL") ?? "claude-sonnet-4-20250514";
 builder.Configuration["ClaudeAgents:MaxTokens"] = Environment.GetEnvironmentVariable("CLAUDE_MAX_TOKENS") ?? "4096";
@@ -219,16 +241,16 @@ builder.Services.AddCors(options =>
         if (allowedOrigins != null && allowedOrigins.Length > 0)
         {
             policy.WithOrigins(allowedOrigins)
-                .AllowAnyMethod()
-                .AllowAnyHeader()
+                .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .WithHeaders("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-CSRF-Token")
                 .AllowCredentials();
         }
         else
         {
             // Default: Allow localhost for development
             policy.WithOrigins("http://localhost:3000", "http://localhost:5137")
-                .AllowAnyMethod()
-                .AllowAnyHeader()
+                .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .WithHeaders("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-CSRF-Token")
                 .AllowCredentials();
         }
     });
