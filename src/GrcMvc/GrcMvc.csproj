@@ -89,6 +89,37 @@
     <!-- API Documentation -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="YamlDotNet" Version="15.1.4" />
+
+    <!-- ABP Framework Modules (High-Value Features) -->
+    <!-- 1. SaaS Module - Edition/Pricing Management ⭐⭐⭐⭐⭐ -->
+    <PackageReference Include="Volo.Saas.Domain" Version="8.3.5" />
+    <PackageReference Include="Volo.Saas.EntityFrameworkCore" Version="8.3.5" />
+    <PackageReference Include="Volo.Saas.Web" Version="8.3.5" />
+
+    <!-- 2. GDPR Compliance - Data Export/Delete ⭐⭐⭐⭐⭐ -->
+    <PackageReference Include="Volo.Abp.Gdpr" Version="8.3.5" />
+
+    <!-- 3. Feature Management - Feature Toggles per Tenant ⭐⭐⭐⭐ -->
+    <PackageReference Include="Volo.Abp.FeatureManagement.Domain" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.EntityFrameworkCore" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.Web" Version="8.3.5" />
+
+    <!-- 4. Payment Gateway - Stripe Integration ⭐⭐⭐⭐ -->
+    <PackageReference Include="Volo.Payment.Stripe" Version="8.3.5" />
+
+    <!-- 5. Audit Log UI - Browse Audit Logs ⭐⭐⭐ -->
+    <PackageReference Include="Volo.Abp.AuditLogging.Web" Version="8.3.5" />
+
+    <!-- 6. Language Management - Translation UI ⭐⭐⭐ -->
+    <PackageReference Include="Volo.Abp.LanguageManagement.Domain" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.LanguageManagement.EntityFrameworkCore" Version="8.3.5" />
+
+    <!-- 7. OpenID Connect - SSO/OAuth2 Provider ⭐⭐⭐ -->
+    <PackageReference Include="Volo.Abp.OpenIddict.Domain" Version="8.3.5" />
+    <PackageReference Include="Volo.Abp.OpenIddict.EntityFrameworkCore" Version="8.3.5" />
+
+    <!-- 8. LDAP Integration - Active Directory ⭐⭐⭐ -->
+    <PackageReference Include="Volo.Abp.Ldap" Version="8.3.5" />
   </ItemGroup>
 
   <!-- Localization Resources -->
